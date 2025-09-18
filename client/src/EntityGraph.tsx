@@ -20,21 +20,17 @@ import { useWorkerLayoutForceAtlas2 } from "@react-sigma/layout-forceatlas2";
 import Sigma from "sigma";
 import seedrandom, { type PRNG } from "seedrandom";
 import { createNodeImageProgram } from "@sigma/node-image";
-import { createNodeCompoundProgram, NodeCircleProgram } from "sigma/rendering";
+import { createNodeCompoundProgram } from "sigma/rendering";
 import { DEFINES } from "./defines.ts";
+import { NodeBorderProgram } from "@sigma/node-border";
 
 const sigmaStyle: CSSProperties = {
   display: "flex",
+  overflow: "hidden",
 };
 
-const nodeImageProgram = createNodeImageProgram({
-  keepWithinCircle: true,
-  correctCentering: true,
-  padding: 0.15,
-});
-
 const nodePictogramProgram = createNodeCompoundProgram([
-  NodeCircleProgram,
+  NodeBorderProgram,
   createNodeImageProgram({
     keepWithinCircle: true,
     correctCentering: true,
@@ -47,10 +43,10 @@ const nodePictogramProgram = createNodeCompoundProgram([
 const sigmaSettings = {
   // allowInvalidContainer: true,
   nodeProgramClasses: {
-    image: nodeImageProgram,
     pictogram: nodePictogramProgram,
+    bordered: NodeBorderProgram,
   },
-  // defaultNodeType: "image",
+  defaultNodeType: "bordered",
   // defaultEdgeType: "arrow",
   labelDensity: 0.07,
   labelGridCellSize: 60,
