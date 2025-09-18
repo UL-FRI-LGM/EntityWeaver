@@ -10,13 +10,15 @@ const Entity = types
     name: types.string,
     type: types.string,
     document_id: types.string,
-    group_id: types.string,
+    group_id: types.maybe(types.string),
   })
   .views((self) => ({
     get globalId() {
       return `Entity-${self.id}`;
     },
   }));
+
+export interface EntityInstance extends Instance<typeof Entity> {}
 
 const Document = types
   .model({
@@ -35,6 +37,7 @@ const EntityGroup = types
   .model({
     id: types.string,
     name: types.string,
+    type: types.string,
   })
   .views((self) => ({
     get globalId() {

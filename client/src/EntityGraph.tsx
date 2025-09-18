@@ -19,13 +19,44 @@ import { autorun } from "mobx";
 import { useWorkerLayoutForceAtlas2 } from "@react-sigma/layout-forceatlas2";
 import Sigma from "sigma";
 import seedrandom, { type PRNG } from "seedrandom";
-
-const sizePerEdge = 5;
-const minNodeSize = 5;
-const maxNodeSize = 50;
+import { createNodeImageProgram } from "@sigma/node-image";
+import { createNodeCompoundProgram, NodeCircleProgram } from "sigma/rendering";
+import { DEFINES } from "./defines.ts";
 
 const sigmaStyle: CSSProperties = {
   display: "flex",
+};
+
+const nodeImageProgram = createNodeImageProgram({
+  keepWithinCircle: true,
+  correctCentering: true,
+  padding: 0.15,
+});
+
+const nodePictogramProgram = createNodeCompoundProgram([
+  NodeCircleProgram,
+  createNodeImageProgram({
+    keepWithinCircle: true,
+    correctCentering: true,
+    drawingMode: "color",
+    colorAttribute: "pictoColor",
+    padding: 0.15,
+  }),
+]);
+
+const sigmaSettings = {
+  // allowInvalidContainer: true,
+  nodeProgramClasses: {
+    image: nodeImageProgram,
+    pictogram: nodePictogramProgram,
+  },
+  // defaultNodeType: "image",
+  // defaultEdgeType: "arrow",
+  labelDensity: 0.07,
+  labelGridCellSize: 60,
+  labelRenderedSizeThreshold: 15,
+  // labelFont: "Lato, sans-serif",
+  zIndex: true,
 };
 
 function getRandomPosition(generator?: PRNG) {
@@ -36,10 +67,25 @@ function getRandomPosition(generator?: PRNG) {
 }
 
 function getNodeSize(edges: number) {
-  const size = edges * sizePerEdge;
-  if (size < minNodeSize) return minNodeSize;
-  if (size > maxNodeSize) return maxNodeSize;
+  const size = edges * DEFINES.sizePerEdge;
+  if (size < DEFINES.minNodeSize) return DEFINES.minNodeSize;
+  if (size > DEFINES.maxNodeSize) return DEFINES.maxNodeSize;
   return size;
+}
+
+function getImageFromType(type: string) {
+  switch (type) {
+    case "ORG":
+      return "/organization.svg";
+    case "LOC":
+      return "/location.svg";
+    case "PER":
+      return "/person.svg";
+    case "MISC":
+      return "/concept.svg";
+    default:
+      return "/concept.svg";
+  }
 }
 
 // Component that load the graph
@@ -58,37 +104,56 @@ export const LoadGraph = observer(() => {
         documentIdToDocument.set(document.id, document);
         graph.addNode(document.globalId, {
           ...getRandomPosition(rng),
-          size: 30,
+          size: DEFINES.document.size,
           label: document.title,
-          color: "#bddb18",
+          color: DEFINES.document.color,
+          image: "/document.svg",
+          pictoColor: DEFINES.document.iconColor,
+          type: "pictogram",
         });
       }
       for (const group of dataset.entityGroups) {
         entityGroupIdToDocument.set(group.id, group);
+        const entityImage = getImageFromType(group.type);
         graph.addNode(group.globalId, {
           ...getRandomPosition(rng),
           size: 15,
           label: group.name,
-          color: "#0036ff",
+          color: DEFINES.entityGroup.color,
+          image: entityImage,
+          pictoColor: DEFINES.entityGroup.iconColor,
+          type: "pictogram",
         });
       }
       for (const entity of dataset.entities) {
-        const group = entityGroupIdToDocument.get(entity.group_id);
-        const document = documentIdToDocument.get(entity.document_id);
+        const entityImage = getImageFromType(entity.type);
         graph.addNode(entity.globalId, {
           ...getRandomPosition(rng),
-          size: 5,
+          size: DEFINES.entity.size,
           label: entity.name,
-          color: "#FA4F40",
+          color: DEFINES.entity.color,
+          image: entityImage,
+          pictoColor: DEFINES.entity.iconColor,
+          type: "pictogram",
         });
-        graph.addEdge(entity.globalId, document?.globalId, {
-          size: 5,
-          color: "#cc07ff",
-        });
-        graph.addEdge(entity.globalId, group?.globalId, {
-          size: 5,
-          color: "#2fdffa",
-        });
+
+        const document = documentIdToDocument.get(entity.document_id);
+        if (document) {
+          graph.addEdge(entity.globalId, document.globalId, {
+            size: DEFINES.documentToEntityEdge.width,
+            color: DEFINES.documentToEntityEdge.color,
+          });
+        }
+
+        const group = entity.group_id
+          ? entityGroupIdToDocument.get(entity.group_id)
+          : undefined;
+        if (group) {
+          graph.addEdge(entity.globalId, group.globalId, {
+            size: DEFINES.groupToEntityEdge.width,
+            color: DEFINES.groupToEntityEdge.color,
+          });
+        }
       }
       // for (const document of dataset.documents) {
       //   const nodeSize = getNodeSize(graph.edges(document.globalId).length);
@@ -160,7 +225,7 @@ const EntityGraph = observer(() => {
   }, [rootStore, sigma]);
 
   return (
-    <SigmaContainer ref={setSigma} style={sigmaStyle}>
+    <SigmaContainer settings={sigmaSettings} ref={setSigma} style={sigmaStyle}>
       <LoadGraph />
       <Fa2 />
       <ControlsContainer position={"bottom-right"}>
