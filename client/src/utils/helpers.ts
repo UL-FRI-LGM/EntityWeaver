@@ -6,9 +6,7 @@ export async function sendApiRequest(
   if (!request.method) {
     throw new Error("The 'method' option is required.");
   }
-  const defaultOptions: RequestInit = {
-    credentials: "include",
-  };
+  const defaultOptions: RequestInit = {};
 
   if (options?.query !== undefined) {
     url += "?" + new URLSearchParams(options.query);
@@ -18,7 +16,10 @@ export async function sendApiRequest(
 
   let errorMsg = "Error connecting to the server.";
 
-  const response = await fetch(`/api/${url}`, fetchOptions);
+  const response = await fetch(
+    `http://localhost:3000/api/${url}`,
+    fetchOptions,
+  );
 
   if (!response.ok) {
     const contentType = response.headers.get("Content-Type");

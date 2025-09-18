@@ -4,10 +4,10 @@ export const DataApi = {
   async getData() {
     const response = await sendApiRequest(`data`, {
       method: "GET",
-      credentials: "include",
     });
 
-    return await response.json();
+    const data = await response.json();
+    return data;
   },
 };
 
