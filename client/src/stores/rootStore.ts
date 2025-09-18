@@ -1,7 +1,6 @@
 import DataApi from "../api/data.ts";
 import { createContext, use } from "react";
 import { types, flow, isAlive, type Instance } from "mobx-state-tree";
-import type Graph from "graphology";
 import type Sigma from "sigma";
 
 const Entity = types
@@ -77,24 +76,44 @@ const Dataset = types
 
 export interface DatasetInstance extends Instance<typeof Dataset> {}
 
+export interface NodeType {
+  x: number;
+  y: number;
+  label: string;
+  size: number;
+  color: string;
+  highlighted?: boolean;
+  image: string;
+  pictogramColor: string;
+  type: string;
+}
+export interface EdgeType {
+  size: number;
+  color: string;
+}
+
 const RootStore = types
   .model({
     dataset: types.optional(Dataset, {}),
     isForceAtlasRunning: types.optional(types.boolean, false),
   })
   .volatile(() => ({
-    graph: null as Graph | null,
-    sigma: null as Sigma | null,
+    sigma: null as Sigma<NodeType, EdgeType> | null,
+    selectedNode: null as string | null,
+    hoveredNode: null as string | null,
   }))
   .actions((self) => ({
     setIsForceAtlasRunning(state: boolean) {
       self.isForceAtlasRunning = state;
     },
-    setGraph(graph: Graph) {
-      self.graph = graph;
-    },
-    setSigma(sigma: Sigma) {
+    setSigma(sigma: Sigma<NodeType, EdgeType>) {
       self.sigma = sigma;
+    },
+    setSelectedNode(nodeId: string | null) {
+      self.selectedNode = nodeId;
+    },
+    setHoveredNode(nodeId: string | null) {
+      self.hoveredNode = nodeId;
     },
   }));
 

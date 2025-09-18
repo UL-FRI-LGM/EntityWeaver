@@ -5,6 +5,9 @@ import {
   FullScreenControl,
   SigmaContainer,
   useLoadGraph,
+  useRegisterEvents,
+  useSetSettings,
+  useSigma,
   ZoomControl,
 } from "@react-sigma/core";
 import "@react-sigma/core/lib/style.css";
@@ -12,12 +15,13 @@ import { observer } from "mobx-react";
 import {
   type DatasetInstance,
   type DocumentInstance,
+  type EdgeType,
   type EntityGroupInstance,
+  type NodeType,
   useMst,
 } from "./stores/rootStore.ts";
 import { autorun } from "mobx";
 import { useWorkerLayoutForceAtlas2 } from "@react-sigma/layout-forceatlas2";
-import Sigma from "sigma";
 import seedrandom, { type PRNG } from "seedrandom";
 import { createNodeImageProgram } from "@sigma/node-image";
 import { createNodeCompoundProgram } from "sigma/rendering";
@@ -35,7 +39,7 @@ const nodePictogramProgram = createNodeCompoundProgram([
     keepWithinCircle: true,
     correctCentering: true,
     drawingMode: "color",
-    colorAttribute: "pictoColor",
+    colorAttribute: "pictogramColor",
     padding: 0.15,
   }),
 ]);
@@ -84,15 +88,19 @@ function getImageFromType(type: string) {
   }
 }
 
-// Component that load the graph
 export const LoadGraph = observer(() => {
   const loadGraph = useLoadGraph();
   const rootStore = useMst();
+  const sigma = useSigma<NodeType, EdgeType>();
+
+  const setSettings = useSetSettings<NodeType, EdgeType>();
+  const registerEvents = useRegisterEvents<NodeType, EdgeType>();
+  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
 
   const reloadGraph = useCallback(
     (dataset: DatasetInstance) => {
       const rng = seedrandom("hello.");
-      const graph = new Graph();
+      const graph = new Graph<NodeType, EdgeType>();
       const documentIdToDocument = new Map<string, DocumentInstance>();
       const entityGroupIdToDocument = new Map<string, EntityGroupInstance>();
 
@@ -104,7 +112,7 @@ export const LoadGraph = observer(() => {
           label: document.title,
           color: DEFINES.document.color,
           image: "/document.svg",
-          pictoColor: DEFINES.document.iconColor,
+          pictogramColor: DEFINES.document.iconColor,
           type: "pictogram",
         });
       }
@@ -117,7 +125,7 @@ export const LoadGraph = observer(() => {
           label: group.name,
           color: DEFINES.entityGroup.color,
           image: entityImage,
-          pictoColor: DEFINES.entityGroup.iconColor,
+          pictogramColor: DEFINES.entityGroup.iconColor,
           type: "pictogram",
         });
       }
@@ -129,7 +137,7 @@ export const LoadGraph = observer(() => {
           label: entity.name,
           color: DEFINES.entity.color,
           image: entityImage,
-          pictoColor: DEFINES.entity.iconColor,
+          pictogramColor: DEFINES.entity.iconColor,
           type: "pictogram",
         });
 
@@ -172,7 +180,51 @@ export const LoadGraph = observer(() => {
     });
 
     return () => disposer();
-  }, [rootStore, reloadGraph]);
+  }, [rootStore, reloadGraph, registerEvents]);
+
+  useEffect(() => {
+    registerEvents({
+      enterNode: (event) => {
+        setHoveredNode(event.node);
+        rootStore.setHoveredNode(event.node);
+      },
+      leaveNode: () => {
+        setHoveredNode(null);
+        rootStore.setHoveredNode(null);
+      },
+      clickNode: (event) => rootStore.setSelectedNode(event.node),
+    });
+  }, [registerEvents, rootStore]);
+
+  useEffect(() => {
+    if (sigma !== null) {
+      rootStore.setSigma(sigma);
+    }
+  }, [rootStore, sigma]);
+
+  useEffect(() => {
+    setSettings({
+      nodeReducer: (node, data) => {
+        const graph = sigma.getGraph();
+        const newData = { ...data, highlighted: data.highlighted ?? false };
+
+        if (hoveredNode) {
+          newData.highlighted =
+            node === hoveredNode || graph.neighbors(hoveredNode).includes(node);
+        }
+        return newData;
+      },
+      edgeReducer: (edge, data) => {
+        const graph = sigma.getGraph();
+        const newData = { ...data, hidden: false };
+
+        if (hoveredNode && !graph.extremities(edge).includes(hoveredNode)) {
+          newData.hidden = true;
+        }
+        return newData;
+      },
+    });
+  }, [hoveredNode, setSettings, sigma]);
 
   return null;
 });
@@ -198,7 +250,8 @@ const Fa2 = observer(() => {
     }, 2000);
 
     return () => {
-      kill();
+      // This prevents hot reload from working properly
+      // kill();
     };
   }, [start, kill, stop, onFinishRenderingLayout]);
 
@@ -209,19 +262,9 @@ const Fa2 = observer(() => {
   return null;
 });
 
-// Component that display the graph
 const EntityGraph = observer(() => {
-  const rootStore = useMst();
-  const [sigma, setSigma] = useState<Sigma | null>(null);
-
-  useEffect(() => {
-    if (sigma !== null) {
-      rootStore.setSigma(sigma);
-    }
-  }, [rootStore, sigma]);
-
   return (
-    <SigmaContainer settings={sigmaSettings} ref={setSigma} style={sigmaStyle}>
+    <SigmaContainer settings={sigmaSettings} style={sigmaStyle}>
       <LoadGraph />
       <Fa2 />
       <ControlsContainer position={"bottom-right"}>
