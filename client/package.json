@@ -20,12 +20,14 @@
     "mobx-state-tree": "^7.0.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "seedrandom": "^3.0.5",
     "sigma": "^3.0.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
+    "@types/seedrandom": "^3.0.8",
     "@vitejs/plugin-react-swc": "^4.0.0",
     "eslint": "^9.33.0",
     "eslint-plugin-react-dom": "^1.53.1",

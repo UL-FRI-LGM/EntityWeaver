@@ -18,16 +18,28 @@ import {
 import { autorun } from "mobx";
 import { useWorkerLayoutForceAtlas2 } from "@react-sigma/layout-forceatlas2";
 import Sigma from "sigma";
+import seedrandom, { type PRNG } from "seedrandom";
+
+const sizePerEdge = 5;
+const minNodeSize = 5;
+const maxNodeSize = 50;
 
 const sigmaStyle: CSSProperties = {
   display: "flex",
 };
 
-function getRandomPosition() {
+function getRandomPosition(generator?: PRNG) {
   return {
-    x: Math.random(),
-    y: Math.random(),
+    x: generator ? generator() : Math.random(),
+    y: generator ? generator() : Math.random(),
   };
+}
+
+function getNodeSize(edges: number) {
+  const size = edges * sizePerEdge;
+  if (size < minNodeSize) return minNodeSize;
+  if (size > maxNodeSize) return maxNodeSize;
+  return size;
 }
 
 // Component that load the graph
@@ -37,14 +49,16 @@ export const LoadGraph = observer(() => {
 
   const reloadGraph = useCallback(
     (dataset: DatasetInstance) => {
+      const rng = seedrandom("hello.");
       const graph = new Graph();
       const documentIdToDocument = new Map<string, DocumentInstance>();
       const entityGroupIdToDocument = new Map<string, EntityGroupInstance>();
+
       for (const document of dataset.documents) {
         documentIdToDocument.set(document.id, document);
         graph.addNode(document.globalId, {
-          ...getRandomPosition(),
-          size: 15,
+          ...getRandomPosition(rng),
+          size: 30,
           label: document.title,
           color: "#bddb18",
         });
@@ -52,7 +66,7 @@ export const LoadGraph = observer(() => {
       for (const group of dataset.entityGroups) {
         entityGroupIdToDocument.set(group.id, group);
         graph.addNode(group.globalId, {
-          ...getRandomPosition(),
+          ...getRandomPosition(rng),
           size: 15,
           label: group.name,
           color: "#0036ff",
@@ -62,8 +76,8 @@ export const LoadGraph = observer(() => {
         const group = entityGroupIdToDocument.get(entity.group_id);
         const document = documentIdToDocument.get(entity.document_id);
         graph.addNode(entity.globalId, {
-          ...getRandomPosition(),
-          size: 15,
+          ...getRandomPosition(rng),
+          size: 5,
           label: entity.name,
           color: "#FA4F40",
         });
@@ -75,6 +89,14 @@ export const LoadGraph = observer(() => {
           size: 5,
           color: "#2fdffa",
         });
+      }
+      // for (const document of dataset.documents) {
+      //   const nodeSize = getNodeSize(graph.edges(document.globalId).length);
+      //   graph.updateNodeAttribute(document.globalId, "size", () => nodeSize);
+      // }
+      for (const group of dataset.entityGroups) {
+        const nodeSize = getNodeSize(graph.edges(group.globalId).length);
+        graph.updateNodeAttribute(group.globalId, "size", () => nodeSize);
       }
       loadGraph(graph);
     },
@@ -149,4 +171,5 @@ const EntityGraph = observer(() => {
   );
 });
 
+// @ts-ignore
 export default EntityGraph;
