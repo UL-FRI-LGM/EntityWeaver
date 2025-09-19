@@ -39,22 +39,17 @@ export async function sendApiRequest(
 }
 
 export function typeToString(type: string) {
-  switch (type) {
-    case "PER":
-      return "Person";
-    case "ORG":
-      return "Organization";
-    case "LOC":
-      return "Location";
-    case "MISC":
-      return "Miscellaneous";
-    default:
-      return type;
-  }
+  if (type in DEFINES.entityTypes.names)
+    return DEFINES.entityTypes.names[
+      type as keyof typeof DEFINES.entityTypes.names
+    ];
+  return DEFINES.entityTypes.names.default;
 }
 
 export function typeToColor(type: string) {
-  if (type in DEFINES.typeColors)
-    return DEFINES.typeColors[type as keyof typeof DEFINES.typeColors];
+  if (type in DEFINES.entityTypes.colors)
+    return DEFINES.entityTypes.colors[
+      type as keyof typeof DEFINES.entityTypes.colors
+    ];
   return null;
 }

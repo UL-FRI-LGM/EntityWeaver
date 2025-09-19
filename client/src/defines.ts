@@ -26,11 +26,19 @@ export const DEFINES = {
     color: "rgb(36,180,59)",
     width: edgeWidth,
   },
-  typeColors: {
-    PER: "#ff8100",
-    ORG: "#fd4719",
-    LOC: "#36da06",
-    MISC: "#07f8f8",
-    default: "#ffffff",
+  entityTypes: {
+    colors: {
+      PER: "#ff8100",
+      ORG: "#fd4719",
+      LOC: "#36da06",
+      MISC: "#07f8f8",
+    },
+    names: {
+      PER: "Person",
+      ORG: "Organization",
+      LOC: "Location",
+      MISC: "Miscellaneous",
+      default: "Unknown",
+    },
   },
 } as const;

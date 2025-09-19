@@ -31,13 +31,28 @@ interface GroupDB {
   type: string;
 }
 
-export const Entity = types.model({
-  id: types.string,
-  name: types.string,
-  type: types.string,
-  document_id: types.string,
-  group_id: types.maybe(types.string),
-});
+export const Entity = types
+  .model({
+    id: types.string,
+    name: types.string,
+    type: types.string,
+    document_id: types.string,
+    group_id: types.maybe(types.string),
+  })
+  .actions((self) => ({
+    setName(name: string) {
+      self.name = name;
+    },
+    setType(type: string) {
+      self.type = type;
+    },
+    setDocumentId(documentId: string) {
+      self.document_id = documentId;
+    },
+    setGroupId(groupId: string | null) {
+      self.group_id = groupId ?? undefined;
+    },
+  }));
 
 export interface EntityInstance extends Instance<typeof Entity> {}
 
