@@ -29,5 +29,9 @@ export default tseslint.config([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      "react/jsx-uses-vars": "error",
+      "react/jsx-uses-react": "error",
+    },
   },
 ]);

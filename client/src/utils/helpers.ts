@@ -43,7 +43,7 @@ export function typeToString(type: string) {
     return DEFINES.entityTypes.names[
       type as keyof typeof DEFINES.entityTypes.names
     ];
-  return DEFINES.entityTypes.names.default;
+  return type;
 }
 
 export function typeToColor(type: string) {

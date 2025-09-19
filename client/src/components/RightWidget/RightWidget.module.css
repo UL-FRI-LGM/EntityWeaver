@@ -11,7 +11,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 25px;
 }
 
 .entityEntry {
@@ -21,4 +21,8 @@
 
 .entityIcon {
   width: var(--mantine-font-size-lg);
+}
+
+.applyChangesButton {
+  margin-top: 15px;
 }

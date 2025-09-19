@@ -22,6 +22,48 @@ function getNodeSize(edges: number) {
   return size;
 }
 
+export function updateEntityNode(
+  sigma: Sigma<NodeType, EdgeType>,
+  nodeId: string,
+  update: {
+    label?: string;
+    type?: string;
+    documentId?: string;
+    groupId?: string;
+  },
+) {
+  const graph = sigma.getGraph();
+  const node = graph.getNodeAttributes(nodeId);
+  if (!node) {
+    console.warn(`Node with id ${nodeId} not found in the graph.`);
+    return;
+  }
+
+  if (update.label !== undefined && update.label !== node.label) {
+    graph.updateNodeAttribute(nodeId, "label", () => update.label!);
+  }
+
+  if (update.type !== undefined && update.type !== node.type) {
+    const entityImage = typeToImage(update.type);
+    graph.updateNodeAttribute(nodeId, "image", () => entityImage);
+  }
+
+  if (update.documentId !== undefined || update.groupId !== undefined) {
+    const edges = graph.edges(nodeId);
+    edges.forEach((edgeId) => {
+      const edge = graph.getEdgeAttributes(edgeId);
+      if (edge.connectionType === "Document") {
+        graph.dropEdge(edgeId);
+      }
+    });
+    graph.addEdge(nodeId, update.documentId, {
+      size: DEFINES.documentToEntityEdge.width,
+      color: DEFINES.documentToEntityEdge.color,
+      connectionType: "Document",
+    });
+  }
+}
+
 export function updateGraph(
   sigma: Sigma<NodeType, EdgeType>,
   dataset: DatasetInstance,
@@ -71,6 +113,7 @@ export function updateGraph(
       graph.addEdge(entity.id, document.id, {
         size: DEFINES.documentToEntityEdge.width,
         color: DEFINES.documentToEntityEdge.color,
+        connectionType: "Document",
       });
     }
 
@@ -81,6 +124,7 @@ export function updateGraph(
       graph.addEdge(entity.id, group.id, {
         size: DEFINES.groupToEntityEdge.width,
         color: DEFINES.groupToEntityEdge.color,
+        connectionType: "Group",
       });
     }
   });

@@ -2,7 +2,7 @@ import DataApi from "../api/data.ts";
 import { createContext, use } from "react";
 import { types, flow, isAlive, type Instance, getRoot } from "mobx-state-tree";
 import type Sigma from "sigma";
-import { updateGraph } from "../utils/graphHelpers.ts";
+import { updateEntityNode, updateGraph } from "../utils/graphHelpers.ts";
 
 interface DatasetDB {
   entities: EntityDB[];
@@ -40,15 +40,30 @@ export const Entity = types
     document_id: types.string,
     group_id: types.maybe(types.string),
   })
+  .views((self) => ({
+    get sigma(): Sigma<NodeType, EdgeType> | null {
+      const rootStore = getRoot(self) as RootInstance;
+      return rootStore.sigma;
+    },
+  }))
   .actions((self) => ({
     setName(name: string) {
       self.name = name;
+      if (self.sigma) {
+        updateEntityNode(self.sigma, self.id, { label: name });
+      }
     },
     setType(type: string) {
       self.type = type;
+      if (self.sigma) {
+        updateEntityNode(self.sigma, self.id, { type: type });
+      }
     },
     setDocumentId(documentId: string) {
       self.document_id = documentId;
+      if (self.sigma) {
+        updateEntityNode(self.sigma, self.id, { documentId: documentId });
+      }
     },
     setGroupId(groupId: string | null) {
       self.group_id = groupId ?? undefined;
@@ -69,11 +84,17 @@ export const Document = types.model({
 
 export interface DocumentInstance extends Instance<typeof Document> {}
 
-export const EntityGroup = types.model({
-  id: types.string,
-  name: types.string,
-  type: types.string,
-});
+export const EntityGroup = types
+  .model({
+    id: types.string,
+    name: types.string,
+    type: types.string,
+  })
+  .views((self) => ({
+    get searchString() {
+      return `${self.name} (${self.id})`;
+    },
+  }));
 // .views((self) => ({
 //   get globalId() {
 //     return `EntityGroup-${self.id}`;
@@ -90,6 +111,17 @@ const Dataset = types
   })
   .volatile(() => ({
     fetchingData: false,
+  }))
+  .views((self) => ({
+    get entityList() {
+      return Array.from(self.entities.values());
+    },
+    get documentList() {
+      return Array.from(self.documents.values());
+    },
+    get groupList() {
+      return Array.from(self.entityGroups.values());
+    },
   }))
   .actions((self) => ({
     afterCreate() {
@@ -146,6 +178,7 @@ export interface NodeType {
 export interface EdgeType {
   size: number;
   color: string;
+  connectionType: "Document" | "Group";
 }
 
 const RootStore = types

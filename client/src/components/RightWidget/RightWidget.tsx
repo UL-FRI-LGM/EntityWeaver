@@ -24,6 +24,7 @@ import { useState } from "react";
 import { DEFINES } from "../../defines.ts";
 import { IconEdit } from "@tabler/icons-react";
 import { typeToColor, typeToString } from "../../utils/helpers.ts";
+import SearchableCombobox from "../SearchableCombobox/SearchableCombobox.tsx";
 
 const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
   ([tag, name]) => (
@@ -33,16 +34,117 @@ const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
   ),
 );
 
+const DocumentSelector = observer(
+  ({
+    documentId,
+    onDocumentChange,
+    label,
+  }: {
+    documentId: string | null;
+    onDocumentChange: (id: string) => void;
+    label: string;
+  }) => {
+    const { dataset } = useMst();
+
+    const selectedDocument = documentId
+      ? dataset.documents.get(documentId)
+      : null;
+
+    const [searchValue, setSearchValue] = useState(
+      selectedDocument?.title ?? "",
+    );
+
+    const shouldFilterOptions = selectedDocument?.title !== searchValue;
+
+    const filteredOptions = shouldFilterOptions
+      ? dataset.documentList.filter((doc) =>
+          doc.title.toLowerCase().includes(searchValue.toLowerCase().trim()),
+        )
+      : dataset.documentList;
+
+    const options = filteredOptions.map((doc) => ({
+      val: doc.id,
+      display: doc.title,
+    }));
+
+    return (
+      <SearchableCombobox
+        label={label}
+        selectedValue={selectedDocument?.title}
+        onChange={onDocumentChange}
+        searchValue={searchValue}
+        setSearchValue={setSearchValue}
+        options={options}
+      />
+    );
+  },
+);
+
+const EntityGroupSelector = observer(
+  ({
+    groupId,
+    onGroupChange,
+    label,
+  }: {
+    groupId: string | null;
+    onGroupChange: (id: string) => void;
+    label: string;
+  }) => {
+    const { dataset } = useMst();
+
+    const selectedGroup = groupId
+      ? dataset.entityGroups.get(groupId)
+      : undefined;
+
+    const [searchValue, setSearchValue] = useState(
+      selectedGroup?.searchString ?? "",
+    );
+
+    const shouldFilterOptions = selectedGroup?.searchString !== searchValue;
+
+    const filteredOptions = shouldFilterOptions
+      ? dataset.groupList.filter((group) =>
+          group.searchString
+            .toLowerCase()
+            .includes(searchValue.toLowerCase().trim()),
+        )
+      : dataset.groupList;
+
+    const options = filteredOptions.map((item) => ({
+      val: item.id,
+      display: item.searchString,
+    }));
+
+    return (
+      <SearchableCombobox
+        label={label}
+        selectedValue={selectedGroup?.searchString}
+        onChange={onGroupChange}
+        searchValue={searchValue}
+        setSearchValue={setSearchValue}
+        options={options}
+      />
+    );
+  },
+);
+
 const EntityEditor = observer(({ entity }: { entity: EntityInstance }) => {
   const entityTypeCombobox = useCombobox();
 
   const [name, setName] = useState(entity.name);
   const [entityType, setEntityType] = useState(entity.type);
+  const [documentId, setDocumentId] = useState(entity.document_id);
 
   function applyChanges() {
     entity.setName(name);
     entity.setType(entityType);
+    entity.setDocumentId(documentId);
   }
+
+  const canApplyChanges =
+    entity.name !== name ||
+    entity.type !== entityType ||
+    entity.document_id !== documentId;
 
   return (
     <Fieldset
@@ -89,15 +191,46 @@ const EntityEditor = observer(({ entity }: { entity: EntityInstance }) => {
           <Combobox.Options>{entityTypeDropdownOptions}</Combobox.Options>
         </Combobox.Dropdown>
       </Combobox>
-      <TextInput label="Document" placeholder="Email" mt="md" />
+      <DocumentSelector
+        label={"Source Document"}
+        documentId={documentId}
+        onDocumentChange={(id) => {
+          setDocumentId(id);
+        }}
+      />
+      <EntityGroupSelector
+        label={"Entity"}
+        groupId={entity.group_id ?? null}
+        onGroupChange={(id) => {
+          entity.setGroupId(id);
+        }}
+      />
       <Button
-        disabled={entity.name === name && entity.type === entityType}
+        disabled={!canApplyChanges}
         variant="filled"
         leftSection={<IconEdit size={14} />}
         onClick={applyChanges}
+        className={classes.applyChangesButton}
       >
         Apply Changes
       </Button>
+      {/* TODO disable tooltip if you just clicked apply changes until you move mouse */}
+      {/*<Tooltip*/}
+      {/*  position="bottom"*/}
+      {/*  disabled={canApplyChanges}*/}
+      {/*  label="No changes to apply"*/}
+      {/*  openDelay={2000}*/}
+      {/*>*/}
+      {/*  <Button*/}
+      {/*    disabled={!canApplyChanges}*/}
+      {/*    variant="filled"*/}
+      {/*    leftSection={<IconEdit size={14} />}*/}
+      {/*    onClick={applyChanges}*/}
+      {/*    className={classes.applyChangesButton}*/}
+      {/*  >*/}
+      {/*    Apply Changes*/}
+      {/*  </Button>*/}
+      {/*</Tooltip>*/}
     </Fieldset>
   );
 });

@@ -38,14 +38,13 @@ export const DEFINES = {
       ORG: "Organization",
       LOC: "Location",
       MISC: "Miscellaneous",
-      default: "Unknown",
     },
     images: {
       PER: "/person.svg",
       ORG: "/organization.svg",
       LOC: "/location.svg",
       MISC: "/concept.svg",
-      default: "/concept.svg",
+      default: "/unknown.svg",
     },
   },
 } as const;
