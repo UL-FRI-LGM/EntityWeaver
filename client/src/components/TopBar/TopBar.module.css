@@ -1,0 +1,5 @@
+.container {
+  height: 50px;
+  background-color: var(--mantine-color-body);
+  border-bottom: 1px solid var(--mantine-color-dark-light-color);
+}

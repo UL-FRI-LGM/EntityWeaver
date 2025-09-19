@@ -3,54 +3,74 @@ import { createContext, use } from "react";
 import { types, flow, isAlive, type Instance } from "mobx-state-tree";
 import type Sigma from "sigma";
 
-const Entity = types
-  .model({
-    id: types.string,
-    name: types.string,
-    type: types.string,
-    document_id: types.string,
-    group_id: types.maybe(types.string),
-  })
-  .views((self) => ({
-    get globalId() {
-      return `Entity-${self.id}`;
-    },
-  }));
+interface DatasetDB {
+  entities: EntityDB[];
+  entity_groups: GroupDB[];
+  documents: DocumentDB[];
+}
+
+const entityPrefix = "Entity-";
+interface EntityDB {
+  id: string;
+  name: string;
+  type: string;
+  document_id: string;
+  group_id: string;
+}
+
+const documentPrefix = "Document-";
+interface DocumentDB {
+  id: string;
+  title: string;
+}
+
+const groupPrefix = "Group-";
+interface GroupDB {
+  id: string;
+  name: string;
+  type: string;
+}
+
+export const Entity = types.model({
+  id: types.string,
+  name: types.string,
+  type: types.string,
+  document_id: types.string,
+  group_id: types.maybe(types.string),
+});
 
 export interface EntityInstance extends Instance<typeof Entity> {}
 
-const Document = types
-  .model({
-    id: types.string,
-    title: types.string,
-  })
-  .views((self) => ({
-    get globalId() {
-      return `Document-${self.id}`;
-    },
-  }));
+export const Document = types.model({
+  id: types.string,
+  title: types.string,
+});
+// .views((self) => ({
+//   get globalId() {
+//     return `Document-${self.id}`;
+//   },
+// }));
 
 export interface DocumentInstance extends Instance<typeof Document> {}
 
-const EntityGroup = types
-  .model({
-    id: types.string,
-    name: types.string,
-    type: types.string,
-  })
-  .views((self) => ({
-    get globalId() {
-      return `EntityGroup-${self.id}`;
-    },
-  }));
+export const EntityGroup = types.model({
+  id: types.string,
+  name: types.string,
+  type: types.string,
+});
+// .views((self) => ({
+//   get globalId() {
+//     return `EntityGroup-${self.id}`;
+//   },
+// }));
 
 export interface EntityGroupInstance extends Instance<typeof EntityGroup> {}
 
 const Dataset = types
   .model({
-    entities: types.array(Entity),
-    documents: types.array(Document),
-    entityGroups: types.array(EntityGroup),
+    entities: types.map(Entity),
+    documents: types.map(Document),
+    entityGroups: types.map(EntityGroup),
   })
   .volatile(() => ({
     fetchingData: false,
@@ -62,14 +82,31 @@ const Dataset = types
     fetchData: flow(function* () {
       if (self.fetchingData) return;
       self.fetchingData = true;
-      const data = yield DataApi.getData();
+      const data: DatasetDB = yield DataApi.getData();
       if (!isAlive(self)) {
         return;
       }
 
-      self.entities = data.entities;
-      self.documents = data.documents;
-      self.entityGroups = data.entity_groups;
+      self.entities.clear();
+      data.entities.forEach((entity: EntityDB) => {
+        entity.id = `${entityPrefix}${entity.id}`;
+        entity.document_id = `${documentPrefix}${entity.document_id}`;
+        entity.group_id = `${groupPrefix}${entity.group_id}`;
+        self.entities.set(entity.id, entity);
+      });
+
+      self.documents.clear();
+      data.documents.forEach((document: DocumentDB) => {
+        document.id = `${documentPrefix}${document.id}`;
+        self.documents.set(document.id, document);
+      });
+
+      self.entityGroups.clear();
+      data.entity_groups.forEach((group: GroupDB) => {
+        group.id = `${groupPrefix}${group.id}`;
+        self.entityGroups.set(group.id, group);
+      });
+
       self.fetchingData = false;
     }),
   }));
@@ -101,6 +138,20 @@ const RootStore = types
     sigma: null as Sigma<NodeType, EdgeType> | null,
     selectedNode: null as string | null,
     hoveredNode: null as string | null,
+  }))
+  .views((self) => ({
+    get selectedNodeInstance() {
+      if (!self.selectedNode) return null;
+      if (self.selectedNode.startsWith(entityPrefix)) {
+        return self.dataset.entities.get(self.selectedNode);
+      } else if (self.selectedNode.startsWith(documentPrefix)) {
+        return self.dataset.documents.get(self.selectedNode);
+      } else if (self.selectedNode.startsWith(groupPrefix)) {
+        return self.dataset.entityGroups.get(self.selectedNode);
+      } else {
+        return null;
+      }
+    },
   }))
   .actions((self) => ({
     setIsForceAtlasRunning(state: boolean) {

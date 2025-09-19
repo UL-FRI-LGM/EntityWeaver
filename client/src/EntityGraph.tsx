@@ -14,9 +14,7 @@ import "@react-sigma/core/lib/style.css";
 import { observer } from "mobx-react";
 import {
   type DatasetInstance,
-  type DocumentInstance,
   type EdgeType,
-  type EntityGroupInstance,
   type NodeType,
   useMst,
 } from "./stores/rootStore.ts";
@@ -101,12 +99,9 @@ export const LoadGraph = observer(() => {
     (dataset: DatasetInstance) => {
       const rng = seedrandom("hello.");
       const graph = new Graph<NodeType, EdgeType>();
-      const documentIdToDocument = new Map<string, DocumentInstance>();
-      const entityGroupIdToDocument = new Map<string, EntityGroupInstance>();
 
-      for (const document of dataset.documents) {
-        documentIdToDocument.set(document.id, document);
-        graph.addNode(document.globalId, {
+      dataset.documents.forEach((document) => {
+        graph.addNode(document.id, {
           ...getRandomPosition(rng),
           size: DEFINES.document.size,
           label: document.title,
@@ -115,11 +110,10 @@ export const LoadGraph = observer(() => {
           pictogramColor: DEFINES.document.iconColor,
           type: "pictogram",
         });
-      }
-      for (const group of dataset.entityGroups) {
-        entityGroupIdToDocument.set(group.id, group);
+      });
+      dataset.entityGroups.forEach((group) => {
         const entityImage = getImageFromType(group.type);
-        graph.addNode(group.globalId, {
+        graph.addNode(group.id, {
           ...getRandomPosition(rng),
           size: 15,
           label: group.name,
@@ -128,10 +122,10 @@ export const LoadGraph = observer(() => {
           pictogramColor: DEFINES.entityGroup.iconColor,
           type: "pictogram",
         });
-      }
-      for (const entity of dataset.entities) {
+      });
+      dataset.entities.forEach((entity) => {
         const entityImage = getImageFromType(entity.type);
-        graph.addNode(entity.globalId, {
+        graph.addNode(entity.id, {
           ...getRandomPosition(rng),
           size: DEFINES.entity.size,
           label: entity.name,
@@ -141,32 +135,32 @@ export const LoadGraph = observer(() => {
           type: "pictogram",
         });
 
-        const document = documentIdToDocument.get(entity.document_id);
+        const document = dataset.documents.get(entity.document_id);
         if (document) {
-          graph.addEdge(entity.globalId, document.globalId, {
+          graph.addEdge(entity.id, document.id, {
             size: DEFINES.documentToEntityEdge.width,
             color: DEFINES.documentToEntityEdge.color,
           });
         }
 
         const group = entity.group_id
-          ? entityGroupIdToDocument.get(entity.group_id)
+          ? dataset.entityGroups.get(entity.group_id)
           : undefined;
         if (group) {
-          graph.addEdge(entity.globalId, group.globalId, {
+          graph.addEdge(entity.id, group.id, {
             size: DEFINES.groupToEntityEdge.width,
             color: DEFINES.groupToEntityEdge.color,
           });
         }
-      }
+      });
       // for (const document of dataset.documents) {
       //   const nodeSize = getNodeSize(graph.edges(document.globalId).length);
       //   graph.updateNodeAttribute(document.globalId, "size", () => nodeSize);
       // }
-      for (const group of dataset.entityGroups) {
-        const nodeSize = getNodeSize(graph.edges(group.globalId).length);
-        graph.updateNodeAttribute(group.globalId, "size", () => nodeSize);
-      }
+      dataset.entityGroups.forEach((group) => {
+        const nodeSize = getNodeSize(graph.edges(group.id).length);
+        graph.updateNodeAttribute(group.id, "size", () => nodeSize);
+      });
       loadGraph(graph);
     },
     [loadGraph],
@@ -275,5 +269,4 @@ const EntityGraph = observer(() => {
   );
 });
 
-// @ts-ignore
 export default EntityGraph;

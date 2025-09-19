@@ -2,6 +2,8 @@ import "./App.css";
 import EntityGraph from "./EntityGraph.tsx";
 import { observer } from "mobx-react";
 import { useMst } from "./stores/rootStore.ts";
+import RightWidget from "./components/RightWidget/RightWidget.tsx";
+import TopBar from "./components/TopBar/TopBar.tsx";
 
 const App = observer(() => {
   const rootStore = useMst();
@@ -14,12 +16,11 @@ const App = observer(() => {
 
   return (
     <div className="app">
-      Test
-      <div>{rootStore.isForceAtlasRunning ? "True" : "False"}</div>
-      <button onClick={test} type="button">
-        AA
-      </button>
-      <EntityGraph />
+      <TopBar />
+      <div className="main">
+        <EntityGraph />
+        <RightWidget />
+      </div>
     </div>
   );
 });

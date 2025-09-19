@@ -1,0 +1,21 @@
+.container {
+  width: 300px;
+  position: relative;
+  background-color: var(--mantine-color-body);
+  border-left: 1px solid var(--mantine-color-dark-light-color);
+  padding: 5px 5px 5px 5px;
+  display: flex;
+}
+
+.fieldset {
+  flex: 1;
+}
+
+.entityEntry {
+  display: flex;
+  align-items: center;
+}
+
+.entityIcon {
+  width: var(--mantine-font-size-lg);
+}
