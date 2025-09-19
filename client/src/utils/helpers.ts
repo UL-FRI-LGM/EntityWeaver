@@ -1,4 +1,5 @@
 import { DEFINES } from "../defines.ts";
+import type { DatasetDB } from "../stores/rootStore.ts";
 
 export async function sendApiRequest(
   url: string,
@@ -36,6 +37,12 @@ export async function sendApiRequest(
     throw new Error(errorMsg);
   }
   return response;
+}
+
+export async function loadDemo() {
+  const response = await fetch("/demo.json");
+  const data: DatasetDB = await response.json();
+  return data;
 }
 
 export function typeToString(type: string) {

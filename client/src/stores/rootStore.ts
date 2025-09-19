@@ -1,10 +1,10 @@
-import DataApi from "../api/data.ts";
 import { createContext, use } from "react";
 import { types, flow, isAlive, type Instance, getRoot } from "mobx-state-tree";
 import type Sigma from "sigma";
 import { updateEntityNode, updateGraph } from "../utils/graphHelpers.ts";
+import { loadDemo } from "../utils/helpers.ts";
 
-interface DatasetDB {
+export interface DatasetDB {
   entities: EntityDB[];
   entity_groups: GroupDB[];
   documents: DocumentDB[];
@@ -130,13 +130,13 @@ const Dataset = types
     fetchData: flow(function* () {
       if (self.fetchingData) return;
       self.fetchingData = true;
-      const data: DatasetDB = yield DataApi.getData();
+      const data: DatasetDB = yield loadDemo();
       if (!isAlive(self)) {
         return;
       }
 
       self.entities.clear();
-      data.entities.forEach((entity: EntityDB) => {
+      data.entities.forEach((entity) => {
         entity.id = `${entityPrefix}${entity.id}`;
         entity.document_id = `${documentPrefix}${entity.document_id}`;
         entity.group_id = `${groupPrefix}${entity.group_id}`;
@@ -144,13 +144,13 @@ const Dataset = types
       });
 
       self.documents.clear();
-      data.documents.forEach((document: DocumentDB) => {
+      data.documents.forEach((document) => {
         document.id = `${documentPrefix}${document.id}`;
         self.documents.set(document.id, document);
       });
 
       self.entityGroups.clear();
-      data.entity_groups.forEach((group: GroupDB) => {
+      data.entity_groups.forEach((group) => {
         group.id = `${groupPrefix}${group.id}`;
         self.entityGroups.set(group.id, group);
       });
