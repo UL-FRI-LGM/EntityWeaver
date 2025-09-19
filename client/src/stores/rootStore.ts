@@ -1,7 +1,8 @@
 import DataApi from "../api/data.ts";
 import { createContext, use } from "react";
-import { types, flow, isAlive, type Instance } from "mobx-state-tree";
+import { types, flow, isAlive, type Instance, getRoot } from "mobx-state-tree";
 import type Sigma from "sigma";
+import { updateGraph } from "../utils/helpers.ts";
 
 interface DatasetDB {
   entities: EntityDB[];
@@ -123,6 +124,9 @@ const Dataset = types
       });
 
       self.fetchingData = false;
+
+      const rootStore = getRoot<RootInstance>(self);
+      rootStore?.onDatasetUpdate();
     }),
   }));
 
@@ -153,6 +157,7 @@ const RootStore = types
     sigma: null as Sigma<NodeType, EdgeType> | null,
     selectedNode: null as string | null,
     hoveredNode: null as string | null,
+    runLayout: false,
   }))
   .views((self) => ({
     get selectedNodeInstance() {
@@ -174,6 +179,7 @@ const RootStore = types
     },
     setSigma(sigma: Sigma<NodeType, EdgeType>) {
       self.sigma = sigma;
+      this.runGraphUpdate();
     },
     setSelectedNode(nodeId: string | null) {
       self.selectedNode = nodeId;
@@ -181,13 +187,25 @@ const RootStore = types
     setHoveredNode(nodeId: string | null) {
       self.hoveredNode = nodeId;
     },
+    onDatasetUpdate() {
+      this.runGraphUpdate();
+    },
+    runGraphUpdate() {
+      if (self.sigma && !self.dataset.fetchingData) {
+        updateGraph(self.sigma, self.dataset);
+        self.runLayout = true;
+      }
+    },
+    setRunLayout(state: boolean) {
+      self.runLayout = state;
+    },
   }));
+
+export interface RootInstance extends Instance<typeof RootStore> {}
 
 const initialState = RootStore.create({});
 
 export const rootStore = initialState;
-
-export interface RootInstance extends Instance<typeof RootStore> {}
 
 const RootStoreContext = createContext<null | RootInstance>(null);
 

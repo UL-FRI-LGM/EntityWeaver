@@ -40,5 +40,12 @@ export const DEFINES = {
       MISC: "Miscellaneous",
       default: "Unknown",
     },
+    images: {
+      PER: "/person.svg",
+      ORG: "/organization.svg",
+      LOC: "/location.svg",
+      MISC: "/concept.svg",
+      default: "/concept.svg",
+    },
   },
 } as const;
