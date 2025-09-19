@@ -2,421 +2,789 @@
   "documents": [
     {
       "id": "doc_1",
-      "title": "Document 1"
+      "title": "Report on Tech Companies"
     },
     {
       "id": "doc_2",
-      "title": "Document 2"
+      "title": "European Travel Notes"
     },
     {
       "id": "doc_3",
-      "title": "Document 3"
+      "title": "Global Trade Agreement 2025"
     },
     {
       "id": "doc_4",
-      "title": "Document 4"
+      "title": "Festival and Events Coverage"
     }
   ],
   "entities": [
     {
-      "id": "ent_1",
+      "id": "entity_1",
       "name": "Alice Johnson",
-      "type": "PER",
-      "document_id": "doc_1",
-      "group_id": "group_1"
+      "type": "PER"
     },
     {
-      "id": "ent_2",
-      "name": "A. Johnson",
-      "type": "PER",
-      "document_id": "doc_2",
-      "group_id": "group_1"
-    },
-    {
-      "id": "ent_3",
+      "id": "entity_2",
       "name": "Bob Smith",
-      "type": "PER",
-      "document_id": "doc_1",
-      "group_id": "group_2"
+      "type": "PER"
     },
     {
-      "id": "ent_4",
-      "name": "B. Smith",
-      "type": "PER",
-      "document_id": "doc_3",
-      "group_id": "group_2"
-    },
-    {
-      "id": "ent_5",
+      "id": "entity_3",
       "name": "Charlie Kim",
-      "type": "PER",
-      "document_id": "doc_2"
+      "type": "PER"
     },
     {
-      "id": "ent_6",
-      "name": "Delta Inc",
-      "type": "ORG",
-      "document_id": "doc_1",
-      "group_id": "group_3"
-    },
-    {
-      "id": "ent_7",
-      "name": "Delta Incorporated",
-      "type": "ORG",
-      "document_id": "doc_2",
-      "group_id": "group_3"
-    },
-    {
-      "id": "ent_8",
-      "name": "Acme Corp",
-      "type": "ORG",
-      "document_id": "doc_1",
-      "group_id": "group_4"
-    },
-    {
-      "id": "ent_9",
-      "name": "Acme Corporation",
-      "type": "ORG",
-      "document_id": "doc_3",
-      "group_id": "group_4"
-    },
-    {
-      "id": "ent_10",
-      "name": "San Francisco",
-      "type": "LOC",
-      "document_id": "doc_1",
-      "group_id": "group_5"
-    },
-    {
-      "id": "ent_11",
-      "name": "SF",
-      "type": "LOC",
-      "document_id": "doc_2",
-      "group_id": "group_5"
-    },
-    {
-      "id": "ent_12",
-      "name": "Berlin",
-      "type": "LOC",
-      "document_id": "doc_3",
-      "group_id": "group_6"
-    },
-    {
-      "id": "ent_13",
-      "name": "Berlin, Germany",
-      "type": "LOC",
-      "document_id": "doc_4",
-      "group_id": "group_6"
-    },
-    {
-      "id": "ent_14",
-      "name": "Tech Summit 2025",
-      "type": "MISC",
-      "document_id": "doc_1",
-      "group_id": "group_7"
-    },
-    {
-      "id": "ent_15",
-      "name": "Global Tech Summit",
-      "type": "MISC",
-      "document_id": "doc_2",
-      "group_id": "group_7"
-    },
-    {
-      "id": "ent_16",
-      "name": "Spring Festival",
-      "type": "MISC",
-      "document_id": "doc_4",
-      "group_id": "group_8"
-    },
-    {
-      "id": "ent_17",
-      "name": "Berlin Spring Festival",
-      "type": "MISC",
-      "document_id": "doc_3",
-      "group_id": "group_8"
-    },
-    {
-      "id": "ent_18",
-      "name": "Eve Adams",
-      "type": "PER",
-      "document_id": "doc_3"
-    },
-    {
-      "id": "ent_19",
+      "id": "entity_4",
       "name": "Sophia Müller",
-      "type": "PER",
-      "document_id": "doc_4",
-      "group_id": "group_9"
+      "type": "PER"
     },
     {
-      "id": "ent_20",
-      "name": "S. Müller",
-      "type": "PER",
-      "document_id": "doc_2",
-      "group_id": "group_9"
-    },
-    {
-      "id": "ent_21",
-      "name": "Oliver O'Neil",
-      "type": "PER",
-      "document_id": "doc_4",
-      "group_id": "group_10"
-    },
-    {
-      "id": "ent_22",
-      "name": "O. O'Neil",
-      "type": "PER",
-      "document_id": "doc_3",
-      "group_id": "group_10"
-    },
-    {
-      "id": "ent_23",
-      "name": "Gamma LLC",
-      "type": "ORG",
-      "document_id": "doc_3",
-      "group_id": "group_11"
-    },
-    {
-      "id": "ent_24",
-      "name": "Gamma Limited",
-      "type": "ORG",
-      "document_id": "doc_4",
-      "group_id": "group_11"
-    },
-    {
-      "id": "ent_25",
-      "name": "Zeta LLC",
-      "type": "ORG",
-      "document_id": "doc_4",
-      "group_id": "group_12"
-    },
-    {
-      "id": "ent_26",
-      "name": "Zeta Limited",
-      "type": "ORG",
-      "document_id": "doc_2",
-      "group_id": "group_12"
-    },
-    {
-      "id": "ent_27",
-      "name": "London",
-      "type": "LOC",
-      "document_id": "doc_2",
-      "group_id": "group_13"
-    },
-    {
-      "id": "ent_28",
-      "name": "London, UK",
-      "type": "LOC",
-      "document_id": "doc_4",
-      "group_id": "group_13"
-    },
-    {
-      "id": "ent_29",
-      "name": "Tokyo",
-      "type": "LOC",
-      "document_id": "doc_1"
-    },
-    {
-      "id": "ent_30",
-      "name": "New York City",
-      "type": "LOC",
-      "document_id": "doc_3",
-      "group_id": "group_14"
-    },
-    {
-      "id": "ent_31",
-      "name": "NYC",
-      "type": "LOC",
-      "document_id": "doc_1",
-      "group_id": "group_14"
-    },
-    {
-      "id": "ent_32",
+      "id": "entity_5",
       "name": "Michael Green",
-      "type": "PER",
-      "document_id": "doc_1"
+      "type": "PER"
     },
     {
-      "id": "ent_33",
+      "id": "entity_6",
       "name": "Laura White",
-      "type": "PER",
-      "document_id": "doc_2"
-    },
-    {
-      "id": "ent_34",
-      "name": "Kevin Brown",
-      "type": "PER",
-      "document_id": "doc_3"
-    },
-    {
-      "id": "ent_35",
-      "name": "Thomas Black",
-      "type": "PER",
-      "document_id": "doc_4"
-    },
-    {
-      "id": "ent_36",
-      "name": "Omega Corp",
-      "type": "ORG",
-      "document_id": "doc_2"
-    },
-    {
-      "id": "ent_37",
-      "name": "Sigma Co",
-      "type": "ORG",
-      "document_id": "doc_3"
-    },
-    {
-      "id": "ent_38",
-      "name": "Lambda Partners",
-      "type": "ORG",
-      "document_id": "doc_4"
-    },
-    {
-      "id": "ent_39",
-      "name": "Paris",
-      "type": "LOC",
-      "document_id": "doc_2"
-    },
-    {
-      "id": "ent_40",
-      "name": "Madrid",
-      "type": "LOC",
-      "document_id": "doc_3"
-    },
-    {
-      "id": "ent_41",
-      "name": "Rome",
-      "type": "LOC",
-      "document_id": "doc_4"
-    },
-    {
-      "id": "ent_42",
-      "name": "Conference 2025",
-      "type": "MISC",
-      "document_id": "doc_1"
-    },
-    {
-      "id": "ent_43",
-      "name": "Annual Report",
-      "type": "MISC",
-      "document_id": "doc_2"
-    },
-    {
-      "id": "ent_44",
-      "name": "Trade Agreement",
-      "type": "MISC",
-      "document_id": "doc_3"
-    },
-    {
-      "id": "ent_45",
-      "name": "Music Festival",
-      "type": "MISC",
-      "document_id": "doc_4"
-    },
-    {
-      "id": "ent_46",
-      "name": "Henry Lee",
-      "type": "PER",
-      "document_id": "doc_1"
-    },
-    {
-      "id": "ent_47",
-      "name": "Ivy Chen",
-      "type": "PER",
-      "document_id": "doc_2"
-    },
-    {
-      "id": "ent_48",
-      "name": "George King",
-      "type": "PER",
-      "document_id": "doc_3"
-    },
-    {
-      "id": "ent_49",
-      "name": "Nina Park",
-      "type": "PER",
-      "document_id": "doc_4"
-    },
-    {
-      "id": "ent_50",
-      "name": "Arctic Council",
-      "type": "ORG",
-      "document_id": "doc_3"
-    }
-  ],
-  "entity_groups": [
-    {
-      "id": "group_1",
-      "name": "Alice Johnson",
       "type": "PER"
     },
     {
-      "id": "group_2",
-      "name": "Bob Smith",
-      "type": "PER"
-    },
-    {
-      "id": "group_3",
-      "name": "Delta Inc",
-      "type": "ORG"
-    },
-    {
-      "id": "group_4",
+      "id": "entity_7",
       "name": "Acme Corp",
       "type": "ORG"
     },
     {
-      "id": "group_5",
+      "id": "entity_8",
+      "name": "Delta Inc",
+      "type": "ORG"
+    },
+    {
+      "id": "entity_9",
+      "name": "Gamma LLC",
+      "type": "ORG"
+    },
+    {
+      "id": "entity_10",
+      "name": "Zeta Partners",
+      "type": "ORG"
+    },
+    {
+      "id": "entity_11",
+      "name": "Omega Corp",
+      "type": "ORG"
+    },
+    {
+      "id": "entity_12",
       "name": "San Francisco",
       "type": "LOC"
     },
     {
-      "id": "group_6",
+      "id": "entity_13",
       "name": "Berlin",
       "type": "LOC"
     },
     {
-      "id": "group_7",
+      "id": "entity_14",
+      "name": "London",
+      "type": "LOC"
+    },
+    {
+      "id": "entity_15",
+      "name": "Tokyo",
+      "type": "LOC"
+    },
+    {
+      "id": "entity_16",
+      "name": "New York City",
+      "type": "LOC"
+    },
+    {
+      "id": "entity_17",
+      "name": "Paris",
+      "type": "LOC"
+    },
+    {
+      "id": "entity_18",
+      "name": "Madrid",
+      "type": "LOC"
+    },
+    {
+      "id": "entity_19",
+      "name": "Rome",
+      "type": "LOC"
+    },
+    {
+      "id": "entity_20",
       "name": "Tech Summit",
       "type": "MISC"
     },
     {
-      "id": "group_8",
+      "id": "entity_21",
       "name": "Spring Festival",
       "type": "MISC"
     },
     {
-      "id": "group_9",
+      "id": "entity_22",
+      "name": "Trade Agreement 2025",
+      "type": "MISC"
+    },
+    {
+      "id": "entity_23",
+      "name": "Music Festival",
+      "type": "MISC"
+    },
+    {
+      "id": "entity_24",
+      "name": "Annual Report",
+      "type": "MISC"
+    },
+    {
+      "id": "entity_25",
+      "name": "Global Conference",
+      "type": "MISC"
+    }
+  ],
+  "mentions": [
+    {
+      "id": "mention_1",
+      "name": "Alice Johnson",
+      "type": "PER",
+      "document_id": "doc_1",
+      "links": [
+        {
+          "entity_id": "entity_1",
+          "confidence": 0.96
+        }
+      ]
+    },
+    {
+      "id": "mention_2",
+      "name": "A. Johnson",
+      "type": "PER",
+      "document_id": "doc_3",
+      "links": [
+        {
+          "entity_id": "entity_1",
+          "confidence": 0.89
+        }
+      ]
+    },
+    {
+      "id": "mention_3",
+      "name": "Bob Smith",
+      "type": "PER",
+      "document_id": "doc_1",
+      "links": [
+        {
+          "entity_id": "entity_2",
+          "confidence": 0.94
+        }
+      ]
+    },
+    {
+      "id": "mention_4",
+      "name": "B. Smith",
+      "type": "PER",
+      "document_id": "doc_2",
+      "links": [
+        {
+          "entity_id": "entity_2",
+          "confidence": 0.87
+        },
+        {
+          "entity_id": "entity_5",
+          "confidence": 0.4
+        }
+      ]
+    },
+    {
+      "id": "mention_5",
+      "name": "Charlie",
+      "type": "PER",
+      "document_id": "doc_4",
+      "links": [
+        {
+          "entity_id": "entity_3",
+          "confidence": 0.9
+        }
+      ]
+    },
+    {
+      "id": "mention_6",
       "name": "Sophia Müller",
-      "type": "PER"
+      "type": "PER",
+      "document_id": "doc_2",
+      "links": [
+        {
+          "entity_id": "entity_4",
+          "confidence": 0.95
+        }
+      ]
     },
     {
-      "id": "group_10",
-      "name": "Oliver O'Neil",
-      "type": "PER"
+      "id": "mention_7",
+      "name": "S. Müller",
+      "type": "PER",
+      "document_id": "doc_3",
+      "links": [
+        {
+          "entity_id": "entity_4",
+          "confidence": 0.85
+        }
+      ]
     },
     {
-      "id": "group_11",
+      "id": "mention_8",
+      "name": "Michael Green",
+      "type": "PER",
+      "document_id": "doc_1",
+      "links": [
+        {
+          "entity_id": "entity_5",
+          "confidence": 0.92
+        }
+      ]
+    },
+    {
+      "id": "mention_9",
+      "name": "Green",
+      "type": "PER",
+      "document_id": "doc_4",
+      "links": [
+        {
+          "entity_id": "entity_5",
+          "confidence": 0.7
+        },
+        {
+          "entity_id": "entity_6",
+          "confidence": 0.3
+        }
+      ]
+    },
+    {
+      "id": "mention_10",
+      "name": "Laura White",
+      "type": "PER",
+      "document_id": "doc_2",
+      "links": []
+    },
+    {
+      "id": "mention_11",
+      "name": "Acme Corp",
+      "type": "ORG",
+      "document_id": "doc_1",
+      "links": [
+        {
+          "entity_id": "entity_7",
+          "confidence": 0.97
+        }
+      ]
+    },
+    {
+      "id": "mention_12",
+      "name": "Acme",
+      "type": "ORG",
+      "document_id": "doc_2",
+      "links": [
+        {
+          "entity_id": "entity_7",
+          "confidence": 0.88
+        }
+      ]
+    },
+    {
+      "id": "mention_13",
+      "name": "Delta Inc",
+      "type": "ORG",
+      "document_id": "doc_1",
+      "links": [
+        {
+          "entity_id": "entity_8",
+          "confidence": 0.95
+        }
+      ]
+    },
+    {
+      "id": "mention_14",
+      "name": "Delta",
+      "type": "ORG",
+      "document_id": "doc_3",
+      "links": [
+        {
+          "entity_id": "entity_8",
+          "confidence": 0.9
+        },
+        {
+          "entity_id": "entity_10",
+          "confidence": 0.3
+        }
+      ]
+    },
+    {
+      "id": "mention_15",
       "name": "Gamma LLC",
-      "type": "ORG"
+      "type": "ORG",
+      "document_id": "doc_2",
+      "links": [
+        {
+          "entity_id": "entity_9",
+          "confidence": 0.93
+        }
+      ]
     },
     {
-      "id": "group_12",
-      "name": "Zeta LLC",
-      "type": "ORG"
+      "id": "mention_16",
+      "name": "Zeta Partners",
+      "type": "ORG",
+      "document_id": "doc_4",
+      "links": [
+        {
+          "entity_id": "entity_10",
+          "confidence": 0.96
+        }
+      ]
     },
     {
-      "id": "group_13",
+      "id": "mention_17",
+      "name": "Omega Corp",
+      "type": "ORG",
+      "document_id": "doc_3",
+      "links": [
+        {
+          "entity_id": "entity_11",
+          "confidence": 0.92
+        }
+      ]
+    },
+    {
+      "id": "mention_18",
+      "name": "San Francisco",
+      "type": "LOC",
+      "document_id": "doc_1",
+      "links": [
+        {
+          "entity_id": "entity_12",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "mention_19",
+      "name": "SF",
+      "type": "LOC",
+      "document_id": "doc_4",
+      "links": [
+        {
+          "entity_id": "entity_12",
+          "confidence": 0.85
+        },
+        {
+          "entity_id": "entity_8",
+          "confidence": 0.2
+        }
+      ]
+    },
+    {
+      "id": "mention_20",
+      "name": "Berlin",
+      "type": "LOC",
+      "document_id": "doc_2",
+      "links": [
+        {
+          "entity_id": "entity_13",
+          "confidence": 0.98
+        }
+      ]
+    },
+    {
+      "id": "mention_21",
+      "name": "Berlin, Germany",
+      "type": "LOC",
+      "document_id": "doc_3",
+      "links": [
+        {
+          "entity_id": "entity_13",
+          "confidence": 0.92
+        }
+      ]
+    },
+    {
+      "id": "mention_22",
       "name": "London",
-      "type": "LOC"
+      "type": "LOC",
+      "document_id": "doc_2",
+      "links": [
+        {
+          "entity_id": "entity_14",
+          "confidence": 0.97
+        }
+      ]
     },
     {
-      "id": "group_14",
-      "name": "New York City",
-      "type": "LOC"
+      "id": "mention_23",
+      "name": "City of London",
+      "type": "LOC",
+      "document_id": "doc_3",
+      "links": [
+        {
+          "entity_id": "entity_14",
+          "confidence": 0.9
+        }
+      ]
+    },
+    {
+      "id": "mention_24",
+      "name": "Tokyo",
+      "type": "LOC",
+      "document_id": "doc_4",
+      "links": [
+        {
+          "entity_id": "entity_15",
+          "confidence": 0.98
+        }
+      ]
+    },
+    {
+      "id": "mention_25",
+      "name": "New York",
+      "type": "LOC",
+      "document_id": "doc_1",
+      "links": [
+        {
+          "entity_id": "entity_16",
+          "confidence": 0.95
+        }
+      ]
+    },
+    {
+      "id": "mention_26",
+      "name": "NYC",
+      "type": "LOC",
+      "document_id": "doc_2",
+      "links": [
+        {
+          "entity_id": "entity_16",
+          "confidence": 0.9
+        }
+      ]
+    },
+    {
+      "id": "mention_27",
+      "name": "Paris",
+      "type": "LOC",
+      "document_id": "doc_4",
+      "links": [
+        {
+          "entity_id": "entity_17",
+          "confidence": 0.97
+        }
+      ]
+    },
+    {
+      "id": "mention_28",
+      "name": "Madrid",
+      "type": "LOC",
+      "document_id": "doc_3",
+      "links": [
+        {
+          "entity_id": "entity_18",
+          "confidence": 0.94
+        }
+      ]
+    },
+    {
+      "id": "mention_29",
+      "name": "Rome",
+      "type": "LOC",
+      "document_id": "doc_1",
+      "links": [
+        {
+          "entity_id": "entity_19",
+          "confidence": 0.96
+        }
+      ]
+    },
+    {
+      "id": "mention_30",
+      "name": "Tech Summit",
+      "type": "MISC",
+      "document_id": "doc_1",
+      "links": [
+        {
+          "entity_id": "entity_20",
+          "confidence": 0.95
+        }
+      ]
+    },
+    {
+      "id": "mention_31",
+      "name": "Tech Summit 2025",
+      "type": "MISC",
+      "document_id": "doc_3",
+      "links": [
+        {
+          "entity_id": "entity_20",
+          "confidence": 0.9
+        },
+        {
+          "entity_id": "entity_22",
+          "confidence": 0.3
+        }
+      ]
+    },
+    {
+      "id": "mention_32",
+      "name": "Spring Festival",
+      "type": "MISC",
+      "document_id": "doc_4",
+      "links": [
+        {
+          "entity_id": "entity_21",
+          "confidence": 0.96
+        }
+      ]
+    },
+    {
+      "id": "mention_33",
+      "name": "Festival in Berlin",
+      "type": "MISC",
+      "document_id": "doc_2",
+      "links": [
+        {
+          "entity_id": "entity_21",
+          "confidence": 0.8
+        },
+        {
+          "entity_id": "entity_13",
+          "confidence": 0.5
+        },
+        {
+          "entity_id": "entity_23",
+          "confidence": 0.4
+        }
+      ]
+    },
+    {
+      "id": "mention_34",
+      "name": "Trade Agreement",
+      "type": "MISC",
+      "document_id": "doc_3",
+      "links": [
+        {
+          "entity_id": "entity_22",
+          "confidence": 0.93
+        }
+      ]
+    },
+    {
+      "id": "mention_35",
+      "name": "Agreement 2025",
+      "type": "MISC",
+      "document_id": "doc_3",
+      "links": [
+        {
+          "entity_id": "entity_22",
+          "confidence": 0.88
+        },
+        {
+          "entity_id": "entity_25",
+          "confidence": 0.2
+        }
+      ]
+    },
+    {
+      "id": "mention_36",
+      "name": "Music Festival",
+      "type": "MISC",
+      "document_id": "doc_4",
+      "links": [
+        {
+          "entity_id": "entity_23",
+          "confidence": 0.97
+        }
+      ]
+    },
+    {
+      "id": "mention_37",
+      "name": "Festival",
+      "type": "MISC",
+      "document_id": "doc_4",
+      "links": [
+        {
+          "entity_id": "entity_21",
+          "confidence": 0.5
+        },
+        {
+          "entity_id": "entity_23",
+          "confidence": 0.6
+        },
+        {
+          "entity_id": "entity_25",
+          "confidence": 0.3
+        }
+      ]
+    },
+    {
+      "id": "mention_38",
+      "name": "Annual Report",
+      "type": "MISC",
+      "document_id": "doc_1",
+      "links": [
+        {
+          "entity_id": "entity_24",
+          "confidence": 0.95
+        }
+      ]
+    },
+    {
+      "id": "mention_39",
+      "name": "Report",
+      "type": "MISC",
+      "document_id": "doc_1",
+      "links": []
+    },
+    {
+      "id": "mention_40",
+      "name": "Conference",
+      "type": "MISC",
+      "document_id": "doc_2",
+      "links": [
+        {
+          "entity_id": "entity_25",
+          "confidence": 0.93
+        }
+      ]
+    },
+    {
+      "id": "mention_41",
+      "name": "Global Conference",
+      "type": "MISC",
+      "document_id": "doc_3",
+      "links": [
+        {
+          "entity_id": "entity_25",
+          "confidence": 0.95
+        }
+      ]
+    },
+    {
+      "id": "mention_42",
+      "name": "Alice",
+      "type": "PER",
+      "document_id": "doc_2",
+      "links": [
+        {
+          "entity_id": "entity_1",
+          "confidence": 0.88
+        },
+        {
+          "entity_id": "entity_6",
+          "confidence": 0.2
+        }
+      ]
+    },
+    {
+      "id": "mention_43",
+      "name": "Smith",
+      "type": "PER",
+      "document_id": "doc_3",
+      "links": [
+        {
+          "entity_id": "entity_2",
+          "confidence": 0.85
+        }
+      ]
+    },
+    {
+      "id": "mention_44",
+      "name": "Kim",
+      "type": "PER",
+      "document_id": "doc_2",
+      "links": [
+        {
+          "entity_id": "entity_3",
+          "confidence": 0.9
+        }
+      ]
+    },
+    {
+      "id": "mention_45",
+      "name": "Laura",
+      "type": "PER",
+      "document_id": "doc_4",
+      "links": [
+        {
+          "entity_id": "entity_6",
+          "confidence": 0.92
+        }
+      ]
+    },
+    {
+      "id": "mention_46",
+      "name": "White",
+      "type": "PER",
+      "document_id": "doc_4",
+      "links": []
+    },
+    {
+      "id": "mention_47",
+      "name": "Omega",
+      "type": "ORG",
+      "document_id": "doc_3",
+      "links": [
+        {
+          "entity_id": "entity_11",
+          "confidence": 0.87
+        }
+      ]
+    },
+    {
+      "id": "mention_48",
+      "name": "Rome Festival",
+      "type": "MISC",
+      "document_id": "doc_4",
+      "links": [
+        {
+          "entity_id": "entity_19",
+          "confidence": 0.5
+        },
+        {
+          "entity_id": "entity_23",
+          "confidence": 0.7
+        }
+      ]
+    },
+    {
+      "id": "mention_49",
+      "name": "London Report",
+      "type": "MISC",
+      "document_id": "doc_2",
+      "links": [
+        {
+          "entity_id": "entity_14",
+          "confidence": 0.4
+        },
+        {
+          "entity_id": "entity_24",
+          "confidence": 0.6
+        }
+      ]
+    },
+    {
+      "id": "mention_50",
+      "name": "Conference 2025",
+      "type": "MISC",
+      "document_id": "doc_3",
+      "links": [
+        {
+          "entity_id": "entity_25",
+          "confidence": 0.9
+        },
+        {
+          "entity_id": "entity_22",
+          "confidence": 0.7
+        }
+      ]
     }
   ]
 }

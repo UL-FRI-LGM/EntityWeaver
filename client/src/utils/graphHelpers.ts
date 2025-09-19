@@ -22,14 +22,14 @@ function getNodeSize(edges: number) {
   return size;
 }
 
-export function updateEntityNode(
+export function updateMentionNode(
   sigma: Sigma<NodeType, EdgeType>,
   nodeId: string,
   update: {
     label?: string;
     type?: string;
     documentId?: string;
-    groupId?: string;
+    entityId?: string;
   },
 ) {
   const graph = sigma.getGraph();
@@ -48,7 +48,7 @@ export function updateEntityNode(
     graph.updateNodeAttribute(nodeId, "image", () => entityImage);
   }
 
-  if (update.documentId !== undefined || update.groupId !== undefined) {
+  if (update.documentId !== undefined) {
     const edges = graph.edges(nodeId);
     edges.forEach((edgeId) => {
       const edge = graph.getEdgeAttributes(edgeId);
@@ -57,8 +57,8 @@ export function updateEntityNode(
       }
     });
     graph.addEdge(nodeId, update.documentId, {
-      size: DEFINES.documentToEntityEdge.width,
-      color: DEFINES.documentToEntityEdge.color,
+      size: DEFINES.documentToMentionEdge.width,
+      color: DEFINES.documentToMentionEdge.color,
       connectionType: "Document",
     });
   }
@@ -84,47 +84,47 @@ export function updateGraph(
       type: "pictogram",
     });
   });
-  dataset.entityGroups.forEach((group) => {
-    const entityImage = typeToImage(group.type);
-    graph.addNode(group.id, {
-      ...getRandomPosition(rng),
-      size: 15,
-      label: group.name,
-      color: DEFINES.entityGroup.color,
-      image: entityImage,
-      pictogramColor: DEFINES.entityGroup.iconColor,
-      type: "pictogram",
-    });
-  });
   dataset.entities.forEach((entity) => {
     const entityImage = typeToImage(entity.type);
     graph.addNode(entity.id, {
       ...getRandomPosition(rng),
-      size: DEFINES.entity.size,
+      size: 15,
       label: entity.name,
       color: DEFINES.entity.color,
       image: entityImage,
       pictogramColor: DEFINES.entity.iconColor,
       type: "pictogram",
     });
+  });
+  dataset.mentions.forEach((mention) => {
+    const entityImage = typeToImage(mention.type);
+    graph.addNode(mention.id, {
+      ...getRandomPosition(rng),
+      size: DEFINES.mention.size,
+      label: mention.name,
+      color: DEFINES.mention.color,
+      image: entityImage,
+      pictogramColor: DEFINES.mention.iconColor,
+      type: "pictogram",
+    });
 
-    const document = dataset.documents.get(entity.document_id);
+    const document = dataset.documents.get(mention.document_id);
     if (document) {
-      graph.addEdge(entity.id, document.id, {
-        size: DEFINES.documentToEntityEdge.width,
-        color: DEFINES.documentToEntityEdge.color,
+      graph.addEdge(mention.id, document.id, {
+        size: DEFINES.documentToMentionEdge.width,
+        color: DEFINES.documentToMentionEdge.color,
         connectionType: "Document",
       });
     }
 
-    const group = entity.group_id
-      ? dataset.entityGroups.get(entity.group_id)
+    const entity = mention.entity_id
+      ? dataset.entities.get(mention.entity_id)
       : undefined;
-    if (group) {
-      graph.addEdge(entity.id, group.id, {
-        size: DEFINES.groupToEntityEdge.width,
-        color: DEFINES.groupToEntityEdge.color,
-        connectionType: "Group",
+    if (entity) {
+      graph.addEdge(mention.id, entity.id, {
+        size: DEFINES.mentionToEntityEdge.width,
+        color: DEFINES.mentionToEntityEdge.color,
+        connectionType: "Entity",
       });
     }
   });
@@ -132,8 +132,8 @@ export function updateGraph(
   //   const nodeSize = getNodeSize(graph.edges(document.globalId).length);
   //   graph.updateNodeAttribute(document.globalId, "size", () => nodeSize);
   // }
-  dataset.entityGroups.forEach((group) => {
-    const nodeSize = getNodeSize(graph.edges(group.id).length);
-    graph.updateNodeAttribute(group.id, "size", () => nodeSize);
+  dataset.entities.forEach((entity) => {
+    const nodeSize = getNodeSize(graph.edges(entity.id).length);
+    graph.updateNodeAttribute(entity.id, "size", () => nodeSize);
   });
 }

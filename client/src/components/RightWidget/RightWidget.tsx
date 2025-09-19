@@ -2,10 +2,10 @@ import { observer } from "mobx-react";
 import {
   Document,
   type DocumentInstance,
+  Mention,
   Entity,
-  EntityGroup,
-  type EntityGroupInstance,
   type EntityInstance,
+  type MentionInstance,
   useMst,
 } from "../../stores/rootStore.ts";
 import classes from "./RightWidget.module.css";
@@ -80,35 +80,35 @@ const DocumentSelector = observer(
   },
 );
 
-const EntityGroupSelector = observer(
+const EntitySelector = observer(
   ({
-    groupId,
-    onGroupChange,
+    entityId,
+    onEntityChange,
     label,
   }: {
-    groupId: string | null;
-    onGroupChange: (id: string) => void;
+    entityId: string | null;
+    onEntityChange: (id: string) => void;
     label: string;
   }) => {
     const { dataset } = useMst();
 
-    const selectedGroup = groupId
-      ? dataset.entityGroups.get(groupId)
+    const selectedEntity = entityId
+      ? dataset.entities.get(entityId)
       : undefined;
 
     const [searchValue, setSearchValue] = useState(
-      selectedGroup?.searchString ?? "",
+      selectedEntity?.searchString ?? "",
     );
 
-    const shouldFilterOptions = selectedGroup?.searchString !== searchValue;
+    const shouldFilterOptions = selectedEntity?.searchString !== searchValue;
 
     const filteredOptions = shouldFilterOptions
-      ? dataset.groupList.filter((group) =>
-          group.searchString
+      ? dataset.entityList.filter((entity) =>
+          entity.searchString
             .toLowerCase()
             .includes(searchValue.toLowerCase().trim()),
         )
-      : dataset.groupList;
+      : dataset.entityList;
 
     const options = filteredOptions.map((item) => ({
       val: item.id,
@@ -118,8 +118,8 @@ const EntityGroupSelector = observer(
     return (
       <SearchableCombobox
         label={label}
-        selectedValue={selectedGroup?.searchString}
-        onChange={onGroupChange}
+        selectedValue={selectedEntity?.searchString}
+        onChange={onEntityChange}
         searchValue={searchValue}
         setSearchValue={setSearchValue}
         options={options}
@@ -128,34 +128,34 @@ const EntityGroupSelector = observer(
   },
 );
 
-const EntityEditor = observer(({ entity }: { entity: EntityInstance }) => {
+const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
   const entityTypeCombobox = useCombobox();
 
-  const [name, setName] = useState(entity.name);
-  const [entityType, setEntityType] = useState(entity.type);
-  const [documentId, setDocumentId] = useState(entity.document_id);
+  const [name, setName] = useState(mention.name);
+  const [entityType, setEntityType] = useState(mention.type);
+  const [documentId, setDocumentId] = useState(mention.document_id);
 
   function applyChanges() {
-    entity.setName(name);
-    entity.setType(entityType);
-    entity.setDocumentId(documentId);
+    mention.setName(name);
+    mention.setType(entityType);
+    mention.setDocumentId(documentId);
   }
 
   const canApplyChanges =
-    entity.name !== name ||
-    entity.type !== entityType ||
-    entity.document_id !== documentId;
+    mention.name !== name ||
+    mention.type !== entityType ||
+    mention.document_id !== documentId;
 
   return (
     <Fieldset
       className={classes.fieldset}
-      legend={typeToString(entity.type)}
+      legend={typeToString(mention.type)}
       styles={{
         root: {
-          borderColor: typeToColor(entity.type) ?? undefined,
+          borderColor: typeToColor(mention.type) ?? undefined,
         },
         legend: {
-          color: typeToColor(entity.type) ?? undefined,
+          color: typeToColor(mention.type) ?? undefined,
         },
       }}
     >
@@ -198,11 +198,11 @@ const EntityEditor = observer(({ entity }: { entity: EntityInstance }) => {
           setDocumentId(id);
         }}
       />
-      <EntityGroupSelector
+      <EntitySelector
         label={"Entity"}
-        groupId={entity.group_id ?? null}
-        onGroupChange={(id) => {
-          entity.setGroupId(id);
+        entityId={mention.entity_id ?? null}
+        onEntityChange={(id) => {
+          mention.setEntityId(id);
         }}
       />
       <Button
@@ -241,11 +241,9 @@ const DocumentEditor = observer(
   },
 );
 
-const EntityGroupEditor = observer(
-  ({ group }: { group: EntityGroupInstance }) => {
-    return <Stack>{group.id}</Stack>;
-  },
-);
+const EntityEditor = observer(({ entity }: { entity: EntityInstance }) => {
+  return <Stack>{entity.id}</Stack>;
+});
 
 const RightWidget = observer(() => {
   const rootStore = useMst();
@@ -254,14 +252,14 @@ const RightWidget = observer(() => {
     const node = rootStore.selectedNodeInstance;
     if (!node) return null;
 
-    if (getType(node) === Entity) {
-      return <EntityEditor entity={node as EntityInstance} />;
+    if (getType(node) === Mention) {
+      return <MentionEditor mention={node as MentionInstance} />;
     }
     if (getType(node) === Document) {
       return <DocumentEditor document={node as DocumentInstance} />;
     }
-    if (getType(node) === EntityGroup) {
-      return <EntityGroupEditor group={node as EntityGroupInstance} />;
+    if (getType(node) === Entity) {
+      return <EntityEditor entity={node as EntityInstance} />;
     }
   }
 

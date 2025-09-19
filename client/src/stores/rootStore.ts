@@ -1,22 +1,22 @@
 import { createContext, use } from "react";
 import { types, flow, isAlive, type Instance, getRoot } from "mobx-state-tree";
 import type Sigma from "sigma";
-import { updateEntityNode, updateGraph } from "../utils/graphHelpers.ts";
+import { updateMentionNode, updateGraph } from "../utils/graphHelpers.ts";
 import { loadDemo } from "../utils/helpers.ts";
 
 export interface DatasetDB {
+  mentions: MentionDB[];
   entities: EntityDB[];
-  entity_groups: GroupDB[];
   documents: DocumentDB[];
 }
 
-const entityPrefix = "Entity-";
-interface EntityDB {
+const mentionPrefix = "Mention-";
+interface MentionDB {
   id: string;
   name: string;
   type: string;
   document_id: string;
-  group_id: string;
+  entity_id: string;
 }
 
 const documentPrefix = "Document-";
@@ -25,20 +25,20 @@ interface DocumentDB {
   title: string;
 }
 
-const groupPrefix = "Group-";
-interface GroupDB {
+const entityPrefix = "Entity-";
+interface EntityDB {
   id: string;
   name: string;
   type: string;
 }
 
-export const Entity = types
+export const Mention = types
   .model({
     id: types.string,
     name: types.string,
     type: types.string,
     document_id: types.string,
-    group_id: types.maybe(types.string),
+    entity_id: types.maybe(types.string),
   })
   .views((self) => ({
     get sigma(): Sigma<NodeType, EdgeType> | null {
@@ -50,41 +50,36 @@ export const Entity = types
     setName(name: string) {
       self.name = name;
       if (self.sigma) {
-        updateEntityNode(self.sigma, self.id, { label: name });
+        updateMentionNode(self.sigma, self.id, { label: name });
       }
     },
     setType(type: string) {
       self.type = type;
       if (self.sigma) {
-        updateEntityNode(self.sigma, self.id, { type: type });
+        updateMentionNode(self.sigma, self.id, { type: type });
       }
     },
     setDocumentId(documentId: string) {
       self.document_id = documentId;
       if (self.sigma) {
-        updateEntityNode(self.sigma, self.id, { documentId: documentId });
+        updateMentionNode(self.sigma, self.id, { documentId: documentId });
       }
     },
-    setGroupId(groupId: string | null) {
-      self.group_id = groupId ?? undefined;
+    setEntityId(entityId: string | null) {
+      self.entity_id = entityId ?? undefined;
     },
   }));
 
-export interface EntityInstance extends Instance<typeof Entity> {}
+export interface MentionInstance extends Instance<typeof Mention> {}
 
 export const Document = types.model({
   id: types.string,
   title: types.string,
 });
-// .views((self) => ({
-//   get globalId() {
-//     return `Document-${self.id}`;
-//   },
-// }));
 
 export interface DocumentInstance extends Instance<typeof Document> {}
 
-export const EntityGroup = types
+export const Entity = types
   .model({
     id: types.string,
     name: types.string,
@@ -95,32 +90,27 @@ export const EntityGroup = types
       return `${self.name} (${self.id})`;
     },
   }));
-// .views((self) => ({
-//   get globalId() {
-//     return `EntityGroup-${self.id}`;
-//   },
-// }));
 
-export interface EntityGroupInstance extends Instance<typeof EntityGroup> {}
+export interface EntityInstance extends Instance<typeof Entity> {}
 
 const Dataset = types
   .model({
-    entities: types.map(Entity),
+    mentions: types.map(Mention),
     documents: types.map(Document),
-    entityGroups: types.map(EntityGroup),
+    entities: types.map(Entity),
   })
   .volatile(() => ({
     fetchingData: false,
   }))
   .views((self) => ({
-    get entityList() {
-      return Array.from(self.entities.values());
+    get mentionList() {
+      return Array.from(self.mentions.values());
     },
     get documentList() {
       return Array.from(self.documents.values());
     },
-    get groupList() {
-      return Array.from(self.entityGroups.values());
+    get entityList() {
+      return Array.from(self.entities.values());
     },
   }))
   .actions((self) => ({
@@ -135,12 +125,12 @@ const Dataset = types
         return;
       }
 
-      self.entities.clear();
-      data.entities.forEach((entity) => {
-        entity.id = `${entityPrefix}${entity.id}`;
-        entity.document_id = `${documentPrefix}${entity.document_id}`;
-        entity.group_id = `${groupPrefix}${entity.group_id}`;
-        self.entities.set(entity.id, entity);
+      self.mentions.clear();
+      data.mentions.forEach((mention) => {
+        mention.id = `${mentionPrefix}${mention.id}`;
+        mention.document_id = `${documentPrefix}${mention.document_id}`;
+        mention.entity_id = `${entityPrefix}${mention.entity_id}`;
+        self.mentions.set(mention.id, mention);
       });
 
       self.documents.clear();
@@ -149,10 +139,10 @@ const Dataset = types
         self.documents.set(document.id, document);
       });
 
-      self.entityGroups.clear();
-      data.entity_groups.forEach((group) => {
-        group.id = `${groupPrefix}${group.id}`;
-        self.entityGroups.set(group.id, group);
+      self.entities.clear();
+      data.entities.forEach((entity) => {
+        entity.id = `${entityPrefix}${entity.id}`;
+        self.entities.set(entity.id, entity);
       });
 
       self.fetchingData = false;
@@ -178,7 +168,7 @@ export interface NodeType {
 export interface EdgeType {
   size: number;
   color: string;
-  connectionType: "Document" | "Group";
+  connectionType: "Document" | "Entity";
 }
 
 const RootStore = types
@@ -195,12 +185,12 @@ const RootStore = types
   .views((self) => ({
     get selectedNodeInstance() {
       if (!self.selectedNode) return null;
-      if (self.selectedNode.startsWith(entityPrefix)) {
-        return self.dataset.entities.get(self.selectedNode);
+      if (self.selectedNode.startsWith(mentionPrefix)) {
+        return self.dataset.mentions.get(self.selectedNode);
       } else if (self.selectedNode.startsWith(documentPrefix)) {
         return self.dataset.documents.get(self.selectedNode);
-      } else if (self.selectedNode.startsWith(groupPrefix)) {
-        return self.dataset.entityGroups.get(self.selectedNode);
+      } else if (self.selectedNode.startsWith(entityPrefix)) {
+        return self.dataset.entities.get(self.selectedNode);
       } else {
         return null;
       }

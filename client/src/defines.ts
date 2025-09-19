@@ -9,20 +9,20 @@ export const DEFINES = {
     iconColor: "black",
     size: 30,
   },
-  entityGroup: {
+  entity: {
     color: "#0036ff",
     iconColor: "white",
   },
-  entity: {
+  mention: {
     color: "#FA4F40",
     iconColor: "black",
     size: 10,
   },
-  documentToEntityEdge: {
+  documentToMentionEdge: {
     color: "#676767",
     width: edgeWidth,
   },
-  groupToEntityEdge: {
+  mentionToEntityEdge: {
     color: "rgb(36,180,59)",
     width: edgeWidth,
   },
