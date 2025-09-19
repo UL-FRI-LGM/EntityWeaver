@@ -133,7 +133,7 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
 
   const [name, setName] = useState(mention.name);
   const [entityType, setEntityType] = useState(mention.type);
-  const [documentId, setDocumentId] = useState(mention.document_id);
+  const [documentId, setDocumentId] = useState(mention.documentId);
 
   function applyChanges() {
     mention.setName(name);
@@ -144,7 +144,7 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
   const canApplyChanges =
     mention.name !== name ||
     mention.type !== entityType ||
-    mention.document_id !== documentId;
+    mention.documentId !== documentId;
 
   return (
     <Fieldset
@@ -198,13 +198,13 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
           setDocumentId(id);
         }}
       />
-      <EntitySelector
-        label={"Entity"}
-        entityId={mention.entity_id ?? null}
-        onEntityChange={(id) => {
-          mention.setEntityId(id);
-        }}
-      />
+      {/*<EntitySelector*/}
+      {/*  label={"Entity"}*/}
+      {/*  entityId={mention.entity_id ?? null}*/}
+      {/*  onEntityChange={(id) => {*/}
+      {/*    mention.setEntityId(id);*/}
+      {/*  }}*/}
+      {/*/>*/}
       <Button
         disabled={!canApplyChanges}
         variant="filled"

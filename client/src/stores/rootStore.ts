@@ -16,7 +16,9 @@ interface MentionDB {
   name: string;
   type: string;
   document_id: string;
-  entity_id: string;
+  links: {
+    entity_id: string;
+  }[];
 }
 
 const documentPrefix = "Document-";
@@ -32,13 +34,17 @@ interface EntityDB {
   type: string;
 }
 
+export const Link = types.model({
+  entity_id: types.string,
+});
+
 export const Mention = types
   .model({
     id: types.string,
     name: types.string,
     type: types.string,
-    document_id: types.string,
-    entity_id: types.maybe(types.string),
+    documentId: types.string,
+    linkedEntities: types.map(Link),
   })
   .views((self) => ({
     get sigma(): Sigma<NodeType, EdgeType> | null {
@@ -60,13 +66,10 @@ export const Mention = types
       }
     },
     setDocumentId(documentId: string) {
-      self.document_id = documentId;
+      self.documentId = documentId;
       if (self.sigma) {
         updateMentionNode(self.sigma, self.id, { documentId: documentId });
       }
-    },
-    setEntityId(entityId: string | null) {
-      self.entity_id = entityId ?? undefined;
     },
   }));
 
@@ -129,8 +132,18 @@ const Dataset = types
       data.mentions.forEach((mention) => {
         mention.id = `${mentionPrefix}${mention.id}`;
         mention.document_id = `${documentPrefix}${mention.document_id}`;
-        mention.entity_id = `${entityPrefix}${mention.entity_id}`;
-        self.mentions.set(mention.id, mention);
+        self.mentions.set(mention.id, {
+          id: mention.id,
+          name: mention.name,
+          type: mention.type,
+          documentId: mention.document_id,
+          linkedEntities: Object.fromEntries(
+            mention.links.map((link) => [
+              `${entityPrefix}${link.entity_id}`,
+              { entity_id: `${entityPrefix}${link.entity_id}` },
+            ]),
+          ),
+        });
       });
 
       self.documents.clear();

@@ -108,7 +108,7 @@ export function updateGraph(
       type: "pictogram",
     });
 
-    const document = dataset.documents.get(mention.document_id);
+    const document = dataset.documents.get(mention.documentId);
     if (document) {
       graph.addEdge(mention.id, document.id, {
         size: DEFINES.documentToMentionEdge.width,
@@ -117,16 +117,13 @@ export function updateGraph(
       });
     }
 
-    const entity = mention.entity_id
-      ? dataset.entities.get(mention.entity_id)
-      : undefined;
-    if (entity) {
-      graph.addEdge(mention.id, entity.id, {
+    mention.linkedEntities.forEach((linkedEntity) => {
+      graph.addEdge(mention.id, linkedEntity.entity_id, {
         size: DEFINES.mentionToEntityEdge.width,
         color: DEFINES.mentionToEntityEdge.color,
         connectionType: "Entity",
       });
-    }
+    });
   });
   // for (const document of dataset.documents) {
   //   const nodeSize = getNodeSize(graph.edges(document.globalId).length);
