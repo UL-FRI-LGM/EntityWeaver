@@ -2,7 +2,7 @@ import DataApi from "../api/data.ts";
 import { createContext, use } from "react";
 import { types, flow, isAlive, type Instance, getRoot } from "mobx-state-tree";
 import type Sigma from "sigma";
-import { updateGraph } from "../utils/helpers.ts";
+import { updateGraph } from "../utils/graphHelpers.ts";
 
 interface DatasetDB {
   entities: EntityDB[];

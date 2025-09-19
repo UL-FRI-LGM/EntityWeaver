@@ -21,9 +21,9 @@ import {
 } from "@mantine/core";
 import { getType } from "mobx-state-tree";
 import { useState } from "react";
-import { typeToColor, typeToString } from "../../utils/helpers.ts";
 import { DEFINES } from "../../defines.ts";
 import { IconEdit } from "@tabler/icons-react";
+import { typeToColor, typeToString } from "../../utils/helpers.ts";
 
 const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
   ([tag, name]) => (
