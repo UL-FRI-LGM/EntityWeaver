@@ -1,17 +1,3 @@
-.fieldset {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  padding: 15px !important;
-  min-height: 0;
-}
-
-.applyChangesButton {
-  margin-top: 15px;
-  flex-shrink: 0;
-}
-
 .mentionsContainer {
   flex: 1 1 auto;
   min-height: 0;
@@ -20,7 +6,6 @@
 }
 
 .linkList {
-  /*max-height: calc(100vh - 350px);*/
   overflow: auto;
   min-height: 0;
 }

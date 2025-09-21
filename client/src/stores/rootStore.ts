@@ -154,6 +154,14 @@ export const Entity = types
     get searchString() {
       return `${self.name} (${self.id})`;
     },
+  }))
+  .actions((self) => ({
+    setName(name: string) {
+      self.name = name;
+    },
+    setType(type: string) {
+      self.type = type;
+    },
   }));
 
 export interface EntityInstance extends Instance<typeof Entity> {}

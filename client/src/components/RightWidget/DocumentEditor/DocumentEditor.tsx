@@ -20,6 +20,7 @@ import {
   useMst,
 } from "@/stores/rootStore.ts";
 import { DEFINES } from "@/defines.ts";
+import sharedClasses from "../shared.module.css";
 
 const MentionLinkEditor = observer(
   ({ mention }: { mention: MentionInstance }) => {
@@ -71,7 +72,7 @@ const DocumentEditor = observer(
 
     return (
       <Fieldset
-        className={classes.fieldset}
+        className={sharedClasses.editorFieldset}
         legend={"Document"}
         styles={{
           root: {
@@ -92,7 +93,7 @@ const DocumentEditor = observer(
           variant="filled"
           leftSection={<IconEdit size={14} />}
           onClick={applyChanges}
-          className={classes.applyChangesButton}
+          className={sharedClasses.applyChangesButton}
         >
           Apply Changes
         </Button>

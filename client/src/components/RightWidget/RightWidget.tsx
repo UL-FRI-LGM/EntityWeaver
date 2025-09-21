@@ -9,14 +9,10 @@ import {
   useMst,
 } from "@/stores/rootStore.ts";
 import classes from "./RightWidget.module.css";
-import { Stack } from "@mantine/core";
 import { getType } from "mobx-state-tree";
 import MentionEditor from "./MentionEditor/MentionEditor.tsx";
 import DocumentEditor from "./DocumentEditor/DocumentEditor.tsx";
-
-const EntityEditor = observer(({ entity }: { entity: EntityInstance }) => {
-  return <Stack>{entity.id}</Stack>;
-});
+import EntityEditor from "@/components/RightWidget/EntityEditor/EntityEditor.tsx";
 
 const RightWidget = observer(() => {
   const rootStore = useMst();

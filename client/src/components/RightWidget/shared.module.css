@@ -1,0 +1,12 @@
+.editorFieldset {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  padding: 15px !important;
+}
+
+.applyChangesButton {
+  margin-top: 15px;
+  flex-shrink: 0;
+}

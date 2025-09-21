@@ -27,6 +27,7 @@ import {
 } from "@/stores/rootStore.ts";
 import SearchableCombobox from "../../SearchableCombobox/SearchableCombobox.tsx";
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
+import sharedClasses from "../shared.module.css";
 
 const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
   ([tag, name]) => (
@@ -165,7 +166,7 @@ const LinkEditor = observer(({ link }: { link: LinkInstance }) => {
 
 const EntityLinkList = observer(({ links }: { links: LinkInstance[] }) => {
   return (
-    <Stack>
+    <Stack className={classes.linkList}>
       {links.map((link) => (
         <LinkEditor key={link.entity.id} link={link} />
       ))}
@@ -220,7 +221,7 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
 
   return (
     <Fieldset
-      className={classes.fieldset}
+      className={sharedClasses.editorFieldset}
       legend={typeToString(mention.type)}
       styles={{
         root: {
@@ -275,7 +276,7 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
         variant="filled"
         leftSection={<IconEdit size={14} />}
         onClick={applyChanges}
-        className={classes.applyChangesButton}
+        className={sharedClasses.applyChangesButton}
       >
         Apply Changes
       </Button>
