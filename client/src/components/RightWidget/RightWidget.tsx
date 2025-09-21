@@ -7,6 +7,7 @@ import {
   type EntityInstance,
   type MentionInstance,
   useMst,
+  type LinkInstance,
 } from "../../stores/rootStore.ts";
 import classes from "./RightWidget.module.css";
 import {
@@ -18,11 +19,16 @@ import {
   Stack,
   TextInput,
   useCombobox,
+  Text,
+  Paper,
+  Divider,
+  ActionIcon,
+  Group,
 } from "@mantine/core";
 import { getType } from "mobx-state-tree";
 import { useState } from "react";
 import { DEFINES } from "../../defines.ts";
-import { IconEdit } from "@tabler/icons-react";
+import { IconEdit, IconX } from "@tabler/icons-react";
 import { typeToColor, typeToString } from "../../utils/helpers.ts";
 import SearchableCombobox from "../SearchableCombobox/SearchableCombobox.tsx";
 
@@ -124,6 +130,44 @@ const EntitySelector = observer(
         setSearchValue={setSearchValue}
         options={options}
       />
+    );
+  },
+);
+
+const LinkEditor = observer(({ link }: { link: LinkInstance }) => {
+  return (
+    <Paper className={classes.linkEntry} shadow="xl" withBorder>
+      <Group justify="space-between">
+        <Text truncate="end" component="span">
+          {link.entity.name}
+        </Text>
+        <ActionIcon variant="default">
+          <IconX onClick={() => link.remove()} />
+        </ActionIcon>
+      </Group>
+    </Paper>
+  );
+});
+
+const EntityLinkList = observer(({ links }: { links: LinkInstance[] }) => {
+  return (
+    <Stack>
+      {links.map((link) => (
+        <LinkEditor key={link.entity.id} link={link} />
+      ))}
+    </Stack>
+  );
+});
+
+const MentionToEntityLinkEditor = observer(
+  ({ mention }: { mention: MentionInstance }) => {
+    return (
+      <Fieldset
+        legend={"Linked Entities"}
+        className={classes.linkedEntitiesContainer}
+      >
+        <EntityLinkList links={mention.entityLinkList} />
+      </Fieldset>
     );
   },
 );
@@ -231,6 +275,8 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
       {/*    Apply Changes*/}
       {/*  </Button>*/}
       {/*</Tooltip>*/}
+      <Divider />
+      <MentionToEntityLinkEditor mention={mention} />
     </Fieldset>
   );
 });

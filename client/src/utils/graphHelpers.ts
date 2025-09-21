@@ -29,7 +29,7 @@ export function updateMentionNode(
     label?: string;
     type?: string;
     documentId?: string;
-    entityId?: string;
+    removedEntityLinks?: string[]; // array of entity IDs
   },
 ) {
   const graph = sigma.getGraph();
@@ -61,6 +61,18 @@ export function updateMentionNode(
       color: DEFINES.documentToMentionEdge.color,
       connectionType: "Document",
     });
+  }
+
+  if (update.removedEntityLinks) {
+    for (const entityId of update.removedEntityLinks) {
+      const edges = graph.edges(nodeId, entityId);
+      for (const edgeId of edges) {
+        const edge = graph.getEdgeAttributes(edgeId);
+        if (edge.connectionType === "Entity") {
+          graph.dropEdge(edgeId);
+        }
+      }
+    }
   }
 }
 
@@ -117,8 +129,8 @@ export function updateGraph(
       });
     }
 
-    mention.linkedEntities.forEach((linkedEntity) => {
-      graph.addEdge(mention.id, linkedEntity.entity_id, {
+    mention.entityLinks.forEach((link) => {
+      graph.addEdge(mention.id, link.entity.id, {
         size: DEFINES.mentionToEntityEdge.width,
         color: DEFINES.mentionToEntityEdge.color,
         connectionType: "Entity",

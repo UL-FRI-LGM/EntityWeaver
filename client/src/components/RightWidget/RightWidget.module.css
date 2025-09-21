@@ -1,9 +1,9 @@
 .container {
-  width: 300px;
+  width: 400px;
   position: relative;
   background-color: var(--mantine-color-body);
   border-left: 1px solid var(--mantine-color-dark-light-color);
-  padding: 5px 5px 5px 5px;
+  padding: 10px;
   display: flex;
 }
 
@@ -12,6 +12,7 @@
   display: flex;
   flex-direction: column;
   gap: 25px;
+  padding: 15px !important;
 }
 
 .entityEntry {
@@ -25,4 +26,17 @@
 
 .applyChangesButton {
   margin-top: 15px;
+}
+
+.linkedEntitiesContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px !important;
+}
+
+.linkEntry {
+  background-color: var(--mantine-color-dark-6) !important;
+  padding: 5px;
 }

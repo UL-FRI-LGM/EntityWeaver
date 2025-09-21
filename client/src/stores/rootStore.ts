@@ -1,5 +1,12 @@
 import { createContext, use } from "react";
-import { types, flow, isAlive, type Instance, getRoot } from "mobx-state-tree";
+import {
+  types,
+  flow,
+  isAlive,
+  type Instance,
+  getRoot,
+  getParentOfType,
+} from "mobx-state-tree";
 import type Sigma from "sigma";
 import { updateMentionNode, updateGraph } from "../utils/graphHelpers.ts";
 import { loadDemo } from "../utils/helpers.ts";
@@ -34,22 +41,34 @@ interface EntityDB {
   type: string;
 }
 
-export const Link = types.model({
-  entity_id: types.string,
-});
+export const Link = types
+  .model({
+    entity: types.reference(types.late(() => Entity)),
+  })
+  .actions((self) => ({
+    remove() {
+      const mention = getParentOfType(self, Mention) as MentionInstance;
+      mention?.removeEntityLink(self.entity.id);
+    },
+  }));
+
+export interface LinkInstance extends Instance<typeof Link> {}
 
 export const Mention = types
   .model({
-    id: types.string,
+    id: types.identifier,
     name: types.string,
     type: types.string,
     documentId: types.string,
-    linkedEntities: types.map(Link),
+    entityLinks: types.map(Link),
   })
   .views((self) => ({
     get sigma(): Sigma<NodeType, EdgeType> | null {
       const rootStore = getRoot(self) as RootInstance;
       return rootStore.sigma;
+    },
+    get entityLinkList() {
+      return Array.from(self.entityLinks.values());
     },
   }))
   .actions((self) => ({
@@ -71,12 +90,20 @@ export const Mention = types
         updateMentionNode(self.sigma, self.id, { documentId: documentId });
       }
     },
+    removeEntityLink(entityId: string) {
+      self.entityLinks.delete(entityId);
+      if (self.sigma) {
+        updateMentionNode(self.sigma, self.id, {
+          removedEntityLinks: [entityId],
+        });
+      }
+    },
   }));
 
 export interface MentionInstance extends Instance<typeof Mention> {}
 
 export const Document = types.model({
-  id: types.string,
+  id: types.identifier,
   title: types.string,
 });
 
@@ -84,7 +111,7 @@ export interface DocumentInstance extends Instance<typeof Document> {}
 
 export const Entity = types
   .model({
-    id: types.string,
+    id: types.identifier,
     name: types.string,
     type: types.string,
   })
@@ -129,22 +156,6 @@ const Dataset = types
       }
 
       self.mentions.clear();
-      data.mentions.forEach((mention) => {
-        mention.id = `${mentionPrefix}${mention.id}`;
-        mention.document_id = `${documentPrefix}${mention.document_id}`;
-        self.mentions.set(mention.id, {
-          id: mention.id,
-          name: mention.name,
-          type: mention.type,
-          documentId: mention.document_id,
-          linkedEntities: Object.fromEntries(
-            mention.links.map((link) => [
-              `${entityPrefix}${link.entity_id}`,
-              { entity_id: `${entityPrefix}${link.entity_id}` },
-            ]),
-          ),
-        });
-      });
 
       self.documents.clear();
       data.documents.forEach((document) => {
@@ -156,6 +167,27 @@ const Dataset = types
       data.entities.forEach((entity) => {
         entity.id = `${entityPrefix}${entity.id}`;
         self.entities.set(entity.id, entity);
+      });
+
+      data.mentions.forEach((mention) => {
+        mention.id = `${mentionPrefix}${mention.id}`;
+        mention.document_id = `${documentPrefix}${mention.document_id}`;
+        self.mentions.set(mention.id, {
+          id: mention.id,
+          name: mention.name,
+          type: mention.type,
+          documentId: mention.document_id,
+          entityLinks: Object.fromEntries(
+            mention.links.map((link) => {
+              link.entity_id = `${entityPrefix}${link.entity_id}`;
+              const linkedEntity = self.entities.get(link.entity_id);
+              if (!linkedEntity) {
+                throw new Error(`Entity with id ${link.entity_id} not found`);
+              }
+              return [linkedEntity.id, { entity: linkedEntity }];
+            }),
+          ),
+        });
       });
 
       self.fetchingData = false;
