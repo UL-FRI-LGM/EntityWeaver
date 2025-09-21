@@ -1,5 +1,6 @@
 .container {
-  width: 400px;
+  max-width: 320px;
+  min-width: 320px;
   position: relative;
   background-color: var(--mantine-color-body);
   border-left: 1px solid var(--mantine-color-dark-light-color);

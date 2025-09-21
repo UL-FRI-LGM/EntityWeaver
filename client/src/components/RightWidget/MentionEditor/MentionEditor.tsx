@@ -139,8 +139,8 @@ const EntitySelector = observer(
 const LinkEditor = observer(({ link }: { link: LinkInstance }) => {
   return (
     <Paper className={classes.linkEntry} shadow="xl" withBorder>
-      <Group justify="space-between">
-        <Text truncate="end" component="span">
+      <Group wrap={"nowrap"} justify="space-between" gap={0}>
+        <Text truncate="end" component="span" className={classes.linkText}>
           {link.entity.name}
         </Text>
         <ActionIcon variant="default">

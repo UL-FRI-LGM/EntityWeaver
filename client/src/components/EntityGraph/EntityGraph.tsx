@@ -72,6 +72,7 @@ export const GraphEffects = observer(() => {
       },
       clickNode: (event) => rootStore.setSelectedNode(event.node),
       doubleClickNode: (event) => {
+        rootStore.setSelectedNode(event.node);
         event.preventSigmaDefault();
         const graph = sigma.getGraph();
         const nodes = sigma
