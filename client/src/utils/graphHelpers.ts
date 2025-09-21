@@ -29,6 +29,8 @@ export function updateMentionNode(
     label?: string;
     type?: string;
     documentId?: string;
+    clearEntityLinks?: boolean;
+    addedEntityLinks?: string[]; // array of entity IDs
     removedEntityLinks?: string[]; // array of entity IDs
   },
 ) {
@@ -61,6 +63,35 @@ export function updateMentionNode(
       color: DEFINES.documentToMentionEdge.color,
       connectionType: "Document",
     });
+  }
+
+  if (update.clearEntityLinks) {
+    const edges = graph.edges(nodeId);
+    for (const edgeId of edges) {
+      if (update.addedEntityLinks) {
+        const entityId = graph.opposite(nodeId, edgeId);
+        if (update.addedEntityLinks.includes(entityId)) {
+          continue;
+        }
+      }
+      const edge = graph.getEdgeAttributes(edgeId);
+      if (edge.connectionType === "Entity") {
+        graph.dropEdge(edgeId);
+      }
+    }
+  }
+
+  if (update.addedEntityLinks) {
+    for (const entityId of update.addedEntityLinks) {
+      if (graph.hasEdge(nodeId, entityId)) {
+        continue;
+      }
+      graph.addEdge(nodeId, entityId, {
+        size: DEFINES.mentionToEntityEdge.width,
+        color: DEFINES.mentionToEntityEdge.color,
+        connectionType: "Entity",
+      });
+    }
   }
 
   if (update.removedEntityLinks) {

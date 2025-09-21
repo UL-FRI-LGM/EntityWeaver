@@ -24,11 +24,13 @@ import {
   Divider,
   ActionIcon,
   Group,
+  Tooltip,
+  Code,
 } from "@mantine/core";
 import { getType } from "mobx-state-tree";
 import { useState } from "react";
 import { DEFINES } from "../../defines.ts";
-import { IconEdit, IconX } from "@tabler/icons-react";
+import { IconEdit, IconLink, IconLinkPlus, IconX } from "@tabler/icons-react";
 import { typeToColor, typeToString } from "../../utils/helpers.ts";
 import SearchableCombobox from "../SearchableCombobox/SearchableCombobox.tsx";
 
@@ -76,6 +78,7 @@ const DocumentSelector = observer(
     return (
       <SearchableCombobox
         label={label}
+        placeholder={"Select Document"}
         selectedValue={selectedDocument?.title}
         onChange={onDocumentChange}
         searchValue={searchValue}
@@ -121,14 +124,19 @@ const EntitySelector = observer(
       display: item.searchString,
     }));
 
+    function onChange(id: string) {
+      onEntityChange(id);
+    }
+
     return (
       <SearchableCombobox
         label={label}
         selectedValue={selectedEntity?.searchString}
-        onChange={onEntityChange}
+        onChange={onChange}
         searchValue={searchValue}
         setSearchValue={setSearchValue}
         options={options}
+        textInputProps={{ style: { flex: 1 } }}
       />
     );
   },
@@ -173,11 +181,13 @@ const MentionToEntityLinkEditor = observer(
 );
 
 const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
+  const rootStore = useMst();
   const entityTypeCombobox = useCombobox();
 
   const [name, setName] = useState(mention.name);
   const [entityType, setEntityType] = useState(mention.type);
   const [documentId, setDocumentId] = useState(mention.documentId);
+  const [entityId, setEntityId] = useState<string | null>(null);
 
   function applyChanges() {
     mention.setName(name);
@@ -185,10 +195,19 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
     mention.setDocumentId(documentId);
   }
 
+  function setLinkedEntity() {
+    if (entityId === null) return;
+    mention.setEntityLink(entityId, !rootStore.holdingShift);
+  }
+
   const canApplyChanges =
     mention.name !== name ||
     mention.type !== entityType ||
     mention.documentId !== documentId;
+
+  const canAddEntity =
+    entityId !== null &&
+    (!mention.entityLinks.has(entityId) || rootStore.holdingShift);
 
   return (
     <Fieldset
@@ -242,13 +261,6 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
           setDocumentId(id);
         }}
       />
-      {/*<EntitySelector*/}
-      {/*  label={"Entity"}*/}
-      {/*  entityId={mention.entity_id ?? null}*/}
-      {/*  onEntityChange={(id) => {*/}
-      {/*    mention.setEntityId(id);*/}
-      {/*  }}*/}
-      {/*/>*/}
       <Button
         disabled={!canApplyChanges}
         variant="filled"
@@ -276,7 +288,48 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
       {/*  </Button>*/}
       {/*</Tooltip>*/}
       <Divider />
-      <MentionToEntityLinkEditor mention={mention} />
+      <Stack gap="10px">
+        <Group
+          preventGrowOverflow={false}
+          wrap="nowrap"
+          align={"end"}
+          gap={12}
+          justify="space-between"
+        >
+          <EntitySelector
+            label={
+              rootStore.holdingShift ? "Set Linked Entity" : "Add Linked Entity"
+            }
+            entityId={entityId}
+            onEntityChange={(id) => {
+              setEntityId(id);
+            }}
+          />
+          <Tooltip
+            position="bottom"
+            label={
+              <Text style={{ maxWidth: 220, textWrap: "wrap" }}>
+                Link a Mention to an Entity. Hold{" "}
+                <Code color="gray.5">SHIFT</Code> to overwrite all current
+                links.
+              </Text>
+            }
+          >
+            <ActionIcon
+              size={36}
+              disabled={!canAddEntity}
+              onClick={setLinkedEntity}
+            >
+              {rootStore.holdingShift ? (
+                <IconLink size={28} />
+              ) : (
+                <IconLinkPlus size={28} />
+              )}
+            </ActionIcon>
+          </Tooltip>
+        </Group>
+        <MentionToEntityLinkEditor mention={mention} />
+      </Stack>
     </Fieldset>
   );
 });

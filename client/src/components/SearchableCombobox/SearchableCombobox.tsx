@@ -1,22 +1,35 @@
 import { useRef } from "react";
-import { Combobox, TextInput, useCombobox } from "@mantine/core";
+import {
+  Combobox,
+  type TextInputProps,
+  TextInput,
+  useCombobox,
+} from "@mantine/core";
 
 interface Props {
-  label: string;
   selectedValue: string | undefined;
   onChange: (id: string) => void;
   searchValue: string;
   setSearchValue: (val: string) => void;
   options: { val: string; display: string }[];
+  label?: string;
+  placeholder?: string;
+  textInputProps?: TextInputProps;
+  // textInputClassNames?: TextInputProps["classNames"];
+  // comboboxClassNames?: ComboboxProps["classNames"];
 }
 
 const SearchableCombobox = ({
-  label,
   selectedValue,
   onChange,
   searchValue,
   setSearchValue,
   options,
+  label,
+  placeholder,
+  textInputProps,
+  // textInputClassNames,
+  // comboboxClassNames,
 }: Props) => {
   const changed = useRef(false);
   const combobox = useCombobox({
@@ -31,6 +44,7 @@ const SearchableCombobox = ({
   return (
     <Combobox
       store={combobox}
+      // classNames={comboboxClassNames}
       onOptionSubmit={(val, optionProps) => {
         setSearchValue(optionProps.children?.toString() ?? "");
         onChange(val);
@@ -41,7 +55,8 @@ const SearchableCombobox = ({
       <Combobox.Target>
         <TextInput
           label={label}
-          placeholder="Select Document"
+          placeholder={placeholder}
+          // classNames={textInputClassNames}
           value={searchValue}
           onChange={(event) => {
             setSearchValue(event.currentTarget.value);
@@ -51,6 +66,9 @@ const SearchableCombobox = ({
           onClick={() => combobox.openDropdown()}
           onFocus={() => combobox.openDropdown()}
           onBlur={() => combobox.closeDropdown()}
+          rightSection={<Combobox.Chevron />}
+          rightSectionPointerEvents="none"
+          {...textInputProps}
         />
       </Combobox.Target>
 

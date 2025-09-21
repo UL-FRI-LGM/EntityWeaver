@@ -71,34 +71,62 @@ export const Mention = types
       return Array.from(self.entityLinks.values());
     },
   }))
-  .actions((self) => ({
-    setName(name: string) {
-      self.name = name;
-      if (self.sigma) {
-        updateMentionNode(self.sigma, self.id, { label: name });
-      }
-    },
-    setType(type: string) {
-      self.type = type;
-      if (self.sigma) {
-        updateMentionNode(self.sigma, self.id, { type: type });
-      }
-    },
-    setDocumentId(documentId: string) {
-      self.documentId = documentId;
-      if (self.sigma) {
-        updateMentionNode(self.sigma, self.id, { documentId: documentId });
-      }
-    },
-    removeEntityLink(entityId: string) {
-      self.entityLinks.delete(entityId);
-      if (self.sigma) {
-        updateMentionNode(self.sigma, self.id, {
-          removedEntityLinks: [entityId],
-        });
-      }
-    },
-  }));
+  .actions((self) => {
+    return {
+      setName(name: string) {
+        self.name = name;
+        if (self.sigma) {
+          updateMentionNode(self.sigma, self.id, { label: name });
+        }
+      },
+      setType(type: string) {
+        self.type = type;
+        if (self.sigma) {
+          updateMentionNode(self.sigma, self.id, { type: type });
+        }
+      },
+      setDocumentId(documentId: string) {
+        self.documentId = documentId;
+        if (self.sigma) {
+          updateMentionNode(self.sigma, self.id, { documentId: documentId });
+        }
+      },
+      removeEntityLink(entityId: string) {
+        self.entityLinks.delete(entityId);
+        if (self.sigma) {
+          updateMentionNode(self.sigma, self.id, {
+            removedEntityLinks: [entityId],
+          });
+        }
+      },
+      setEntityLink(entityId: string, keepExisting: boolean = true) {
+        const alreadyHasLink = self.entityLinks.has(entityId);
+        if (keepExisting && alreadyHasLink) {
+          return;
+        }
+        if (!keepExisting) {
+          if (!alreadyHasLink) {
+            self.entityLinks.clear();
+          } else {
+            self.entityLinks.forEach((link) => {
+              if (link.entity.id !== entityId) {
+                self.entityLinks.delete(link.entity.id);
+              }
+            });
+          }
+        }
+        if (!alreadyHasLink) {
+          self.entityLinks.set(entityId, { entity: entityId });
+        }
+        if (self.sigma) {
+          updateMentionNode(self.sigma, self.id, {
+            addedEntityLinks: [entityId],
+            clearEntityLinks: !keepExisting,
+          });
+        }
+      },
+    };
+  });
 
 export interface MentionInstance extends Instance<typeof Mention> {}
 
@@ -226,6 +254,7 @@ const RootStore = types
     selectedNode: null as string | null,
     hoveredNode: null as string | null,
     runLayout: false,
+    holdingShift: false,
   }))
   .views((self) => ({
     get selectedNodeInstance() {
@@ -266,6 +295,9 @@ const RootStore = types
     },
     setRunLayout(state: boolean) {
       self.runLayout = state;
+    },
+    setHoldingShift(state: boolean) {
+      self.holdingShift = state;
     },
   }));
 

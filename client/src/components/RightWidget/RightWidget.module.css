@@ -28,6 +28,12 @@
   margin-top: 15px;
 }
 
+.linkedEntitiesEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .linkedEntitiesContainer {
   flex: 1;
   display: flex;
@@ -39,4 +45,9 @@
 .linkEntry {
   background-color: var(--mantine-color-dark-6) !important;
   padding: 5px;
+}
+
+.entityLinkSelectorInput {
+  flex: 1;
+  color: green;
 }
