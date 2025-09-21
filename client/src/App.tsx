@@ -1,5 +1,5 @@
 import "./App.css";
-import EntityGraph from "./EntityGraph.tsx";
+import EntityGraph from "./components/EntityGraph/EntityGraph.tsx";
 import RightWidget from "./components/RightWidget/RightWidget.tsx";
 import TopBar from "./components/TopBar/TopBar.tsx";
 import { useWindowEvent } from "@mantine/hooks";

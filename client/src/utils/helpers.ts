@@ -1,5 +1,5 @@
 import { DEFINES } from "../defines.ts";
-import type { DatasetDB } from "../stores/rootStore.ts";
+import type { DatasetDB } from "@/stores/rootStore.ts";
 
 export async function sendApiRequest(
   url: string,

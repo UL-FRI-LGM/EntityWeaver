@@ -5,7 +5,7 @@ import type {
   DatasetInstance,
   EdgeType,
   NodeType,
-} from "../stores/rootStore.ts";
+} from "@/stores/rootStore.ts";
 import { typeToImage } from "./helpers.ts";
 
 function getRandomPosition(generator?: PRNG) {

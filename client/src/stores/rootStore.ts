@@ -8,8 +8,8 @@ import {
   getParentOfType,
 } from "mobx-state-tree";
 import type Sigma from "sigma";
-import { updateMentionNode, updateGraph } from "../utils/graphHelpers.ts";
-import { loadDemo } from "../utils/helpers.ts";
+import { updateMentionNode, updateGraph } from "@/utils/graphHelpers.ts";
+import { loadDemo } from "@/utils/helpers.ts";
 
 export interface DatasetDB {
   mentions: MentionDB[];

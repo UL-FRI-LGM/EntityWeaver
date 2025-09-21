@@ -30,8 +30,17 @@ export default tseslint.config([
       globals: globals.browser,
     },
     rules: {
-      "react/jsx-uses-vars": "error",
-      "react/jsx-uses-react": "error",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          args: "after-used",
+          argsIgnorePattern: "^_",
+          vars: "all",
+          varsIgnorePattern: "^_",
+          caughtErrors: "none",
+          ignoreTypeReferences: true,
+        },
+      ],
     },
   },
 ]);
