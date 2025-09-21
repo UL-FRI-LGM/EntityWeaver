@@ -30,15 +30,14 @@ export default tseslint.config([
       globals: globals.browser,
     },
     rules: {
-      "@typescript-eslint/no-unused-vars": [
+      "no-unused-vars": [
         "error",
         {
-          args: "after-used",
+          args: "all",
           argsIgnorePattern: "^_",
           vars: "all",
           varsIgnorePattern: "^_",
-          caughtErrors: "none",
-          ignoreTypeReferences: true,
+          caughtErrors: "all",
         },
       ],
     },

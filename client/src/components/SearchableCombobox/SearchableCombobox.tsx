@@ -8,9 +8,9 @@ import {
 
 interface Props {
   selectedValue: string | undefined;
-  onChange: (id: string) => void;
+  onChange: (_id: string) => void;
   searchValue: string;
-  setSearchValue: (val: string) => void;
+  setSearchValue: (_val: string) => void;
   options: { val: string; display: string }[];
   label?: string;
   placeholder?: string;

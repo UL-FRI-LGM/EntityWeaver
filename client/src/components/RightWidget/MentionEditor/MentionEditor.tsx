@@ -43,7 +43,7 @@ const DocumentSelector = observer(
     label,
   }: {
     documentId: string | null;
-    onDocumentChange: (id: string) => void;
+    onDocumentChange: (_id: string) => void;
     label: string;
   }) => {
     const { dataset } = useMst();
@@ -90,7 +90,7 @@ const EntitySelector = observer(
     label,
   }: {
     entityId: string | null;
-    onEntityChange: (id: string) => void;
+    onEntityChange: (_id: string) => void;
     label: string;
   }) => {
     const { dataset } = useMst();
