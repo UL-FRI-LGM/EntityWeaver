@@ -46,7 +46,7 @@ const DocumentSelector = observer(
     onDocumentChange: (_id: string) => void;
     label: string;
   }) => {
-    const { dataset } = useMst();
+    const { dataset, setSelectedNode } = useMst();
 
     const selectedDocument = documentId
       ? dataset.documents.get(documentId)
@@ -70,15 +70,27 @@ const DocumentSelector = observer(
     }));
 
     return (
-      <SearchableCombobox
-        label={label}
-        placeholder={"Select Document"}
-        selectedValue={selectedDocument?.title}
-        onChange={onDocumentChange}
-        searchValue={searchValue}
-        setSearchValue={setSearchValue}
-        options={options}
-      />
+      <Group align="end" justify="space-between" gap={10}>
+        <SearchableCombobox
+          label={label}
+          placeholder={"Select Document"}
+          selectedValue={selectedDocument?.title}
+          onChange={onDocumentChange}
+          searchValue={searchValue}
+          setSearchValue={setSearchValue}
+          options={options}
+          textInputProps={{ style: { flex: 1 } }}
+        />
+        <Tooltip label={"Open Document Editor"}>
+          <ActionIcon
+            size={36}
+            variant="default"
+            onClick={() => setSelectedNode(documentId)}
+          >
+            <IconEdit />
+          </ActionIcon>
+        </Tooltip>
+      </Group>
     );
   },
 );
@@ -180,13 +192,16 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
 
   const [name, setName] = useState(mention.name);
   const [entityType, setEntityType] = useState(mention.type);
-  const [documentId, setDocumentId] = useState(mention.documentId);
+  const [documentId, setDocumentId] = useState(mention.document.id);
   const [entityId, setEntityId] = useState<string | null>(null);
 
   function applyChanges() {
     mention.setName(name);
     mention.setType(entityType);
-    mention.setDocumentId(documentId);
+    const document = rootStore.dataset.documents.get(documentId);
+    if (document) {
+      mention.setDocumentId(document);
+    }
   }
 
   function setLinkedEntity() {
@@ -197,7 +212,7 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
   const canApplyChanges =
     mention.name !== name ||
     mention.type !== entityType ||
-    mention.documentId !== documentId;
+    mention.document.id !== documentId;
 
   const canAddEntity =
     entityId !== null &&

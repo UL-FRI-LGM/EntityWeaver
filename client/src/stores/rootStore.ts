@@ -60,7 +60,7 @@ export const Mention = types
     id: types.identifier,
     name: types.string,
     type: types.string,
-    documentId: types.string,
+    document: types.reference(types.late(() => Document)),
     entityLinks: types.map(Link),
   })
   .views((self) => ({
@@ -86,10 +86,10 @@ export const Mention = types
           updateMentionNode(self.sigma, self.id, { type: type });
         }
       },
-      setDocumentId(documentId: string) {
-        self.documentId = documentId;
+      setDocumentId(document: DocumentInstance) {
+        self.document = document;
         if (self.sigma) {
-          updateMentionNode(self.sigma, self.id, { documentId: documentId });
+          updateMentionNode(self.sigma, self.id, { documentId: document.id });
         }
       },
       removeEntityLink(entityId: string) {
@@ -131,10 +131,16 @@ export const Mention = types
 
 export interface MentionInstance extends Instance<typeof Mention> {}
 
-export const Document = types.model({
-  id: types.identifier,
-  title: types.string,
-});
+export const Document = types
+  .model({
+    id: types.identifier,
+    title: types.string,
+  })
+  .actions((self) => ({
+    setTitle(title: string) {
+      self.title = title;
+    },
+  }));
 
 export interface DocumentInstance extends Instance<typeof Document> {}
 
@@ -205,7 +211,7 @@ const Dataset = types
           id: mention.id,
           name: mention.name,
           type: mention.type,
-          documentId: mention.document_id,
+          document: mention.document_id,
           entityLinks: Object.fromEntries(
             mention.links.map((link) => {
               link.entity_id = `${entityPrefix}${link.entity_id}`;

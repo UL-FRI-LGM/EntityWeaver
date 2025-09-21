@@ -12,12 +12,7 @@ import classes from "./RightWidget.module.css";
 import { Stack } from "@mantine/core";
 import { getType } from "mobx-state-tree";
 import MentionEditor from "./MentionEditor/MentionEditor.tsx";
-
-const DocumentEditor = observer(
-  ({ document }: { document: DocumentInstance }) => {
-    return <Stack>{document.id}</Stack>;
-  },
-);
+import DocumentEditor from "./DocumentEditor/DocumentEditor.tsx";
 
 const EntityEditor = observer(({ entity }: { entity: EntityInstance }) => {
   return <Stack>{entity.id}</Stack>;

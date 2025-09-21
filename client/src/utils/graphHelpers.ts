@@ -151,7 +151,7 @@ export function updateGraph(
       type: "pictogram",
     });
 
-    const document = dataset.documents.get(mention.documentId);
+    const document = dataset.documents.get(mention.document.id);
     if (document) {
       graph.addEdge(mention.id, document.id, {
         size: DEFINES.documentToMentionEdge.width,
