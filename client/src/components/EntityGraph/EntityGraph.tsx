@@ -13,18 +13,23 @@ import { observer } from "mobx-react";
 import { type EdgeType, type NodeType, useMst } from "@/stores/rootStore.ts";
 import { useWorkerLayoutForceAtlas2 } from "@react-sigma/layout-forceatlas2";
 import { createNodeImageProgram } from "@sigma/node-image";
-import { createNodeCompoundProgram } from "sigma/rendering";
+import {
+  createNodeCompoundProgram,
+  type NodeProgramType,
+} from "sigma/rendering";
 import { NodeBorderProgram } from "@sigma/node-border";
 import classes from "./EntityGraph.module.css";
 import type Sigma from "sigma";
+import type { Settings } from "sigma/settings";
+import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
 
 const sigmaStyle: CSSProperties = {
   display: "flex",
   overflow: "hidden",
 };
 
-const nodePictogramProgram = createNodeCompoundProgram([
-  NodeBorderProgram,
+const nodePictogramProgram = createNodeCompoundProgram<NodeType, EdgeType>([
+  NodeBorderProgram as NodeProgramType<NodeType, EdgeType>,
   createNodeImageProgram({
     keepWithinCircle: true,
     correctCentering: true,
@@ -34,7 +39,7 @@ const nodePictogramProgram = createNodeCompoundProgram([
   }),
 ]);
 
-const sigmaSettings = {
+const sigmaSettings: Partial<Settings<NodeType, EdgeType>> = {
   // allowInvalidContainer: true,
   nodeProgramClasses: {
     pictogram: nodePictogramProgram,
@@ -47,6 +52,7 @@ const sigmaSettings = {
   labelRenderedSizeThreshold: 15,
   // labelFont: "Lato, sans-serif",
   zIndex: true,
+  doubleClickZoomingRatio: 1,
 };
 
 export const GraphEffects = observer(() => {
@@ -65,8 +71,28 @@ export const GraphEffects = observer(() => {
         rootStore.setHoveredNode(null);
       },
       clickNode: (event) => rootStore.setSelectedNode(event.node),
+      doubleClickNode: (event) => {
+        event.preventSigmaDefault();
+        const graph = sigma.getGraph();
+        const nodes = sigma
+          .getGraph()
+          .filterNodes(
+            (nodeId) =>
+              nodeId === event.node ||
+              graph.neighbors(event.node).includes(nodeId),
+          );
+        const cameraState = getCameraStateToFitViewportToNodes(
+          // @ts-ignore: TS2345
+          sigma,
+          nodes,
+        );
+        sigma
+          .getCamera()
+          .animate(cameraState, { duration: 1000 })
+          .catch(console.error);
+      },
     });
-  }, [registerEvents, rootStore]);
+  }, [registerEvents, rootStore, sigma]);
 
   useEffect(() => {
     if (sigma !== null) {
@@ -113,6 +139,7 @@ export const GraphEffects = observer(() => {
   ]);
 
   return null;
+  // return <button onClick={() => rootStore.test()}></button>;
 });
 
 const Fa2 = observer(() => {
@@ -124,7 +151,7 @@ const Fa2 = observer(() => {
 
   const onFinishRenderingLayout = useCallback(() => {
     const camera = rootStore.sigma?.getCamera();
-    camera?.animatedReset();
+    camera?.animatedReset({ duration: 1 }).catch(console.error);
   }, [rootStore]);
 
   useEffect(() => {

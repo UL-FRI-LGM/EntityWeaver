@@ -1,12 +1,3 @@
-.container {
-  width: 400px;
-  position: relative;
-  background-color: var(--mantine-color-body);
-  border-left: 1px solid var(--mantine-color-dark-light-color);
-  padding: 10px;
-  display: flex;
-}
-
 .fieldset {
   flex: 1;
   display: flex;
@@ -15,23 +6,8 @@
   padding: 15px !important;
 }
 
-.entityEntry {
-  display: flex;
-  align-items: center;
-}
-
-.entityIcon {
-  width: var(--mantine-font-size-lg);
-}
-
 .applyChangesButton {
   margin-top: 15px;
-}
-
-.linkedEntitiesEditor {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
 }
 
 .linkedEntitiesContainer {
@@ -45,9 +21,4 @@
 .linkEntry {
   background-color: var(--mantine-color-dark-6) !important;
   padding: 5px;
-}
-
-.entityLinkSelectorInput {
-  flex: 1;
-  color: green;
 }

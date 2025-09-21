@@ -99,7 +99,7 @@ export const Mention = types
           });
         }
       },
-      setEntityLink(entityId: string, keepExisting: boolean = true) {
+      setEntityLink(entityId: string, keepExisting = true) {
         const alreadyHasLink = self.entityLinks.has(entityId);
         if (keepExisting && alreadyHasLink) {
           return;
