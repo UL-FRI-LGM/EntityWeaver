@@ -249,6 +249,8 @@ export interface NodeType {
   size: number;
   color: string;
   highlighted?: boolean;
+  borderColor?: string;
+  borderSize?: number;
   image: string;
   pictogramColor: string;
   type: string;
@@ -268,6 +270,7 @@ const RootStore = types
     sigma: null as Sigma<NodeType, EdgeType> | null,
     selectedNode: null as string | null,
     hoveredNode: null as string | null,
+    uiHoveredNode: null as string | null,
     runLayout: false,
     holdingShift: false,
     highlightOnSelect: true,
@@ -321,6 +324,9 @@ const RootStore = types
     },
     setHighlightOnHover(state: boolean) {
       self.highlightOnHover = state;
+    },
+    setUiHoveredNode(nodeId: string | null) {
+      self.uiHoveredNode = nodeId;
     },
     onFinishRenderingLayout() {
       // const cameraState = self.sigma?.getCamera().getState();

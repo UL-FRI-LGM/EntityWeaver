@@ -4,14 +4,21 @@ import {
   type TextInputProps,
   TextInput,
   useCombobox,
+  type ComboboxOptionProps,
 } from "@mantine/core";
 
-interface Props {
+export interface SearchableComboboxOption {
+  val: string;
+  display: string;
+  props?: Partial<ComboboxOptionProps>;
+}
+
+interface SearchableComboboxProps {
   selectedValue: string | undefined;
   onChange: (_id: string) => void;
   searchValue: string;
   setSearchValue: (_val: string) => void;
-  options: { val: string; display: string }[];
+  options: SearchableComboboxOption[];
   label?: string;
   placeholder?: string;
   textInputProps?: TextInputProps;
@@ -30,7 +37,7 @@ const SearchableCombobox = ({
   textInputProps,
   // textInputClassNames,
   // comboboxClassNames,
-}: Props) => {
+}: SearchableComboboxProps) => {
   const changed = useRef(false);
   const combobox = useCombobox({
     onDropdownClose: () => {
@@ -74,8 +81,8 @@ const SearchableCombobox = ({
 
       <Combobox.Dropdown>
         <Combobox.Options mah={200} style={{ overflowY: "auto" }}>
-          {options.map(({ val, display }) => (
-            <Combobox.Option key={val} value={val}>
+          {options.map(({ val, display, props }) => (
+            <Combobox.Option key={val} value={val} {...props}>
               {display}
             </Combobox.Option>
           ))}

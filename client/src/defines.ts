@@ -4,19 +4,28 @@ export const DEFINES = {
   sizePerEdge: 5,
   minNodeSize: 15,
   maxNodeSize: 50,
+  selection: {
+    borderColor: "#b70000",
+  },
+  uiHover: {
+    borderColor: "#048385",
+  },
   document: {
     color: "#ffff00",
     iconColor: "black",
     size: 30,
+    borderSize: 0.1,
   },
   entity: {
     color: "#0036ff",
     iconColor: "white",
+    borderSize: 0.15,
   },
   mention: {
     color: "#FA4F40",
     iconColor: "black",
     size: 10,
+    borderSize: 0.2,
   },
   documentToMentionEdge: {
     color: "#676767",

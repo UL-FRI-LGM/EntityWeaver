@@ -25,7 +25,9 @@ import {
   type MentionInstance,
   useMst,
 } from "@/stores/rootStore.ts";
-import SearchableCombobox from "../../SearchableCombobox/SearchableCombobox.tsx";
+import SearchableCombobox, {
+  type SearchableComboboxOption,
+} from "../../SearchableCombobox/SearchableCombobox.tsx";
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
 import sharedClasses from "../shared.module.css";
 
@@ -47,6 +49,7 @@ const DocumentSelector = observer(
     onDocumentChange: (_id: string) => void;
     label: string;
   }) => {
+    const rootStore = useMst();
     const { dataset, setSelectedNode } = useMst();
 
     const selectedDocument = documentId
@@ -65,9 +68,13 @@ const DocumentSelector = observer(
         )
       : dataset.documentList;
 
-    const options = filteredOptions.map((doc) => ({
+    const options: SearchableComboboxOption[] = filteredOptions.map((doc) => ({
       val: doc.id,
       display: doc.title,
+      props: {
+        onMouseEnter: () => rootStore.setUiHoveredNode(doc.id),
+        onMouseLeave: () => rootStore.setUiHoveredNode(null),
+      },
     }));
 
     return (
@@ -80,7 +87,11 @@ const DocumentSelector = observer(
           searchValue={searchValue}
           setSearchValue={setSearchValue}
           options={options}
-          textInputProps={{ style: { flex: 1 } }}
+          textInputProps={{
+            style: { flex: 1 },
+            onMouseEnter: () => rootStore.setUiHoveredNode(documentId),
+            onMouseLeave: () => rootStore.setUiHoveredNode(null),
+          }}
         />
         <Tooltip label={"Open Document Editor"}>
           <ActionIcon
@@ -106,10 +117,10 @@ const EntitySelector = observer(
     onEntityChange: (_id: string) => void;
     label: string;
   }) => {
-    const { dataset } = useMst();
+    const rootStore = useMst();
 
     const selectedEntity = entityId
-      ? dataset.entities.get(entityId)
+      ? rootStore.dataset.entities.get(entityId)
       : undefined;
 
     const [searchValue, setSearchValue] = useState(
@@ -119,16 +130,20 @@ const EntitySelector = observer(
     const shouldFilterOptions = selectedEntity?.searchString !== searchValue;
 
     const filteredOptions = shouldFilterOptions
-      ? dataset.entityList.filter((entity) =>
+      ? rootStore.dataset.entityList.filter((entity) =>
           entity.searchString
             .toLowerCase()
             .includes(searchValue.toLowerCase().trim()),
         )
-      : dataset.entityList;
+      : rootStore.dataset.entityList;
 
-    const options = filteredOptions.map((item) => ({
+    const options: SearchableComboboxOption[] = filteredOptions.map((item) => ({
       val: item.id,
       display: item.searchString,
+      props: {
+        onMouseEnter: () => rootStore.setUiHoveredNode(item.id),
+        onMouseLeave: () => rootStore.setUiHoveredNode(null),
+      },
     }));
 
     function onChange(id: string) {
@@ -143,16 +158,34 @@ const EntitySelector = observer(
         searchValue={searchValue}
         setSearchValue={setSearchValue}
         options={options}
-        textInputProps={{ style: { flex: 1 } }}
+        textInputProps={{
+          style: { flex: 1 },
+          onMouseEnter: () => rootStore.setUiHoveredNode(entityId),
+          onMouseLeave: () => rootStore.setUiHoveredNode(null),
+        }}
       />
     );
   },
 );
 
 const LinkEditor = observer(({ link }: { link: LinkInstance }) => {
+  const rootStore = useMst();
+
   return (
-    <Paper className={classes.linkEntry} shadow="xl" withBorder>
-      <Group wrap={"nowrap"} justify="space-between" gap={0}>
+    <Paper
+      className={classes.linkEntry}
+      shadow="xl"
+      withBorder
+      onMouseEnter={() => rootStore.setUiHoveredNode(link.entity.id)}
+      onMouseLeave={() => rootStore.setUiHoveredNode(null)}
+    >
+      <Group
+        wrap={"nowrap"}
+        justify="space-between"
+        gap={0}
+        onMouseEnter={() => rootStore.setUiHoveredNode(link.entity.id)}
+        onMouseLeave={() => rootStore.setUiHoveredNode(null)}
+      >
         <Text truncate="end" component="span" className={classes.linkText}>
           {link.entity.name}
         </Text>

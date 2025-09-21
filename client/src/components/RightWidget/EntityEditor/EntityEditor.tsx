@@ -10,22 +10,14 @@ import {
   Stack,
   TextInput,
   useCombobox,
-  Text,
-  Paper,
   Divider,
-  ActionIcon,
-  Group,
-  Tooltip,
 } from "@mantine/core";
 import { useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
 import { DEFINES } from "@/defines.ts";
-import {
-  type EntityInstance,
-  type MentionInstance,
-  useMst,
-} from "@/stores/rootStore.ts";
+import { type EntityInstance, useMst } from "@/stores/rootStore.ts";
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
+import MentionLinkEditor from "@/components/RightWidget/MentionLinkEditor.tsx";
 
 const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
   ([tag, name]) => (
@@ -33,29 +25,6 @@ const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
       {name}
     </Combobox.Option>
   ),
-);
-
-const MentionLinkEditor = observer(
-  ({ mention }: { mention: MentionInstance }) => {
-    const rootStore = useMst();
-    return (
-      <Paper className={classes.linkEntry} shadow="xl" withBorder>
-        <Group wrap={"nowrap"} justify="space-between" gap={0}>
-          <Text truncate="end" component="span" className={classes.linkText}>
-            {mention.name}
-          </Text>
-          <Tooltip label={"Open Mention Editor"}>
-            <ActionIcon
-              variant="default"
-              onClick={() => rootStore.setSelectedNode(mention.id)}
-            >
-              <IconEdit />
-            </ActionIcon>
-          </Tooltip>
-        </Group>
-      </Paper>
-    );
-  },
 );
 
 const MentionList = observer(({ entityId }: { entityId: string }) => {

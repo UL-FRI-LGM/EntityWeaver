@@ -17,19 +17,30 @@ import {
   createNodeCompoundProgram,
   type NodeProgramType,
 } from "sigma/rendering";
-import { NodeBorderProgram } from "@sigma/node-border";
+import { createNodeBorderProgram } from "@sigma/node-border";
 import classes from "./EntityGraph.module.css";
 import type Sigma from "sigma";
 import type { Settings } from "sigma/settings";
 import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
+import { DEFINES } from "@/defines.ts";
 
 const sigmaStyle: CSSProperties = {
   display: "flex",
   overflow: "hidden",
 };
 
+const nodeBorderProgram = createNodeBorderProgram({
+  borders: [
+    {
+      size: { attribute: "borderSize", defaultValue: 0.1 },
+      color: { attribute: "borderColor", defaultValue: "black" },
+    },
+    { size: { fill: true }, color: { attribute: "color" } },
+  ],
+});
+
 const nodePictogramProgram = createNodeCompoundProgram<NodeType, EdgeType>([
-  NodeBorderProgram as NodeProgramType<NodeType, EdgeType>,
+  nodeBorderProgram as NodeProgramType<NodeType, EdgeType>,
   createNodeImageProgram({
     keepWithinCircle: true,
     correctCentering: true,
@@ -43,7 +54,7 @@ const sigmaSettings: Partial<Settings<NodeType, EdgeType>> = {
   // allowInvalidContainer: true,
   nodeProgramClasses: {
     pictogram: nodePictogramProgram,
-    bordered: NodeBorderProgram,
+    bordered: nodeBorderProgram,
   },
   defaultNodeType: "bordered",
   // defaultEdgeType: "arrow",
@@ -131,6 +142,9 @@ export const GraphEffects = observer(() => {
       highlightedNodes.add(rootStore.hoveredNode);
     if (rootStore.highlightOnSelect && rootStore.selectedNode)
       highlightedNodes.add(rootStore.selectedNode);
+    if (rootStore.uiHoveredNode) {
+      highlightedNodes.add(rootStore.uiHoveredNode);
+    }
 
     const allHighLightedNodes = new Set<string>();
 
@@ -146,6 +160,11 @@ export const GraphEffects = observer(() => {
           ) {
             newData.highlighted = true;
             allHighLightedNodes.add(node);
+            if (rootStore.selectedNode === node) {
+              newData.borderColor = DEFINES.selection.borderColor;
+            } else if (rootStore.uiHoveredNode === node) {
+              newData.borderColor = DEFINES.uiHover.borderColor;
+            }
           }
         }
         return newData;
@@ -168,8 +187,10 @@ export const GraphEffects = observer(() => {
     });
   }, [
     rootStore.hoveredNode,
+    rootStore.highlightOnHover,
     rootStore.selectedNode,
     rootStore.highlightOnSelect,
+    rootStore.uiHoveredNode,
     setSettings,
     sigma,
   ]);

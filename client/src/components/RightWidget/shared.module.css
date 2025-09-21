@@ -10,3 +10,12 @@
   margin-top: 15px;
   flex-shrink: 0;
 }
+
+.mentionLinkEntry {
+  background-color: var(--mantine-color-dark-6) !important;
+  padding: 5px;
+}
+
+.mentionLinkText {
+  max-width: 190px;
+}

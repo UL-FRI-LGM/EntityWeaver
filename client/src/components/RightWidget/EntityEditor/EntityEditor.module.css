@@ -10,12 +10,3 @@
   overflow: auto;
   min-height: 0;
 }
-
-.linkEntry {
-  background-color: var(--mantine-color-dark-6) !important;
-  padding: 5px;
-}
-
-.linkText {
-  max-width: 190px;
-}

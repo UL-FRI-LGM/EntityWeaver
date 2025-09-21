@@ -1,49 +1,12 @@
 import { observer } from "mobx-react";
 import classes from "./DocumentEditor.module.css";
-import {
-  Button,
-  Fieldset,
-  TextInput,
-  Divider,
-  Paper,
-  Group,
-  Text,
-  ActionIcon,
-  Stack,
-  Tooltip,
-} from "@mantine/core";
+import { Button, Fieldset, TextInput, Divider, Stack } from "@mantine/core";
 import { useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
-import {
-  type DocumentInstance,
-  type MentionInstance,
-  useMst,
-} from "@/stores/rootStore.ts";
+import { type DocumentInstance, useMst } from "@/stores/rootStore.ts";
 import { DEFINES } from "@/defines.ts";
 import sharedClasses from "../shared.module.css";
-
-const MentionLinkEditor = observer(
-  ({ mention }: { mention: MentionInstance }) => {
-    const rootStore = useMst();
-    return (
-      <Paper className={classes.linkEntry} shadow="xl" withBorder>
-        <Group wrap={"nowrap"} justify="space-between" gap={0}>
-          <Text truncate="end" component="span" className={classes.linkText}>
-            {mention.name}
-          </Text>
-          <Tooltip label={"Open Mention Editor"}>
-            <ActionIcon
-              variant="default"
-              onClick={() => rootStore.setSelectedNode(mention.id)}
-            >
-              <IconEdit />
-            </ActionIcon>
-          </Tooltip>
-        </Group>
-      </Paper>
-    );
-  },
-);
+import MentionLinkEditor from "@/components/RightWidget/MentionLinkEditor.tsx";
 
 const MentionList = observer(({ documentId }: { documentId: string }) => {
   const rootStore = useMst();
