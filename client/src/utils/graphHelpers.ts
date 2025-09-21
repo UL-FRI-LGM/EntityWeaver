@@ -135,6 +135,7 @@ export function updateGraph(
       pictogramColor: DEFINES.document.iconColor,
       type: "pictogram",
       borderSize: DEFINES.document.borderSize,
+      nodeType: "Document",
     });
   });
   dataset.entities.forEach((entity) => {
@@ -148,6 +149,7 @@ export function updateGraph(
       pictogramColor: DEFINES.entity.iconColor,
       type: "pictogram",
       borderSize: DEFINES.entity.borderSize,
+      nodeType: "Entity",
     });
   });
   dataset.mentions.forEach((mention) => {
@@ -161,6 +163,7 @@ export function updateGraph(
       pictogramColor: DEFINES.mention.iconColor,
       type: "pictogram",
       borderSize: DEFINES.mention.borderSize,
+      nodeType: "Mention",
     });
 
     const document = dataset.documents.get(mention.document.id);

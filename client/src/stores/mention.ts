@@ -6,7 +6,10 @@ import {
 } from "mobx-state-tree";
 import type Sigma from "sigma";
 import type { EdgeType, NodeType, RootInstance } from "@/stores/rootStore.ts";
-import { updateMentionNode } from "@/utils/graphHelpers.ts";
+import {
+  updateMentionNode,
+  updateNodeProperties,
+} from "@/utils/graphHelpers.ts";
 import { Entity } from "@/stores/entity.ts";
 import { Document, type DocumentInstance } from "@/stores/document.ts";
 
@@ -37,6 +40,8 @@ export interface LinkInstance extends Instance<typeof Link> {}
 export const Mention = types
   .model({
     id: types.identifier,
+    x: types.maybe(types.number),
+    y: types.maybe(types.number),
     name: types.string,
     type: types.string,
     document: types.reference(types.late(() => Document)),
@@ -51,61 +56,66 @@ export const Mention = types
       return Array.from(self.entityLinks.values());
     },
   }))
-  .actions((self) => {
-    return {
-      setName(name: string) {
-        self.name = name;
-        if (self.sigma) {
-          updateMentionNode(self.sigma, self.id, { label: name });
-        }
-      },
-      setType(type: string) {
-        self.type = type;
-        if (self.sigma) {
-          updateMentionNode(self.sigma, self.id, { type: type });
-        }
-      },
-      setDocumentId(document: DocumentInstance) {
-        self.document = document;
-        if (self.sigma) {
-          updateMentionNode(self.sigma, self.id, { documentId: document.id });
-        }
-      },
-      removeEntityLink(entityId: string) {
-        self.entityLinks.delete(entityId);
-        if (self.sigma) {
-          updateMentionNode(self.sigma, self.id, {
-            removedEntityLinks: [entityId],
-          });
-        }
-      },
-      setEntityLink(entityId: string, keepExisting = true) {
-        const alreadyHasLink = self.entityLinks.has(entityId);
-        if (keepExisting && alreadyHasLink) {
-          return;
-        }
-        if (!keepExisting) {
-          if (!alreadyHasLink) {
-            self.entityLinks.clear();
-          } else {
-            self.entityLinks.forEach((link) => {
-              if (link.entity.id !== entityId) {
-                self.entityLinks.delete(link.entity.id);
-              }
-            });
-          }
-        }
+  .actions((self) => ({
+    setPosition(position: { x?: number | null; y?: number | null }) {
+      self.x = position.x ?? undefined;
+      self.y = position.y ?? undefined;
+      if (self.x !== null || self.y !== null) {
+        updateNodeProperties(self.sigma, self.id, { x: self.x, y: self.y });
+      }
+    },
+    setName(name: string) {
+      self.name = name;
+      if (self.sigma) {
+        updateMentionNode(self.sigma, self.id, { label: name });
+      }
+    },
+    setType(type: string) {
+      self.type = type;
+      if (self.sigma) {
+        updateMentionNode(self.sigma, self.id, { type: type });
+      }
+    },
+    setDocumentId(document: DocumentInstance) {
+      self.document = document;
+      if (self.sigma) {
+        updateMentionNode(self.sigma, self.id, { documentId: document.id });
+      }
+    },
+    removeEntityLink(entityId: string) {
+      self.entityLinks.delete(entityId);
+      if (self.sigma) {
+        updateMentionNode(self.sigma, self.id, {
+          removedEntityLinks: [entityId],
+        });
+      }
+    },
+    setEntityLink(entityId: string, keepExisting = true) {
+      const alreadyHasLink = self.entityLinks.has(entityId);
+      if (keepExisting && alreadyHasLink) {
+        return;
+      }
+      if (!keepExisting) {
         if (!alreadyHasLink) {
-          self.entityLinks.set(entityId, { entity: entityId });
-        }
-        if (self.sigma) {
-          updateMentionNode(self.sigma, self.id, {
-            addedEntityLinks: [entityId],
-            clearEntityLinks: !keepExisting,
+          self.entityLinks.clear();
+        } else {
+          self.entityLinks.forEach((link) => {
+            if (link.entity.id !== entityId) {
+              self.entityLinks.delete(link.entity.id);
+            }
           });
         }
-      },
-    };
-  });
+      }
+      if (!alreadyHasLink) {
+        self.entityLinks.set(entityId, { entity: entityId });
+      }
+      if (self.sigma) {
+        updateMentionNode(self.sigma, self.id, {
+          addedEntityLinks: [entityId],
+          clearEntityLinks: !keepExisting,
+        });
+      }
+    },
+  }));
 
 export interface MentionInstance extends Instance<typeof Mention> {}

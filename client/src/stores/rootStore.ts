@@ -3,7 +3,7 @@ import { types, type Instance } from "mobx-state-tree";
 import type Sigma from "sigma";
 import { updateGraph, updateNodeProperties } from "@/utils/graphHelpers.ts";
 import type { AnimateOptions } from "sigma/utils";
-import { Dataset } from "@/stores/dataset.ts";
+import { Dataset, type NodeTypes } from "@/stores/dataset.ts";
 import { mentionPrefix } from "@/stores/mention.ts";
 import { documentPrefix } from "@/stores/document.ts";
 import { entityPrefix } from "@/stores/entity.ts";
@@ -21,6 +21,7 @@ export interface NodeType {
   image: string;
   pictogramColor: string;
   type: string;
+  nodeType: NodeTypes;
 }
 export interface EdgeType {
   size: number;
@@ -39,6 +40,7 @@ const RootStore = types
     hoveredNode: null as string | null,
     uiHoveredNode: null as string | null,
     runLayout: false,
+    layoutInProgress: false,
     holdingShift: false,
     highlightOnSelect: true,
     highlightOnHover: true,
@@ -106,6 +108,9 @@ const RootStore = types
     setRunLayout(state: boolean) {
       self.runLayout = state;
     },
+    setLayoutInProgress(state: boolean) {
+      self.layoutInProgress = state;
+    },
     setHoldingShift(state: boolean) {
       self.holdingShift = state;
     },
@@ -125,6 +130,10 @@ const RootStore = types
       // ) {
       //   this.resetCamera();
       // }
+      self.sigma?.getGraph().forEachNode((node, attributes) => {
+        self.dataset.setNodePosition(node, attributes.nodeType, attributes);
+      });
+      self.layoutInProgress = false;
     },
     resetCamera(options: Partial<AnimateOptions> = { duration: 1 }) {
       const camera = self.sigma?.getCamera();

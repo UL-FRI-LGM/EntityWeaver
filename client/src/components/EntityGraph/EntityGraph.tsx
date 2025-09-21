@@ -22,6 +22,7 @@ import classes from "./EntityGraph.module.css";
 import type Sigma from "sigma";
 import type { Settings } from "sigma/settings";
 import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
+import { isLeftClick } from "@/utils/helpers.ts";
 
 const sigmaStyle: CSSProperties = {
   display: "flex",
@@ -105,13 +106,19 @@ export const GraphEffects = observer(() => {
           .catch(console.error);
       },
       downNode: (event) => {
+        if (!isLeftClick(event.event.original) || rootStore.layoutInProgress)
+          return;
         setDraggedNode(event.node);
       },
       mousemovebody: (event) => {
         if (!draggedNode) return;
         const pos = sigma.viewportToGraph(event);
-        sigma.getGraph().setNodeAttribute(draggedNode, "x", pos.x);
-        sigma.getGraph().setNodeAttribute(draggedNode, "y", pos.y);
+        const attributes = sigma.getGraph().getNodeAttributes(draggedNode);
+        rootStore.dataset.setNodePosition(
+          draggedNode,
+          attributes.nodeType,
+          pos,
+        );
 
         event.preventSigmaDefault();
         event.original.preventDefault();
@@ -123,11 +130,8 @@ export const GraphEffects = observer(() => {
           sigma.getGraph().removeNodeAttribute(draggedNode, "highlighted");
         }
       },
-      mousedown: () => {
-        if (!sigma.getCustomBBox()) sigma.setCustomBBox(sigma.getBBox());
-      },
     });
-  }, [draggedNode, registerEvents, rootStore, sigma]);
+  }, [draggedNode, registerEvents, rootStore, rootStore.dataset, sigma]);
 
   useEffect(() => {
     if (sigma !== null) {
@@ -203,6 +207,7 @@ const Fa2 = observer(() => {
   useEffect(() => {
     if (rootStore.runLayout) {
       rootStore.setRunLayout(false);
+      rootStore.setLayoutInProgress(true);
       start();
 
       setTimeout(() => {

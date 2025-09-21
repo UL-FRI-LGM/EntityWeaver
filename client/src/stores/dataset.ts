@@ -9,6 +9,8 @@ import {
 import { loadDemo } from "@/utils/helpers.ts";
 import type { RootInstance } from "@/stores/rootStore.ts";
 
+export type NodeTypes = "Document" | "Entity" | "Mention";
+
 export interface DatasetDB {
   mentions: MentionDB[];
   entities: EntityDB[];
@@ -186,6 +188,35 @@ export const Dataset = types
   .actions((self) => ({
     afterCreate() {
       this.fetchData().catch((err) => console.error(err));
+    },
+    setNodePosition(
+      nodeId: string,
+      nodeType: NodeTypes,
+      position: { x?: number | null; y?: number | null },
+    ) {
+      if (nodeType === "Document") {
+        const document = self.documents.get(nodeId);
+        if (!document) {
+          console.warn(`Document with id ${nodeId} not found`);
+          return;
+        }
+        document.setPosition(position);
+        return;
+      } else if (nodeType === "Entity") {
+        const entity = self.entities.get(nodeId);
+        if (!entity) {
+          console.warn(`Entity with id ${nodeId} not found`);
+          return;
+        }
+        entity.setPosition(position);
+      } else if (nodeType === "Mention") {
+        const mention = self.mentions.get(nodeId);
+        if (!mention) {
+          console.warn(`Mention with id ${nodeId} not found`);
+          return;
+        }
+        mention.setPosition(position);
+      }
     },
     fetchData: flow(function* () {
       if (self.fetchingData) return;

@@ -68,3 +68,11 @@ export function typeToImage(type: string) {
     ];
   return DEFINES.entityTypes.images.default;
 }
+
+export function isLeftClick(event: MouseEvent | TouchEvent) {
+  if (event instanceof MouseEvent) {
+    const mouseEvent = event as MouseEvent;
+    if (mouseEvent.button === 0) return true;
+  }
+  return false;
+}

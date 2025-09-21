@@ -1,4 +1,7 @@
-import { type Instance, types } from "mobx-state-tree";
+import { getRoot, type Instance, types } from "mobx-state-tree";
+import { updateNodeProperties } from "@/utils/graphHelpers.ts";
+import type Sigma from "sigma";
+import type { EdgeType, NodeType, RootInstance } from "@/stores/rootStore.ts";
 
 export const entityPrefix = "Entity-";
 export interface EntityDB {
@@ -10,12 +13,18 @@ export interface EntityDB {
 export const Entity = types
   .model({
     id: types.identifier,
+    x: types.maybe(types.number),
+    y: types.maybe(types.number),
     name: types.string,
     type: types.string,
   })
   .views((self) => ({
     get searchString() {
       return `${self.name} (${self.id})`;
+    },
+    get sigma(): Sigma<NodeType, EdgeType> | null {
+      const rootStore = getRoot(self) as RootInstance;
+      return rootStore.sigma;
     },
   }))
   .actions((self) => ({
@@ -24,6 +33,13 @@ export const Entity = types
     },
     setType(type: string) {
       self.type = type;
+    },
+    setPosition(position: { x?: number | null; y?: number | null }) {
+      self.x = position.x ?? undefined;
+      self.y = position.y ?? undefined;
+      if (self.x !== null || self.y !== null) {
+        updateNodeProperties(self.sigma, self.id, { x: self.x, y: self.y });
+      }
     },
   }));
 
