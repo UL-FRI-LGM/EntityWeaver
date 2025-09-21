@@ -10,15 +10,12 @@ import {
 } from "@react-sigma/core";
 import "@react-sigma/core/lib/style.css";
 import { observer } from "mobx-react";
-import {
-  type EdgeType,
-  type NodeType,
-  useMst,
-} from "../../stores/rootStore.ts";
+import { type EdgeType, type NodeType, useMst } from "@/stores/rootStore.ts";
 import { useWorkerLayoutForceAtlas2 } from "@react-sigma/layout-forceatlas2";
 import { createNodeImageProgram } from "@sigma/node-image";
 import { createNodeCompoundProgram } from "sigma/rendering";
 import { NodeBorderProgram } from "@sigma/node-border";
+import classes from "./EntityGraph.module.css";
 import type Sigma from "sigma";
 
 const sigmaStyle: CSSProperties = {
@@ -180,8 +177,8 @@ const EntityGraph = observer(() => {
       <GraphEffects />
       <Fa2 />
       <ControlsContainer position={"bottom-right"}>
-        <ZoomControl />
-        <FullScreenControl />
+        <ZoomControl className={classes.controls} />
+        <FullScreenControl className={classes.controls} />
       </ControlsContainer>
     </SigmaContainer>
   );
