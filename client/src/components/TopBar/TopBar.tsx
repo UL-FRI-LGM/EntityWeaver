@@ -8,6 +8,14 @@ const TopBar = observer(() => {
   return (
     <Group justify={"end"} className={classes.container}>
       <Switch
+        label={"Highlight Hovered Node"}
+        checked={rootStore.highlightOnHover}
+        className={classes.switch}
+        onChange={(event) =>
+          rootStore.setHighlightOnHover(event.currentTarget.checked)
+        }
+      />
+      <Switch
         label={"Highlight Selected Node"}
         checked={rootStore.highlightOnSelect}
         className={classes.switch}

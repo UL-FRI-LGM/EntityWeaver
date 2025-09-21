@@ -271,6 +271,7 @@ const RootStore = types
     runLayout: false,
     holdingShift: false,
     highlightOnSelect: true,
+    highlightOnHover: true,
   }))
   .views((self) => ({
     get selectedNodeInstance() {
@@ -317,6 +318,9 @@ const RootStore = types
     },
     setHighlightOnSelect(state: boolean) {
       self.highlightOnSelect = state;
+    },
+    setHighlightOnHover(state: boolean) {
+      self.highlightOnHover = state;
     },
     onFinishRenderingLayout() {
       // const cameraState = self.sigma?.getCamera().getState();

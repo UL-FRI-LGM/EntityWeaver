@@ -62,6 +62,8 @@ export const GraphEffects = observer(() => {
   const setSettings = useSetSettings<NodeType, EdgeType>();
   const registerEvents = useRegisterEvents<NodeType, EdgeType>();
 
+  const [draggedNode, setDraggedNode] = useState<string | null>(null);
+
   useEffect(() => {
     registerEvents({
       enterNode: (event) => {
@@ -92,8 +94,30 @@ export const GraphEffects = observer(() => {
           .animate(cameraState, { duration: 1000 })
           .catch(console.error);
       },
+      downNode: (event) => {
+        setDraggedNode(event.node);
+      },
+      mousemovebody: (event) => {
+        if (!draggedNode) return;
+        const pos = sigma.viewportToGraph(event);
+        sigma.getGraph().setNodeAttribute(draggedNode, "x", pos.x);
+        sigma.getGraph().setNodeAttribute(draggedNode, "y", pos.y);
+
+        event.preventSigmaDefault();
+        event.original.preventDefault();
+        event.original.stopPropagation();
+      },
+      mouseup: () => {
+        if (draggedNode) {
+          setDraggedNode(null);
+          sigma.getGraph().removeNodeAttribute(draggedNode, "highlighted");
+        }
+      },
+      mousedown: () => {
+        if (!sigma.getCustomBBox()) sigma.setCustomBBox(sigma.getBBox());
+      },
     });
-  }, [registerEvents, rootStore, sigma]);
+  }, [draggedNode, registerEvents, rootStore, sigma]);
 
   useEffect(() => {
     if (sigma !== null) {
@@ -102,32 +126,43 @@ export const GraphEffects = observer(() => {
   }, [rootStore, sigma]);
 
   useEffect(() => {
-    const highlightedNode =
-      rootStore.highlightOnSelect && rootStore.selectedNode
-        ? rootStore.selectedNode
-        : rootStore.hoveredNode;
+    const highlightedNodes = new Set<string>();
+    if (rootStore.highlightOnHover && rootStore.hoveredNode)
+      highlightedNodes.add(rootStore.hoveredNode);
+    if (rootStore.highlightOnSelect && rootStore.selectedNode)
+      highlightedNodes.add(rootStore.selectedNode);
+
+    const allHighLightedNodes = new Set<string>();
+
     setSettings({
       nodeReducer: (node, data) => {
         const graph = sigma.getGraph();
         const newData = { ...data, highlighted: data.highlighted ?? false };
 
-        if (highlightedNode) {
-          newData.highlighted =
-            node === highlightedNode ||
-            graph.neighbors(highlightedNode).includes(node);
+        if (highlightedNodes.size > 0) {
+          if (
+            highlightedNodes.has(node) ||
+            graph.neighbors(node).some((nodeId) => highlightedNodes.has(nodeId))
+          ) {
+            newData.highlighted = true;
+            allHighLightedNodes.add(node);
+          }
         }
         return newData;
       },
       edgeReducer: (edge, data) => {
-        const graph = sigma.getGraph();
         const newData = { ...data, hidden: false };
+        const graph = sigma.getGraph();
 
-        if (
-          highlightedNode &&
-          !graph.extremities(edge).includes(highlightedNode)
-        ) {
-          newData.hidden = true;
+        if (allHighLightedNodes.size > 0) {
+          for (const nodeId of graph.extremities(edge)) {
+            if (!allHighLightedNodes.has(nodeId)) {
+              newData.hidden = true;
+              break;
+            }
+          }
         }
+
         return newData;
       },
     });
