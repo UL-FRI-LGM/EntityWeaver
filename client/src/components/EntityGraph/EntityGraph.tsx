@@ -58,16 +58,13 @@ export const GraphEffects = observer(() => {
 
   const setSettings = useSetSettings<NodeType, EdgeType>();
   const registerEvents = useRegisterEvents<NodeType, EdgeType>();
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
 
   useEffect(() => {
     registerEvents({
       enterNode: (event) => {
-        setHoveredNode(event.node);
         rootStore.setHoveredNode(event.node);
       },
       leaveNode: () => {
-        setHoveredNode(null);
         rootStore.setHoveredNode(null);
       },
       clickNode: (event) => rootStore.setSelectedNode(event.node),
@@ -81,14 +78,19 @@ export const GraphEffects = observer(() => {
   }, [rootStore, sigma]);
 
   useEffect(() => {
+    const highlightedNode =
+      rootStore.highlightOnSelect && rootStore.selectedNode
+        ? rootStore.selectedNode
+        : rootStore.hoveredNode;
     setSettings({
       nodeReducer: (node, data) => {
         const graph = sigma.getGraph();
         const newData = { ...data, highlighted: data.highlighted ?? false };
 
-        if (hoveredNode) {
+        if (highlightedNode) {
           newData.highlighted =
-            node === hoveredNode || graph.neighbors(hoveredNode).includes(node);
+            node === highlightedNode ||
+            graph.neighbors(highlightedNode).includes(node);
         }
         return newData;
       },
@@ -96,13 +98,22 @@ export const GraphEffects = observer(() => {
         const graph = sigma.getGraph();
         const newData = { ...data, hidden: false };
 
-        if (hoveredNode && !graph.extremities(edge).includes(hoveredNode)) {
+        if (
+          highlightedNode &&
+          !graph.extremities(edge).includes(highlightedNode)
+        ) {
           newData.hidden = true;
         }
         return newData;
       },
     });
-  }, [hoveredNode, setSettings, sigma]);
+  }, [
+    rootStore.hoveredNode,
+    rootStore.selectedNode,
+    rootStore.highlightOnSelect,
+    setSettings,
+    sigma,
+  ]);
 
   return null;
 });

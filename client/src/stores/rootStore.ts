@@ -255,6 +255,7 @@ const RootStore = types
     hoveredNode: null as string | null,
     runLayout: false,
     holdingShift: false,
+    highlightOnSelect: true,
   }))
   .views((self) => ({
     get selectedNodeInstance() {
@@ -298,6 +299,9 @@ const RootStore = types
     },
     setHoldingShift(state: boolean) {
       self.holdingShift = state;
+    },
+    setHighlightOnSelect(state: boolean) {
+      self.highlightOnSelect = state;
     },
   }));
 
