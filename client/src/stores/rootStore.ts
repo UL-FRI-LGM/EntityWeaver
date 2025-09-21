@@ -10,6 +10,7 @@ import {
 import type Sigma from "sigma";
 import { updateMentionNode, updateGraph } from "@/utils/graphHelpers.ts";
 import { loadDemo } from "@/utils/helpers.ts";
+import type { AnimateOptions } from "sigma/utils";
 
 export interface DatasetDB {
   mentions: MentionDB[];
@@ -302,6 +303,21 @@ const RootStore = types
     },
     setHighlightOnSelect(state: boolean) {
       self.highlightOnSelect = state;
+    },
+    onFinishRenderingLayout() {
+      // const cameraState = self.sigma?.getCamera().getState();
+      // if (!cameraState) return;
+      // if (
+      //   cameraState.x === 0.5 &&
+      //   cameraState.y === 0.5 &&
+      //   cameraState.ratio === 1
+      // ) {
+      //   this.resetCamera();
+      // }
+    },
+    resetCamera(options: Partial<AnimateOptions> = { duration: 1 }) {
+      const camera = self.sigma?.getCamera();
+      camera?.animatedReset(options).catch(console.error);
     },
   }));
 

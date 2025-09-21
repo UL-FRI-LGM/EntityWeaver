@@ -1,4 +1,4 @@
-import { type CSSProperties, useCallback, useEffect, useState } from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 import {
   ControlsContainer,
   FullScreenControl,
@@ -149,11 +149,6 @@ const Fa2 = observer(() => {
     settings: { slowDown: 10 },
   });
 
-  const onFinishRenderingLayout = useCallback(() => {
-    const camera = rootStore.sigma?.getCamera();
-    camera?.animatedReset({ duration: 1 }).catch(console.error);
-  }, [rootStore]);
-
   useEffect(() => {
     if (rootStore.runLayout) {
       rootStore.setRunLayout(false);
@@ -161,7 +156,7 @@ const Fa2 = observer(() => {
 
       setTimeout(() => {
         stop();
-        onFinishRenderingLayout();
+        rootStore.onFinishRenderingLayout();
       }, 2000);
     }
 
@@ -169,14 +164,7 @@ const Fa2 = observer(() => {
       // This prevents hot reload from working properly
       // kill();
     };
-  }, [
-    start,
-    kill,
-    stop,
-    onFinishRenderingLayout,
-    rootStore.runLayout,
-    rootStore,
-  ]);
+  }, [start, kill, stop, rootStore.runLayout, rootStore]);
 
   useEffect(() => {
     rootStore.setIsForceAtlasRunning(isRunning);
