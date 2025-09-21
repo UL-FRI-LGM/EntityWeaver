@@ -1,18 +1,13 @@
 import { observer } from "mobx-react";
-import {
-  Document,
-  type DocumentInstance,
-  Mention,
-  Entity,
-  type EntityInstance,
-  type MentionInstance,
-  useMst,
-} from "@/stores/rootStore.ts";
+import { useMst } from "@/stores/rootStore.ts";
 import classes from "./RightWidget.module.css";
 import { getType } from "mobx-state-tree";
 import MentionEditor from "./MentionEditor/MentionEditor.tsx";
 import DocumentEditor from "./DocumentEditor/DocumentEditor.tsx";
 import EntityEditor from "@/components/RightWidget/EntityEditor/EntityEditor.tsx";
+import { Mention, type MentionInstance } from "@/stores/mention.ts";
+import { Entity, type EntityInstance } from "@/stores/entity.ts";
+import { Document, type DocumentInstance } from "@/stores/document.ts";
 
 const RightWidget = observer(() => {
   const rootStore = useMst();

@@ -1,8 +1,9 @@
 import { observer } from "mobx-react";
-import { type MentionInstance, useMst } from "@/stores/rootStore.ts";
+import { useMst } from "@/stores/rootStore.ts";
 import { ActionIcon, Group, Paper, Text, Tooltip } from "@mantine/core";
 import classes from "./shared.module.css";
 import { IconEdit } from "@tabler/icons-react";
+import type { MentionInstance } from "@/stores/mention.ts";
 
 const MentionLinkEditor = observer(
   ({ mention }: { mention: MentionInstance }) => {

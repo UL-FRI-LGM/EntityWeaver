@@ -20,16 +20,13 @@ import {
 import { useState } from "react";
 import { IconEdit, IconLink, IconLinkPlus, IconX } from "@tabler/icons-react";
 import { DEFINES } from "@/defines.ts";
-import {
-  type LinkInstance,
-  type MentionInstance,
-  useMst,
-} from "@/stores/rootStore.ts";
+import { useMst } from "@/stores/rootStore.ts";
 import SearchableCombobox, {
   type SearchableComboboxOption,
 } from "../../SearchableCombobox/SearchableCombobox.tsx";
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
 import sharedClasses from "../shared.module.css";
+import type { LinkInstance, MentionInstance } from "@/stores/mention.ts";
 
 const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
   ([tag, name]) => (

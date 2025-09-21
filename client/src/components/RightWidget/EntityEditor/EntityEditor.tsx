@@ -15,9 +15,10 @@ import {
 import { useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
 import { DEFINES } from "@/defines.ts";
-import { type EntityInstance, useMst } from "@/stores/rootStore.ts";
+import { useMst } from "@/stores/rootStore.ts";
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
 import MentionLinkEditor from "@/components/RightWidget/MentionLinkEditor.tsx";
+import type { EntityInstance } from "@/stores/entity.ts";
 
 const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
   ([tag, name]) => (

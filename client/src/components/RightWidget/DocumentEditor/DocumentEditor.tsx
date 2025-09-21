@@ -3,10 +3,11 @@ import classes from "./DocumentEditor.module.css";
 import { Button, Fieldset, TextInput, Divider, Stack } from "@mantine/core";
 import { useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
-import { type DocumentInstance, useMst } from "@/stores/rootStore.ts";
+import { useMst } from "@/stores/rootStore.ts";
 import { DEFINES } from "@/defines.ts";
 import sharedClasses from "../shared.module.css";
 import MentionLinkEditor from "@/components/RightWidget/MentionLinkEditor.tsx";
+import type { DocumentInstance } from "@/stores/document.ts";
 
 const MentionList = observer(({ documentId }: { documentId: string }) => {
   const rootStore = useMst();

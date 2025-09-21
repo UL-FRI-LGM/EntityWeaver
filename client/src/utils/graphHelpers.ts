@@ -1,12 +1,9 @@
 import { DEFINES } from "../defines.ts";
 import seedrandom, { type PRNG } from "seedrandom";
 import type Sigma from "sigma";
-import type {
-  DatasetInstance,
-  EdgeType,
-  NodeType,
-} from "@/stores/rootStore.ts";
+import type { EdgeType, NodeType } from "@/stores/rootStore.ts";
 import { typeToImage } from "./helpers.ts";
+import type { DatasetInstance } from "@/stores/dataset.ts";
 
 function getRandomPosition(generator?: PRNG) {
   return {
