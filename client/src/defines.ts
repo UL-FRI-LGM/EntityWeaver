@@ -4,6 +4,7 @@ export const DEFINES = {
   sizePerEdge: 5,
   minNodeSize: 15,
   maxNodeSize: 50,
+  layoutRuntimeInMs: 1000,
   selection: {
     borderColor: "#b70000",
   },

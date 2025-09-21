@@ -39,6 +39,7 @@ const RootStore = types
     selectedNode: null as string | null,
     hoveredNode: null as string | null,
     uiHoveredNode: null as string | null,
+    initialLoad: true,
     runLayout: false,
     layoutInProgress: false,
     holdingShift: false,
@@ -57,6 +58,11 @@ const RootStore = types
       } else {
         return null;
       }
+    },
+    get graphLoading() {
+      return (
+        self.initialLoad || self.dataset.fetchingData || self.layoutInProgress
+      );
     },
   }))
   .actions((self) => ({
@@ -110,6 +116,9 @@ const RootStore = types
     },
     setLayoutInProgress(state: boolean) {
       self.layoutInProgress = state;
+      if (!self.layoutInProgress) {
+        self.initialLoad = false;
+      }
     },
     setHoldingShift(state: boolean) {
       self.holdingShift = state;
@@ -133,7 +142,7 @@ const RootStore = types
       self.sigma?.getGraph().forEachNode((node, attributes) => {
         self.dataset.setNodePosition(node, attributes.nodeType, attributes);
       });
-      self.layoutInProgress = false;
+      this.setLayoutInProgress(false);
     },
     resetCamera(options: Partial<AnimateOptions> = { duration: 1 }) {
       const camera = self.sigma?.getCamera();

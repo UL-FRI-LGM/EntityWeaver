@@ -23,6 +23,8 @@ import type Sigma from "sigma";
 import type { Settings } from "sigma/settings";
 import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
 import { isLeftClick } from "@/utils/helpers.ts";
+import { LoadingOverlay } from "@mantine/core";
+import { DEFINES } from "@/defines.ts";
 
 const sigmaStyle: CSSProperties = {
   display: "flex",
@@ -213,7 +215,7 @@ const Fa2 = observer(() => {
       setTimeout(() => {
         stop();
         rootStore.onFinishRenderingLayout();
-      }, 2000);
+      }, DEFINES.layoutRuntimeInMs);
     }
 
     return () => {
@@ -251,6 +253,17 @@ const EntityGraph = observer(() => {
         <ZoomControl className={classes.controls} />
         <FullScreenControl className={classes.controls} />
       </ControlsContainer>
+      <LoadingOverlay
+        visible={rootStore.graphLoading}
+        zIndex={1000}
+        overlayProps={{
+          radius: "sm",
+          blur: 2,
+          backgroundOpacity: 1,
+          color: "#ffffff",
+        }}
+        transitionProps={{ exitDuration: 500 }}
+      />
     </SigmaContainer>
   );
 });
