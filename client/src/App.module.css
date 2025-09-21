@@ -1,0 +1,39 @@
+.app {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+}
+
+.graphContainer {
+  display: flex;
+  flex: 1;
+}
+
+.graphTooltipContainer {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  opacity: 0.8;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background-color: black;
+}
+
+.mouseClickTooltip {
+  position: relative;
+  gap: 2px !important;
+}
+
+.doubleClockTooltip {
+  font-size: 8px !important;
+  position: absolute;
+  left: 8px;
+  top: 11px;
+  pointer-events: none;
+}
