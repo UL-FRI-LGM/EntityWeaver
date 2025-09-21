@@ -22,7 +22,6 @@ import classes from "./EntityGraph.module.css";
 import type Sigma from "sigma";
 import type { Settings } from "sigma/settings";
 import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
-import { DEFINES } from "@/defines.ts";
 
 const sigmaStyle: CSSProperties = {
   display: "flex",
@@ -160,11 +159,6 @@ export const GraphEffects = observer(() => {
           ) {
             newData.highlighted = true;
             allHighLightedNodes.add(node);
-            if (rootStore.selectedNode === node) {
-              newData.borderColor = DEFINES.selection.borderColor;
-            } else if (rootStore.uiHoveredNode === node) {
-              newData.borderColor = DEFINES.uiHover.borderColor;
-            }
           }
         }
         return newData;

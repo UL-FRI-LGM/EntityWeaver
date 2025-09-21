@@ -19,6 +19,18 @@ function getNodeSize(edges: number) {
   return size;
 }
 
+export function updateNodeProperties(
+  sigma: Sigma<NodeType, EdgeType> | null,
+  nodeId: string,
+  properties: Partial<NodeType>,
+) {
+  if (!sigma) {
+    return;
+  }
+  const graph = sigma.getGraph();
+  graph.mergeNodeAttributes(nodeId, properties);
+}
+
 export function updateMentionNode(
   sigma: Sigma<NodeType, EdgeType>,
   nodeId: string,

@@ -1,12 +1,13 @@
 import { createContext, use } from "react";
 import { types, type Instance } from "mobx-state-tree";
 import type Sigma from "sigma";
-import { updateGraph } from "@/utils/graphHelpers.ts";
+import { updateGraph, updateNodeProperties } from "@/utils/graphHelpers.ts";
 import type { AnimateOptions } from "sigma/utils";
 import { Dataset } from "@/stores/dataset.ts";
 import { mentionPrefix } from "@/stores/mention.ts";
 import { documentPrefix } from "@/stores/document.ts";
 import { entityPrefix } from "@/stores/entity.ts";
+import { DEFINES } from "@/defines.ts";
 
 export interface NodeType {
   x: number;
@@ -65,10 +66,33 @@ const RootStore = types
       this.runGraphUpdate();
     },
     setSelectedNode(nodeId: string | null) {
+      if (self.selectedNode && nodeId === null) {
+        updateNodeProperties(self.sigma, self.selectedNode, {
+          borderColor: undefined,
+        });
+      }
       self.selectedNode = nodeId;
+      if (nodeId) {
+        updateNodeProperties(self.sigma, nodeId, {
+          borderColor: DEFINES.selection.borderColor,
+        });
+      }
     },
     setHoveredNode(nodeId: string | null) {
       self.hoveredNode = nodeId;
+    },
+    setUiHoveredNode(nodeId: string | null) {
+      if (self.uiHoveredNode && nodeId === null) {
+        updateNodeProperties(self.sigma, self.uiHoveredNode, {
+          borderColor: undefined,
+        });
+      }
+      self.uiHoveredNode = nodeId;
+      if (nodeId) {
+        updateNodeProperties(self.sigma, nodeId, {
+          borderColor: DEFINES.uiHover.borderColor,
+        });
+      }
     },
     onDatasetUpdate() {
       this.runGraphUpdate();
@@ -90,9 +114,6 @@ const RootStore = types
     },
     setHighlightOnHover(state: boolean) {
       self.highlightOnHover = state;
-    },
-    setUiHoveredNode(nodeId: string | null) {
-      self.uiHoveredNode = nodeId;
     },
     onFinishRenderingLayout() {
       // const cameraState = self.sigma?.getCamera().getState();
