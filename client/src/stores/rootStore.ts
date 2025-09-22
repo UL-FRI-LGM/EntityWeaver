@@ -14,7 +14,11 @@ import {
   updateNodeProperties,
 } from "@/utils/graphHelpers.ts";
 import type { AnimateOptions } from "sigma/utils";
-import { Dataset, type NodeTypes } from "@/stores/dataset.ts";
+import {
+  Dataset,
+  type DatasetSnapShotIn,
+  type GraphNodeType,
+} from "@/stores/dataset.ts";
 import { mentionPrefix } from "@/stores/mention.ts";
 import { documentPrefix } from "@/stores/document.ts";
 import { entityPrefix } from "@/stores/entity.ts";
@@ -39,7 +43,7 @@ export interface NodeType {
   image: string;
   pictogramColor: string;
   type: string;
-  nodeType: NodeTypes;
+  nodeType: GraphNodeType;
   entityType?: string;
 }
 export interface EdgeType {
@@ -117,11 +121,11 @@ const RootStore = types
     selectedNode: null as string | null,
     hoveredNode: null as string | null,
     uiHoveredNode: null as string | null,
-    initialLoad: true,
     runLayout: false,
     layoutInProgress: false,
     isForceAtlasRunning: false,
     holdingShift: false,
+    loadingData: false,
   }))
   .views((self) => ({
     get selectedNodeInstance() {
@@ -138,20 +142,26 @@ const RootStore = types
     },
     get graphLoading() {
       return (
-        self.initialLoad || self.dataset.fetchingData || self.layoutInProgress
+        self.loadingData || self.dataset.fetchingData || self.layoutInProgress
       );
     },
   }))
   .actions((self) => ({
+    setLoadingData(state: boolean) {
+      self.loadingData = state;
+    },
     setUiState(uiState: UiStateSnapShotIn) {
       self.uiState = UiState.create(uiState);
+    },
+    setDataset(dataset: DatasetSnapShotIn) {
+      self.dataset = Dataset.create(dataset);
+      this.runGraphUpdate(false);
     },
     setIsForceAtlasRunning(state: boolean) {
       self.isForceAtlasRunning = state;
     },
     setSigma(sigma: Sigma<NodeType, EdgeType>) {
       self.sigma = sigma;
-      this.runGraphUpdate();
     },
     setSelectedNode(nodeId: string | null) {
       if (self.selectedNode) {
@@ -189,14 +199,22 @@ const RootStore = types
         updateEntityToDocumentNodes(self.sigma, self.dataset);
       }
     },
+    clearGraphState() {
+      console.log("clearning state");
+      self.selectedNode = null;
+      self.hoveredNode = null;
+      self.uiHoveredNode = null;
+    },
 
     onDatasetUpdate() {
       this.runGraphUpdate();
     },
-    runGraphUpdate() {
-      if (self.sigma && !self.dataset.fetchingData) {
-        updateGraph(self.sigma, self.dataset);
-        self.runLayout = true;
+    runGraphUpdate(runLayout = true) {
+      if (self.sigma) {
+        this.clearGraphState();
+        updateGraph(self.sigma, self.dataset, self.uiState.colorByType);
+        self.sigma.getCamera().animatedReset().catch(console.error);
+        if (runLayout) self.runLayout = runLayout;
       }
     },
     setRunLayout(state: boolean) {
@@ -204,9 +222,6 @@ const RootStore = types
     },
     setLayoutInProgress(state: boolean) {
       self.layoutInProgress = state;
-      if (!self.layoutInProgress) {
-        self.initialLoad = false;
-      }
     },
     setHoldingShift(state: boolean) {
       self.holdingShift = state;

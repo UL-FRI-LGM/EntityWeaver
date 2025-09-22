@@ -104,3 +104,64 @@ export function loadFromLocalStorage<T>(key: string, defaultValue: T): T {
   }
   return defaultValue;
 }
+
+export function downloadTextFile(content: string, fileName: string) {
+  const blob = new Blob([content], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Reads a file and returns its contents in the requested format.
+ */
+export function readFile(_file: File, _as: "text"): Promise<string>;
+
+export function readFile(
+  _file: File,
+  _as: "dataURL",
+): Promise<string | ArrayBuffer>;
+
+export function readFile(_file: File, _as: "arrayBuffer"): Promise<ArrayBuffer>;
+
+export function readFile(
+  file: File,
+  as?: "text" | "dataURL" | "arrayBuffer",
+): Promise<string | ArrayBuffer> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (reader.result !== null) {
+        resolve(reader.result);
+      } else {
+        reject(new Error("File read resulted in null"));
+      }
+    };
+
+    reader.onerror = () => reject(reader.error);
+
+    switch (as) {
+      case "dataURL":
+        reader.readAsDataURL(file);
+        break;
+      case "arrayBuffer":
+        reader.readAsArrayBuffer(file);
+        break;
+      case "text":
+      default:
+        reader.readAsText(file);
+    }
+  });
+}
+
+export function nextFrame(): Promise<number> {
+  return new Promise((resolve) => requestAnimationFrame(resolve));
+}

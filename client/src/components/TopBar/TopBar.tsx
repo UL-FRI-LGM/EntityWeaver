@@ -8,12 +8,18 @@ import {
   IconCaretDownFilled,
   IconCaretUpFilled,
   IconCloud,
+  IconDownload,
   IconFile,
+  IconFileCode2,
   IconMapPin,
   IconSitemap,
+  IconUpload,
   IconUserCircle,
 } from "@tabler/icons-react";
 import { useState } from "react";
+import { downloadTextFile, readFile } from "@/utils/helpers.ts";
+import { useFileDialog } from "@mantine/hooks";
+import type { DatasetSnapShotIn } from "@/stores/dataset.ts";
 
 const FiltersMenu = observer(() => {
   const rootStore = useMst();
@@ -143,12 +149,101 @@ const FiltersMenu = observer(() => {
   );
 });
 
+const FileMenu = observer(() => {
+  const rootStore = useMst();
+
+  const [showFileMenu, setShowFileMenu] = useState(false);
+
+  const uploadJSONDialog = useFileDialog({
+    accept: ".json",
+    resetOnOpen: true,
+    onChange: onImportGraphFromJson,
+  });
+
+  async function onImportGraphFromJson(files: FileList | null) {
+    try {
+      if (!files || files.length === 0) return;
+      rootStore.setLoadingData(true);
+      const graphFile = files[0];
+      const contents = await readFile(graphFile, "text");
+      const datasetSnapshot = JSON.parse(contents) as DatasetSnapShotIn;
+      rootStore.setDataset(datasetSnapshot);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      rootStore.setLoadingData(false);
+    }
+  }
+
+  function onExportGraphToJson() {
+    try {
+      const dataset = rootStore.dataset.toJSON();
+      downloadTextFile(JSON.stringify(dataset, null, 2), "graph.json");
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function loadDemo() {
+    try {
+      await rootStore.dataset.loadDemo();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  return (
+    <Menu
+      opened={showFileMenu}
+      onChange={(value) => setShowFileMenu(value)}
+      position="bottom-start"
+      shadow="md"
+    >
+      <Menu.Target>
+        <Button
+          className={classes.filterButton}
+          classNames={{ label: classes.filterLabel }}
+          variant="subtle"
+          color="gray"
+          rightSection={
+            showFileMenu ? (
+              <IconCaretUpFilled size={14} />
+            ) : (
+              <IconCaretDownFilled size={14} />
+            )
+          }
+        >
+          File
+        </Button>
+      </Menu.Target>
+      <Menu.Dropdown>
+        <Menu.Item
+          leftSection={<IconUpload size={14} />}
+          onClick={uploadJSONDialog.open}
+        >
+          Load Graph from JSON
+        </Menu.Item>
+        <Menu.Item
+          leftSection={<IconDownload size={14} />}
+          onClick={onExportGraphToJson}
+        >
+          Export Graph to JSON
+        </Menu.Item>
+        <Menu.Item leftSection={<IconFileCode2 size={14} />} onClick={loadDemo}>
+          Load Demo data
+        </Menu.Item>
+      </Menu.Dropdown>
+    </Menu>
+  );
+});
+
 const TopBar = observer(() => {
   const rootStore = useMst();
 
   return (
     <Group justify={"space-between"} className={classes.container}>
-      <Group gap={30}>
+      <Group gap={40}>
+        <FileMenu />
+
         <Switch
           label={"Entity View"}
           checked={rootStore.uiState.entityView}

@@ -305,41 +305,50 @@ const EntityGraph = observer(() => {
   );
 
   return (
-    <SigmaContainer
-      ref={(instance) => setSigma(instance as Sigma<NodeType, EdgeType> | null)}
-      settings={sigmaSettings}
-      style={sigmaStyle}
-    >
-      <GraphEffects />
-      <Fa2 />
-      <ControlsContainer position={"bottom-right"}>
-        <ZoomControl className={classes.controls} />
-        <FullScreenControl className={classes.controls} />
-      </ControlsContainer>
-      <ControlsContainer
-        position={"top-right"}
-        className={classes.searchContainer}
+    <div className={classes.outerContainer}>
+      <div
+        className={classes.innerContainer}
+        style={{ opacity: rootStore.graphLoading ? 0 : 1 }}
       >
-        {/* In this example we set minisearch options to allow searching on the node's attribute named `tag`.
-            Node & edge attributes are indexed with the prefix `prop_` to avoid name collision. */}
-        <GraphSearch
-          type="nodes"
-          className={classes.searchBox}
-          value={
-            rootStore.selectedNode
-              ? { type: "nodes", id: rootStore.selectedNode }
-              : null
+        <SigmaContainer
+          ref={(instance) =>
+            setSigma(instance as Sigma<NodeType, EdgeType> | null)
           }
-          onFocus={onFocus}
-          onChange={onChange}
-          postSearchResult={postSearchResult}
-          minisearchOptions={{ fields: ["prop_name", "prop_title"] }}
-          labels={{
-            type_something_to_search: "Start typing to search",
-            no_result_found: "No results found",
-          }}
-        />
-      </ControlsContainer>
+          settings={sigmaSettings}
+          style={sigmaStyle}
+        >
+          <GraphEffects />
+          <Fa2 />
+          <ControlsContainer position={"bottom-right"}>
+            <ZoomControl className={classes.controls} />
+            <FullScreenControl className={classes.controls} />
+          </ControlsContainer>
+          <ControlsContainer
+            position={"top-right"}
+            className={classes.searchContainer}
+          >
+            {/* In this example we set minisearch options to allow searching on the node's attribute named `tag`.
+              Node & edge attributes are indexed with the prefix `prop_` to avoid name collision. */}
+            <GraphSearch
+              type="nodes"
+              className={classes.searchBox}
+              value={
+                rootStore.selectedNode
+                  ? { type: "nodes", id: rootStore.selectedNode }
+                  : null
+              }
+              onFocus={onFocus}
+              onChange={onChange}
+              postSearchResult={postSearchResult}
+              minisearchOptions={{ fields: ["prop_name", "prop_title"] }}
+              labels={{
+                type_something_to_search: "Start typing to search",
+                no_result_found: "No results found",
+              }}
+            />
+          </ControlsContainer>
+        </SigmaContainer>
+      </div>
       <LoadingOverlay
         visible={rootStore.graphLoading}
         zIndex={1000}
@@ -349,9 +358,9 @@ const EntityGraph = observer(() => {
           backgroundOpacity: 1,
           color: "#ffffff",
         }}
-        transitionProps={{ exitDuration: 500 }}
+        transitionProps={{ exitDuration: 1000, enterDelay: 0 }}
       />
-    </SigmaContainer>
+    </div>
   );
 });
 

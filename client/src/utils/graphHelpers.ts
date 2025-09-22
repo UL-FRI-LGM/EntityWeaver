@@ -7,13 +7,10 @@ import type {
   UiStateInstance,
 } from "@/stores/rootStore.ts";
 import { typeIconToColor, typeToColor, typeToImage } from "./helpers.ts";
-import type { DatasetInstance } from "@/stores/dataset.ts";
+import type { DatasetInstance, GraphNodeType } from "@/stores/dataset.ts";
 
 function getRandomPosition(generator?: PRNG) {
-  return {
-    x: generator ? generator() : Math.random(),
-    y: generator ? generator() : Math.random(),
-  };
+  return generator ? generator() : Math.random();
 }
 
 function getNodeSize(edges: number) {
@@ -40,6 +37,30 @@ export function isNodeHidden(
   );
 }
 
+function getNodeColors(
+  nodeType: GraphNodeType,
+  entityType: string,
+  colorByEntityType: boolean,
+) {
+  if (colorByEntityType) {
+    return {
+      color: typeToColor(entityType) ?? DEFINES.entityTypes.colors.MISC,
+      pictogramColor:
+        typeIconToColor(entityType) ?? DEFINES.entityTypes.iconColor.MISC,
+    };
+  } else {
+    return nodeType === "Entity"
+      ? {
+          color: DEFINES.entity.color,
+          pictogramColor: DEFINES.entity.iconColor,
+        }
+      : {
+          color: DEFINES.mention.color,
+          pictogramColor: DEFINES.mention.iconColor,
+        };
+  }
+}
+
 export function setColorByType(
   sigma: Sigma<NodeType, EdgeType> | null,
   state: boolean,
@@ -52,26 +73,13 @@ export function setColorByType(
     if (attributes.nodeType === "Document" || !attributes.entityType) {
       return;
     }
-    if (state) {
-      const newColor =
-        typeToColor(attributes.entityType) ?? DEFINES.entityTypes.colors.MISC;
-      graph.setNodeAttribute(nodeId, "color", newColor);
-      const newIconColor =
-        typeIconToColor(attributes.entityType) ??
-        DEFINES.entityTypes.iconColor.MISC;
-      graph.setNodeAttribute(nodeId, "pictogramColor", newIconColor);
-    } else {
-      const newColor =
-        attributes.nodeType === "Entity"
-          ? DEFINES.entity.color
-          : DEFINES.mention.color;
-      graph.setNodeAttribute(nodeId, "color", newColor);
-      const newIconColor =
-        attributes.nodeType === "Entity"
-          ? DEFINES.entity.iconColor
-          : DEFINES.mention.iconColor;
-      graph.setNodeAttribute(nodeId, "pictogramColor", newIconColor);
-    }
+    const { color, pictogramColor } = getNodeColors(
+      attributes.nodeType,
+      attributes.entityType,
+      state,
+    );
+    graph.setNodeAttribute(nodeId, "color", color);
+    graph.setNodeAttribute(nodeId, "pictogramColor", pictogramColor);
   });
 }
 
@@ -207,6 +215,7 @@ export function updateEntityToDocumentNodes(
 export function updateGraph(
   sigma: Sigma<NodeType, EdgeType>,
   dataset: DatasetInstance,
+  colorByEntityType: boolean,
   seed = "hello.",
 ) {
   const rng = seedrandom(seed);
@@ -215,7 +224,8 @@ export function updateGraph(
 
   dataset.documents.forEach((document) => {
     graph.addNode(document.id, {
-      ...getRandomPosition(rng),
+      x: document.x ?? getRandomPosition(rng),
+      y: document.y ?? getRandomPosition(rng),
       size: DEFINES.document.size,
       label: document.title,
       color: DEFINES.document.color,
@@ -228,13 +238,19 @@ export function updateGraph(
   });
   dataset.entities.forEach((entity) => {
     const entityImage = typeToImage(entity.type);
+    const { color, pictogramColor } = getNodeColors(
+      "Entity",
+      entity.type,
+      colorByEntityType,
+    );
     graph.addNode(entity.id, {
-      ...getRandomPosition(rng),
+      x: entity.x ?? getRandomPosition(rng),
+      y: entity.y ?? getRandomPosition(rng),
       size: 15,
       label: entity.name,
-      color: DEFINES.entity.color,
+      color: color,
       image: entityImage,
-      pictogramColor: DEFINES.entity.iconColor,
+      pictogramColor: pictogramColor,
       type: "pictogram",
       borderSize: DEFINES.entity.borderSize,
       nodeType: "Entity",
@@ -243,13 +259,19 @@ export function updateGraph(
   });
   dataset.mentions.forEach((mention) => {
     const entityImage = typeToImage(mention.type);
+    const { color, pictogramColor } = getNodeColors(
+      "Mention",
+      mention.type,
+      colorByEntityType,
+    );
     graph.addNode(mention.id, {
-      ...getRandomPosition(rng),
+      x: mention.x ?? getRandomPosition(rng),
+      y: mention.y ?? getRandomPosition(rng),
       size: DEFINES.mention.size,
       label: mention.name,
-      color: DEFINES.mention.color,
+      color: color,
       image: entityImage,
-      pictogramColor: DEFINES.mention.iconColor,
+      pictogramColor: pictogramColor,
       type: "pictogram",
       borderSize: DEFINES.mention.borderSize,
       nodeType: "Mention",

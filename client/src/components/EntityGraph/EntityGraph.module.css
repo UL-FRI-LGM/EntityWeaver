@@ -1,3 +1,16 @@
+.innerContainer,
+.outerContainer {
+  display: flex;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.outerContainer {
+  background-color: #ffffff;
+}
+
 .controls > button > svg {
   color: black !important;
 }

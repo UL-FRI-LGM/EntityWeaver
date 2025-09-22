@@ -1,4 +1,12 @@
-import { flow, getRoot, type Instance, isAlive, types } from "mobx-state-tree";
+import {
+  flow,
+  getRoot,
+  getSnapshot,
+  type Instance,
+  isAlive,
+  type SnapshotIn,
+  types,
+} from "mobx-state-tree";
 import { Mention, type MentionDB, mentionPrefix } from "@/stores/mention.ts";
 import { Entity, type EntityDB, entityPrefix } from "@/stores/entity.ts";
 import {
@@ -6,10 +14,10 @@ import {
   type DocumentDB,
   documentPrefix,
 } from "@/stores/document.ts";
-import { loadDemo } from "@/utils/helpers.ts";
+import { loadDemo, nextFrame } from "@/utils/helpers.ts";
 import type { RootInstance } from "@/stores/rootStore.ts";
 
-export type NodeTypes = "Document" | "Entity" | "Mention";
+export type GraphNodeType = "Document" | "Entity" | "Mention";
 
 export interface DatasetDB {
   mentions: MentionDB[];
@@ -186,12 +194,17 @@ export const Dataset = types
     },
   }))
   .actions((self) => ({
+    toJSON() {
+      return getSnapshot(self);
+    },
     afterCreate() {
-      this.fetchData().catch((err) => console.error(err));
+      if (import.meta.env.VITE_AUTO_LOAD_DEMO === "true") {
+        this.loadDemo().catch((err) => console.error(err));
+      }
     },
     setNodePosition(
       nodeId: string,
-      nodeType: NodeTypes,
+      nodeType: GraphNodeType,
       position: { x?: number | null; y?: number | null },
     ) {
       if (nodeType === "Document") {
@@ -218,23 +231,25 @@ export const Dataset = types
         mention.setPosition(position);
       }
     },
-    fetchData: flow(function* () {
+    loadDemo: flow(function* () {
       if (self.fetchingData) return;
       self.fetchingData = true;
+      yield nextFrame();
+
       const data: DatasetDB = yield loadDemo();
       if (!isAlive(self)) {
         return;
       }
 
       self.mentions.clear();
-
       self.documents.clear();
+      self.entities.clear();
+
       data.documents.forEach((document) => {
         document.id = `${documentPrefix}${document.id}`;
         self.documents.set(document.id, document);
       });
 
-      self.entities.clear();
       data.entities.forEach((entity) => {
         entity.id = `${entityPrefix}${entity.id}`;
         self.entities.set(entity.id, entity);
@@ -269,3 +284,4 @@ export const Dataset = types
   }));
 
 export interface DatasetInstance extends Instance<typeof Dataset> {}
+export interface DatasetSnapShotIn extends SnapshotIn<typeof Dataset> {}
