@@ -156,9 +156,14 @@ export const GraphEffects = observer(() => {
     setSettings({
       nodeReducer: (node, data) => {
         const graph = sigma.getGraph();
-        const newData = { ...data, highlighted: data.highlighted ?? false };
+        const newData = {
+          ...data,
+          highlighted: data.highlighted ?? false,
+        };
 
-        if (highlightedNodes.size > 0) {
+        if (rootStore.entityView && data.nodeType === "Mention") {
+          newData.hidden = true;
+        } else if (highlightedNodes.size > 0) {
           if (
             highlightedNodes.has(node) ||
             graph.neighbors(node).some((nodeId) => highlightedNodes.has(nodeId))
@@ -173,7 +178,12 @@ export const GraphEffects = observer(() => {
         const newData = { ...data, hidden: false };
         const graph = sigma.getGraph();
 
-        if (allHighLightedNodes.size > 0) {
+        if (
+          !rootStore.entityView &&
+          data.connectionType === "EntityToDocument"
+        ) {
+          newData.hidden = true;
+        } else if (allHighLightedNodes.size > 0) {
           for (const nodeId of graph.extremities(edge)) {
             if (!allHighLightedNodes.has(nodeId)) {
               newData.hidden = true;
@@ -191,6 +201,7 @@ export const GraphEffects = observer(() => {
     rootStore.selectedNode,
     rootStore.highlightOnSelect,
     rootStore.uiHoveredNode,
+    rootStore.entityView,
     setSettings,
     sigma,
   ]);

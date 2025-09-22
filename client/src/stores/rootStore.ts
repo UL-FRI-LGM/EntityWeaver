@@ -1,13 +1,22 @@
 import { createContext, use } from "react";
 import { types, type Instance } from "mobx-state-tree";
 import type Sigma from "sigma";
-import { updateGraph, updateNodeProperties } from "@/utils/graphHelpers.ts";
+import {
+  updateEntityToDocumentNodes,
+  updateGraph,
+  updateNodeProperties,
+} from "@/utils/graphHelpers.ts";
 import type { AnimateOptions } from "sigma/utils";
 import { Dataset, type NodeTypes } from "@/stores/dataset.ts";
 import { mentionPrefix } from "@/stores/mention.ts";
 import { documentPrefix } from "@/stores/document.ts";
 import { entityPrefix } from "@/stores/entity.ts";
 import { DEFINES } from "@/defines.ts";
+
+export type ConnectionType =
+  | "MentionToDocument"
+  | "MentionToEntity"
+  | "EntityToDocument";
 
 export interface NodeType {
   x: number;
@@ -18,6 +27,7 @@ export interface NodeType {
   highlighted?: boolean;
   borderColor?: string;
   borderSize?: number;
+  hidden?: boolean;
   image: string;
   pictogramColor: string;
   type: string;
@@ -26,7 +36,8 @@ export interface NodeType {
 export interface EdgeType {
   size: number;
   color: string;
-  connectionType: "Document" | "Entity";
+  connectionType: ConnectionType;
+  hidden?: boolean;
 }
 
 const RootStore = types
@@ -45,6 +56,7 @@ const RootStore = types
     holdingShift: false,
     highlightOnSelect: true,
     highlightOnHover: true,
+    entityView: false,
   }))
   .views((self) => ({
     get selectedNodeInstance() {
@@ -74,7 +86,8 @@ const RootStore = types
       this.runGraphUpdate();
     },
     setSelectedNode(nodeId: string | null) {
-      if (self.selectedNode && nodeId === null) {
+      if (self.selectedNode) {
+        console.log("Deselecting node", self.selectedNode);
         updateNodeProperties(self.sigma, self.selectedNode, {
           borderColor: undefined,
         });
@@ -102,6 +115,13 @@ const RootStore = types
         });
       }
     },
+    setEntityView(state: boolean) {
+      self.entityView = state;
+      if (state) {
+        updateEntityToDocumentNodes(self.sigma, self.dataset);
+      }
+    },
+
     onDatasetUpdate() {
       this.runGraphUpdate();
     },

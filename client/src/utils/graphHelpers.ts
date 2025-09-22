@@ -63,14 +63,14 @@ export function updateMentionNode(
     const edges = graph.edges(nodeId);
     edges.forEach((edgeId) => {
       const edge = graph.getEdgeAttributes(edgeId);
-      if (edge.connectionType === "Document") {
+      if (edge.connectionType === "MentionToDocument") {
         graph.dropEdge(edgeId);
       }
     });
     graph.addEdge(nodeId, update.documentId, {
-      size: DEFINES.documentToMentionEdge.width,
-      color: DEFINES.documentToMentionEdge.color,
-      connectionType: "Document",
+      size: DEFINES.mentionToDocumentEdge.width,
+      color: DEFINES.mentionToDocumentEdge.color,
+      connectionType: "MentionToDocument",
     });
   }
 
@@ -84,7 +84,7 @@ export function updateMentionNode(
         }
       }
       const edge = graph.getEdgeAttributes(edgeId);
-      if (edge.connectionType === "Entity") {
+      if (edge.connectionType === "MentionToEntity") {
         graph.dropEdge(edgeId);
       }
     }
@@ -98,7 +98,7 @@ export function updateMentionNode(
       graph.addEdge(nodeId, entityId, {
         size: DEFINES.mentionToEntityEdge.width,
         color: DEFINES.mentionToEntityEdge.color,
-        connectionType: "Entity",
+        connectionType: "MentionToEntity",
       });
     }
   }
@@ -108,10 +108,42 @@ export function updateMentionNode(
       const edges = graph.edges(nodeId, entityId);
       for (const edgeId of edges) {
         const edge = graph.getEdgeAttributes(edgeId);
-        if (edge.connectionType === "Entity") {
+        if (edge.connectionType === "MentionToEntity") {
           graph.dropEdge(edgeId);
         }
       }
+    }
+  }
+}
+
+export function updateEntityToDocumentNodes(
+  sigma: Sigma<NodeType, EdgeType> | null,
+  dataset: DatasetInstance,
+) {
+  if (!sigma) {
+    return;
+  }
+  const graph = sigma.getGraph();
+  graph.forEachEdge((edgeId, attributes) => {
+    if (attributes.connectionType === "EntityToDocument") {
+      graph.dropEdge(edgeId);
+    }
+  });
+
+  for (const entity of dataset.entityList) {
+    const mentions = dataset.mentionList.filter((mention) =>
+      mention.entityLinkList.some((link) => link.entity.id === entity.id),
+    );
+    const connectedDocuments = new Set<string>();
+    for (const mention of mentions) {
+      connectedDocuments.add(mention.document.id);
+    }
+    for (const documentId of connectedDocuments) {
+      graph.addEdge(entity.id, documentId, {
+        size: DEFINES.entityToDocumentEdge.width,
+        color: DEFINES.entityToDocumentEdge.color,
+        connectionType: "EntityToDocument",
+      });
     }
   }
 }
@@ -169,9 +201,9 @@ export function updateGraph(
     const document = dataset.documents.get(mention.document.id);
     if (document) {
       graph.addEdge(mention.id, document.id, {
-        size: DEFINES.documentToMentionEdge.width,
-        color: DEFINES.documentToMentionEdge.color,
-        connectionType: "Document",
+        size: DEFINES.mentionToDocumentEdge.width,
+        color: DEFINES.mentionToDocumentEdge.color,
+        connectionType: "MentionToDocument",
       });
     }
 
@@ -179,7 +211,7 @@ export function updateGraph(
       graph.addEdge(mention.id, link.entity.id, {
         size: DEFINES.mentionToEntityEdge.width,
         color: DEFINES.mentionToEntityEdge.color,
-        connectionType: "Entity",
+        connectionType: "MentionToEntity",
       });
     });
   });

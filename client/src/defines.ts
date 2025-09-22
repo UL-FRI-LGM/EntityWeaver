@@ -28,12 +28,16 @@ export const DEFINES = {
     size: 10,
     borderSize: 0.2,
   },
-  documentToMentionEdge: {
+  mentionToDocumentEdge: {
     color: "#676767",
     width: edgeWidth,
   },
   mentionToEntityEdge: {
     color: "rgb(36,180,59)",
+    width: edgeWidth,
+  },
+  entityToDocumentEdge: {
+    color: "#676767",
     width: edgeWidth,
   },
   entityTypes: {

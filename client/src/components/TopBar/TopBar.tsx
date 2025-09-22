@@ -6,23 +6,33 @@ import { useMst } from "@/stores/rootStore.ts";
 const TopBar = observer(() => {
   const rootStore = useMst();
   return (
-    <Group justify={"end"} className={classes.container}>
+    <Group justify={"space-between"} className={classes.container}>
       <Switch
-        label={"Highlight Hovered Node"}
-        checked={rootStore.highlightOnHover}
+        label={"Entity View"}
+        checked={rootStore.entityView}
         className={classes.switch}
         onChange={(event) =>
-          rootStore.setHighlightOnHover(event.currentTarget.checked)
+          rootStore.setEntityView(event.currentTarget.checked)
         }
       />
-      <Switch
-        label={"Highlight Selected Node"}
-        checked={rootStore.highlightOnSelect}
-        className={classes.switch}
-        onChange={(event) =>
-          rootStore.setHighlightOnSelect(event.currentTarget.checked)
-        }
-      />
+      <Group>
+        <Switch
+          label={"Highlight Hovered Node"}
+          checked={rootStore.highlightOnHover}
+          className={classes.switch}
+          onChange={(event) =>
+            rootStore.setHighlightOnHover(event.currentTarget.checked)
+          }
+        />
+        <Switch
+          label={"Highlight Selected Node"}
+          checked={rootStore.highlightOnSelect}
+          className={classes.switch}
+          onChange={(event) =>
+            rootStore.setHighlightOnSelect(event.currentTarget.checked)
+          }
+        />
+      </Group>
     </Group>
   );
 });
