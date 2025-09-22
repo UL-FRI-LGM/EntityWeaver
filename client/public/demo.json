@@ -759,5 +759,134 @@
       "document_id": "doc_1",
       "links": []
     }
+  ],
+  "collocations": [
+    {
+      "id": "col_1",
+      "document_id": "doc_1",
+      "mentions": [
+        "mention_1",
+        "mention_35",
+        "mention_15",
+        "mention_38"
+      ]
+    },
+    {
+      "id": "col_2",
+      "document_id": "doc_1",
+      "mentions": [
+        "mention_34",
+        "mention_50",
+        "mention_46",
+        "mention_27",
+        "mention_17"
+      ]
+    },
+    {
+      "id": "col_3",
+      "document_id": "doc_1",
+      "mentions": [
+        "mention_14",
+        "mention_3",
+        "mention_44"
+      ]
+    },
+    {
+      "id": "col_4",
+      "document_id": "doc_2",
+      "mentions": [
+        "mention_23",
+        "mention_16",
+        "mention_36",
+        "mention_2",
+        "mention_5"
+      ]
+    },
+    {
+      "id": "col_5",
+      "document_id": "doc_2",
+      "mentions": [
+        "mention_4",
+        "mention_28",
+        "mention_18"
+      ]
+    },
+    {
+      "id": "col_6",
+      "document_id": "doc_2",
+      "mentions": [
+        "mention_19",
+        "mention_29",
+        "mention_48",
+        "mention_39",
+        "mention_7"
+      ]
+    },
+    {
+      "id": "col_7",
+      "document_id": "doc_3",
+      "mentions": [
+        "mention_24",
+        "mention_11",
+        "mention_30",
+        "mention_40"
+      ]
+    },
+    {
+      "id": "col_8",
+      "document_id": "doc_3",
+      "mentions": [
+        "mention_20",
+        "mention_9"
+      ]
+    },
+    {
+      "id": "col_9",
+      "document_id": "doc_3",
+      "mentions": [
+        "mention_25",
+        "mention_6",
+        "mention_8",
+        "mention_31",
+        "mention_41"
+      ]
+    },
+    {
+      "id": "col_10",
+      "document_id": "doc_3",
+      "mentions": [
+        "mention_22",
+        "mention_49"
+      ]
+    },
+    {
+      "id": "col_11",
+      "document_id": "doc_4",
+      "mentions": [
+        "mention_37",
+        "mention_33"
+      ]
+    },
+    {
+      "id": "col_12",
+      "document_id": "doc_4",
+      "mentions": [
+        "mention_47",
+        "mention_13",
+        "mention_10",
+        "mention_45"
+      ]
+    },
+    {
+      "id": "col_13",
+      "document_id": "doc_4",
+      "mentions": [
+        "mention_26",
+        "mention_12",
+        "mention_43",
+        "mention_32",
+        "mention_42"
+      ]
+    }
   ]
 }

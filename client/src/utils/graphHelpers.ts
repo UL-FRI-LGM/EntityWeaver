@@ -8,6 +8,7 @@ import type {
 } from "@/stores/rootStore.ts";
 import { typeIconToColor, typeToColor, typeToImage } from "./helpers.ts";
 import type { DatasetInstance, GraphNodeType } from "@/stores/dataset.ts";
+import type { MentionInstance } from "@/stores/mention.ts";
 
 function getRandomPosition(generator?: PRNG) {
   return generator ? generator() : Math.random();
@@ -180,7 +181,7 @@ export function updateMentionNode(
   }
 }
 
-export function updateEntityToDocumentNodes(
+export function updateEntityViewEdges(
   sigma: Sigma<NodeType, EdgeType> | null,
   dataset: DatasetInstance,
 ) {
@@ -189,7 +190,10 @@ export function updateEntityToDocumentNodes(
   }
   const graph = sigma.getGraph();
   graph.forEachEdge((edgeId, attributes) => {
-    if (attributes.connectionType === "EntityToDocument") {
+    if (
+      attributes.connectionType === "EntityToDocument" ||
+      attributes.connectionType === "EntityCollocation"
+    ) {
       graph.dropEdge(edgeId);
     }
   });
@@ -209,6 +213,33 @@ export function updateEntityToDocumentNodes(
         connectionType: "EntityToDocument",
       });
     }
+
+    const collocatedMentions = new Set<MentionInstance>();
+    for (const collocation of dataset.collocationsList) {
+      for (const mention of collocation.mentionsList) {
+        if (mentions.some((m) => m.id === mention.id)) {
+          collocation.mentionsList.forEach((m) => {
+            collocatedMentions.add(m);
+          });
+        }
+      }
+    }
+
+    collocatedMentions.forEach((mention) => {
+      for (const entityLink of mention.entityLinkList) {
+        if (entityLink.entity.id === entity.id) {
+          continue;
+        }
+        if (graph.hasEdge(entity.id, entityLink.entity.id)) {
+          continue;
+        }
+        graph.addEdge(entity.id, entityLink.entity.id, {
+          size: DEFINES.collocationEdge.width,
+          color: DEFINES.collocationEdge.color,
+          connectionType: "EntityCollocation",
+        });
+      }
+    });
   }
 }
 
@@ -234,6 +265,7 @@ export function updateGraph(
       type: "pictogram",
       borderSize: DEFINES.document.borderSize,
       nodeType: "Document",
+      zIndex: 0,
     });
   });
   dataset.entities.forEach((entity) => {
@@ -255,6 +287,7 @@ export function updateGraph(
       borderSize: DEFINES.entity.borderSize,
       nodeType: "Entity",
       entityType: entity.type,
+      zIndex: 10,
     });
   });
   dataset.mentions.forEach((mention) => {
@@ -276,6 +309,7 @@ export function updateGraph(
       borderSize: DEFINES.mention.borderSize,
       nodeType: "Mention",
       entityType: mention.type,
+      zIndex: 20,
     });
 
     const document = dataset.documents.get(mention.document.id);
@@ -284,6 +318,7 @@ export function updateGraph(
         size: DEFINES.mentionToDocumentEdge.width,
         color: DEFINES.mentionToDocumentEdge.color,
         connectionType: "MentionToDocument",
+        zIndex: 1,
       });
     }
 
@@ -292,9 +327,28 @@ export function updateGraph(
         size: DEFINES.mentionToEntityEdge.width,
         color: DEFINES.mentionToEntityEdge.color,
         connectionType: "MentionToEntity",
+        zIndex: 2,
       });
     });
   });
+
+  dataset.collocations.forEach((collocation) => {
+    for (let i = 0; i < collocation.mentionsList.length - 1; i++) {
+      for (let j = i + 1; j < collocation.mentionsList.length; j++) {
+        const mentionA = collocation.mentionsList[i];
+        const mentionB = collocation.mentionsList[j];
+        if (graph.hasEdge(mentionA.id, mentionB.id)) {
+          continue;
+        }
+        graph.addEdge(mentionA.id, mentionB.id, {
+          size: DEFINES.collocationEdge.width,
+          color: DEFINES.collocationEdge.color,
+          connectionType: "MentionCollocation",
+        });
+      }
+    }
+  });
+
   // for (const document of dataset.documents) {
   //   const nodeSize = getNodeSize(graph.edges(document.globalId).length);
   //   graph.updateNodeAttribute(document.globalId, "size", () => nodeSize);
@@ -303,4 +357,6 @@ export function updateGraph(
     const nodeSize = getNodeSize(graph.edges(entity.id).length);
     graph.updateNodeAttribute(entity.id, "size", () => nodeSize);
   });
+
+  sigma.refresh();
 }

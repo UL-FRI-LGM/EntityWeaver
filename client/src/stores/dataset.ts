@@ -16,6 +16,7 @@ import {
 } from "@/stores/document.ts";
 import { loadDemo, nextFrame } from "@/utils/helpers.ts";
 import type { RootInstance } from "@/stores/rootStore.ts";
+import { Collocation, type CollocationDB } from "@/stores/collocation.ts";
 
 export type GraphNodeType = "Document" | "Entity" | "Mention";
 
@@ -23,161 +24,15 @@ export interface DatasetDB {
   mentions: MentionDB[];
   entities: EntityDB[];
   documents: DocumentDB[];
+  collocations: CollocationDB[];
 }
-//
-// export const mentionPrefix = "Mention-";
-// interface MentionDB {
-//   id: string;
-//   name: string;
-//   type: string;
-//   document_id: string;
-//   links: {
-//     entity_id: string;
-//   }[];
-// }
-//
-// export const documentPrefix = "Document-";
-// interface DocumentDB {
-//   id: string;
-//   title: string;
-// }
-//
-// export const entityPrefix = "Entity-";
-// interface EntityDB {
-//   id: string;
-//   name: string;
-//   type: string;
-// }
-//
-// export const Link = types
-//   .model({
-//     entity: types.reference(types.late(() => Entity)),
-//   })
-//   .actions((self) => ({
-//     remove() {
-//       const mention = getParentOfType(self, Mention) as MentionInstance;
-//       mention?.removeEntityLink(self.entity.id);
-//     },
-//   }));
-//
-// export interface LinkInstance extends Instance<typeof Link> {}
-//
-// export const Mention = types
-//   .model({
-//     id: types.identifier,
-//     name: types.string,
-//     type: types.string,
-//     document: types.reference(types.late(() => Document)),
-//     entityLinks: types.map(Link),
-//   })
-//   .views((self) => ({
-//     get sigma(): Sigma<NodeType, EdgeType> | null {
-//       const rootStore = getRoot(self) as RootInstance;
-//       return rootStore.sigma;
-//     },
-//     get entityLinkList() {
-//       return Array.from(self.entityLinks.values());
-//     },
-//   }))
-//   .actions((self) => {
-//     return {
-//       setName(name: string) {
-//         self.name = name;
-//         if (self.sigma) {
-//           updateMentionNode(self.sigma, self.id, { label: name });
-//         }
-//       },
-//       setType(type: string) {
-//         self.type = type;
-//         if (self.sigma) {
-//           updateMentionNode(self.sigma, self.id, { type: type });
-//         }
-//       },
-//       setDocumentId(document: DocumentInstance) {
-//         self.document = document;
-//         if (self.sigma) {
-//           updateMentionNode(self.sigma, self.id, { documentId: document.id });
-//         }
-//       },
-//       removeEntityLink(entityId: string) {
-//         self.entityLinks.delete(entityId);
-//         if (self.sigma) {
-//           updateMentionNode(self.sigma, self.id, {
-//             removedEntityLinks: [entityId],
-//           });
-//         }
-//       },
-//       setEntityLink(entityId: string, keepExisting = true) {
-//         const alreadyHasLink = self.entityLinks.has(entityId);
-//         if (keepExisting && alreadyHasLink) {
-//           return;
-//         }
-//         if (!keepExisting) {
-//           if (!alreadyHasLink) {
-//             self.entityLinks.clear();
-//           } else {
-//             self.entityLinks.forEach((link) => {
-//               if (link.entity.id !== entityId) {
-//                 self.entityLinks.delete(link.entity.id);
-//               }
-//             });
-//           }
-//         }
-//         if (!alreadyHasLink) {
-//           self.entityLinks.set(entityId, { entity: entityId });
-//         }
-//         if (self.sigma) {
-//           updateMentionNode(self.sigma, self.id, {
-//             addedEntityLinks: [entityId],
-//             clearEntityLinks: !keepExisting,
-//           });
-//         }
-//       },
-//     };
-//   });
-//
-// export interface MentionInstance extends Instance<typeof Mention> {}
-//
-// export const Document = types
-//   .model({
-//     id: types.identifier,
-//     title: types.string,
-//   })
-//   .actions((self) => ({
-//     setTitle(title: string) {
-//       self.title = title;
-//     },
-//   }));
-//
-// export interface DocumentInstance extends Instance<typeof Document> {}
-//
-// export const Entity = types
-//   .model({
-//     id: types.identifier,
-//     name: types.string,
-//     type: types.string,
-//   })
-//   .views((self) => ({
-//     get searchString() {
-//       return `${self.name} (${self.id})`;
-//     },
-//   }))
-//   .actions((self) => ({
-//     setName(name: string) {
-//       self.name = name;
-//     },
-//     setType(type: string) {
-//       self.type = type;
-//     },
-//   }));
-//
-// export interface EntityInstance extends Instance<typeof Entity> {}
 
 export const Dataset = types
   .model({
     mentions: types.map(Mention),
     documents: types.map(Document),
     entities: types.map(Entity),
+    collocations: types.map(Collocation),
   })
   .volatile(() => ({
     fetchingData: false,
@@ -191,6 +46,9 @@ export const Dataset = types
     },
     get entityList() {
       return Array.from(self.entities.values());
+    },
+    get collocationsList() {
+      return Array.from(self.collocations.values());
     },
   }))
   .actions((self) => ({
@@ -244,6 +102,7 @@ export const Dataset = types
       self.mentions.clear();
       self.documents.clear();
       self.entities.clear();
+      self.collocations.clear();
 
       data.documents.forEach((document) => {
         document.id = `${documentPrefix}${document.id}`;
@@ -275,6 +134,41 @@ export const Dataset = types
           ),
         });
       });
+
+      data.collocations.forEach((collocation) => {
+        collocation.id = `Collocation-${collocation.id}`;
+        const mentionsMap = new Map<string, string>();
+        const fullDocumentId = `${documentPrefix}${collocation.document_id}`;
+        collocation.mentions.forEach((mentionId) => {
+          const fullMentionId = `${mentionPrefix}${mentionId}`;
+          const mention = self.mentions.get(fullMentionId);
+          if (!mention) {
+            console.warn(
+              `Mention with id ${fullMentionId} not found for collocation ${collocation.id}`,
+            );
+            return;
+          }
+          if (mention?.document.id !== fullDocumentId) {
+            console.warn(
+              `Mention with id ${fullMentionId} does not belong to document ${fullDocumentId} for collocation ${collocation.id}`,
+            );
+            return;
+          }
+          mentionsMap.set(mention.id, mention.id);
+        });
+        if (mentionsMap.size < 2) {
+          console.warn(
+            `Collocation with id ${collocation.id} has less than 2 valid mentions, skipping`,
+          );
+          return;
+        }
+        self.collocations.set(collocation.id, {
+          id: collocation.id,
+          mentions: Object.fromEntries(mentionsMap),
+        });
+      });
+
+      console.log(`Added ${self.collocations.size} valid collocations`);
 
       self.fetchingData = false;
 

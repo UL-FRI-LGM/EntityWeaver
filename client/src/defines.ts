@@ -41,6 +41,10 @@ export const DEFINES = {
     color: "#282828",
     width: edgeWidth,
   },
+  collocationEdge: {
+    color: "#b0b0b0",
+    width: edgeWidth,
+  },
   entityTypes: {
     colors: {
       PER: "#ff8200",
@@ -66,6 +70,15 @@ export const DEFINES = {
       LOC: "/location.svg",
       MISC: "/concept.svg",
       default: "/unknown.svg",
+    },
+  },
+  layout: {
+    edgeWeights: {
+      MentionToDocument: 0.5,
+      MentionToEntity: 1,
+      EntityToDocument: 0,
+      MentionCollocation: 2,
+      EntityCollocation: 0,
     },
   },
 } as const;

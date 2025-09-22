@@ -9,7 +9,7 @@ import {
 import type Sigma from "sigma";
 import {
   setColorByType,
-  updateEntityToDocumentNodes,
+  updateEntityViewEdges,
   updateGraph,
   updateNodeProperties,
 } from "@/utils/graphHelpers.ts";
@@ -28,11 +28,13 @@ import { loadFromLocalStorage, storeInLocalStorage } from "@/utils/helpers.ts";
 export type ConnectionType =
   | "MentionToDocument"
   | "MentionToEntity"
-  | "EntityToDocument";
+  | "EntityToDocument"
+  | "MentionCollocation"
+  | "EntityCollocation";
 
 export interface NodeType {
-  x: number;
-  y: number;
+  x?: number;
+  y?: number;
   label: string;
   size: number;
   color: string;
@@ -45,12 +47,14 @@ export interface NodeType {
   type: string;
   nodeType: GraphNodeType;
   entityType?: string;
+  zIndex?: number;
 }
 export interface EdgeType {
   size: number;
   color: string;
   connectionType: ConnectionType;
   hidden?: boolean;
+  zIndex?: number;
 }
 
 const Filters = types
@@ -196,11 +200,10 @@ const RootStore = types
     setEntityView(state: boolean) {
       self.uiState.entityView = state;
       if (state) {
-        updateEntityToDocumentNodes(self.sigma, self.dataset);
+        updateEntityViewEdges(self.sigma, self.dataset);
       }
     },
     clearGraphState() {
-      console.log("clearning state");
       self.selectedNode = null;
       self.hoveredNode = null;
       self.uiHoveredNode = null;

@@ -1,4 +1,10 @@
-import { type CSSProperties, useCallback, useEffect, useState } from "react";
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   ControlsContainer,
   FullScreenControl,
@@ -28,6 +34,7 @@ import { DEFINES } from "@/defines.ts";
 import { GraphSearch, type GraphSearchOption } from "@react-sigma/graph-search";
 import "./EntityGraph.css";
 import { isNodeHidden } from "@/utils/graphHelpers.ts";
+import type { ForceAtlas2LayoutParameters } from "graphology-layout-forceatlas2";
 
 const sigmaStyle: CSSProperties = {
   display: "flex",
@@ -69,6 +76,9 @@ const sigmaSettings: Partial<Settings<NodeType, EdgeType>> = {
   // labelFont: "Lato, sans-serif",
   zIndex: true,
   doubleClickZoomingRatio: 1,
+  // defaultDrawNodeHover: () => {
+  //   return;
+  // },
 };
 
 export const GraphEffects = observer(() => {
@@ -79,17 +89,22 @@ export const GraphEffects = observer(() => {
   const registerEvents = useRegisterEvents<NodeType, EdgeType>();
 
   const [draggedNode, setDraggedNode] = useState<string | null>(null);
+  const dragging = useRef(false);
 
   useEffect(() => {
     registerEvents({
       enterNode: (event) => {
-        rootStore.setHoveredNode(event.node);
+        if (!draggedNode) rootStore.setHoveredNode(event.node);
       },
       leaveNode: () => {
         rootStore.setHoveredNode(null);
       },
-      clickNode: (event) => rootStore.setSelectedNode(event.node),
+      // clickNode: (event) => {
+      //   if (!dragging.current) rootStore.setSelectedNode(event.node);
+      // },
       doubleClickNode: (event) => {
+        console.log(dragging.current);
+        if (dragging.current) return;
         rootStore.setSelectedNode(event.node);
         event.preventSigmaDefault();
         const graph = sigma.getGraph();
@@ -117,6 +132,7 @@ export const GraphEffects = observer(() => {
       },
       mousemovebody: (event) => {
         if (!draggedNode) return;
+        dragging.current = true;
         const pos = sigma.viewportToGraph(event);
         const attributes = sigma.getGraph().getNodeAttributes(draggedNode);
         rootStore.dataset.setNodePosition(
@@ -132,7 +148,16 @@ export const GraphEffects = observer(() => {
       mouseup: () => {
         if (draggedNode) {
           setDraggedNode(null);
+          dragging.current = false;
           sigma.getGraph().removeNodeAttribute(draggedNode, "highlighted");
+        }
+
+        /*
+          Moved here from clickNode since this triggers first,
+          and we want to ensure dragged node is selected after drag ends on another node
+        */
+        if (draggedNode || rootStore.hoveredNode) {
+          rootStore.setSelectedNode(draggedNode ?? rootStore.hoveredNode);
         }
       },
     });
@@ -145,6 +170,7 @@ export const GraphEffects = observer(() => {
   }, [rootStore, sigma]);
 
   useEffect(() => {
+    if (!sigma) return;
     const highlightedNodes = new Set<string>();
     if (rootStore.uiState.highlightOnHover && rootStore.hoveredNode)
       highlightedNodes.add(rootStore.hoveredNode);
@@ -174,6 +200,7 @@ export const GraphEffects = observer(() => {
             allHighLightedNodes.add(node);
           }
         }
+
         return newData;
       },
       edgeReducer: (edge, data) => {
@@ -182,15 +209,23 @@ export const GraphEffects = observer(() => {
 
         if (
           !rootStore.uiState.entityView &&
-          data.connectionType === "EntityToDocument"
+          (data.connectionType === "EntityToDocument" ||
+            data.connectionType === "EntityCollocation")
         ) {
           newData.hidden = true;
         } else if (allHighLightedNodes.size > 0) {
+          let foundOriginalNode = false;
           for (const nodeId of graph.extremities(edge)) {
             if (!allHighLightedNodes.has(nodeId)) {
               newData.hidden = true;
               break;
             }
+            if (highlightedNodes.has(nodeId)) {
+              foundOriginalNode = true;
+            }
+          }
+          if (!foundOriginalNode) {
+            newData.hidden = true;
           }
         }
 
@@ -217,15 +252,20 @@ export const GraphEffects = observer(() => {
   ]);
 
   return null;
-  // return <button onClick={() => rootStore.test()}></button>;
 });
+
+const forceAtlasOptions: ForceAtlas2LayoutParameters<NodeType, EdgeType> = {
+  settings: { slowDown: 10 },
+  getEdgeWeight: (_edge, attributes) =>
+    DEFINES.layout.edgeWeights[attributes.connectionType],
+};
 
 const Fa2 = observer(() => {
   const rootStore = useMst();
 
-  const { start, stop, kill, isRunning } = useWorkerLayoutForceAtlas2({
-    settings: { slowDown: 10 },
-  });
+  const { start, stop, kill, isRunning } = useWorkerLayoutForceAtlas2(
+    forceAtlasOptions as ForceAtlas2LayoutParameters,
+  );
 
   useEffect(() => {
     if (rootStore.runLayout) {
