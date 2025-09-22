@@ -5,10 +5,10 @@ import TopBar from "./components/TopBar/TopBar.tsx";
 import { useWindowEvent } from "@mantine/hooks";
 import { observer } from "mobx-react";
 import { useMst } from "./stores/rootStore.ts";
-import * as React from "react";
 import { Group, Text } from "@mantine/core";
 import RightClickIcon from "./assets/mouse-right-button.svg?react";
 import LeftClickIcon from "./assets/mouse-left-button.svg?react";
+import { type MouseEvent } from "react";
 
 const App = observer(() => {
   const rootStore = useMst();
@@ -25,7 +25,7 @@ const App = observer(() => {
     }
   });
 
-  function onContextMenu(event: React.MouseEvent) {
+  function onContextMenu(event: MouseEvent) {
     event.preventDefault();
     rootStore.setSelectedNode(null);
   }

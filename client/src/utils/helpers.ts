@@ -84,3 +84,23 @@ export function isLeftClick(event: MouseEvent | TouchEvent) {
   }
   return false;
 }
+
+export function storeInLocalStorage(key: string, value: any) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error("Failed to store in localStorage:", error);
+  }
+}
+
+export function loadFromLocalStorage<T>(key: string, defaultValue: T): T {
+  try {
+    const storedValue = localStorage.getItem(key);
+    if (storedValue) {
+      return JSON.parse(storedValue) as T;
+    }
+  } catch (error) {
+    console.error("Failed to load from localStorage:", error);
+  }
+  return defaultValue;
+}

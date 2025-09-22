@@ -1,6 +1,7 @@
 const edgeWidth = 4;
 
 export const DEFINES = {
+  uiStateStorageKey: "graph-ui-state",
   sizePerEdge: 5,
   minNodeSize: 15,
   maxNodeSize: 50,

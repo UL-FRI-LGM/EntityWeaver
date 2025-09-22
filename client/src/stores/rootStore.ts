@@ -1,5 +1,11 @@
 import { createContext, use } from "react";
-import { types, type Instance, getRoot } from "mobx-state-tree";
+import {
+  types,
+  type Instance,
+  getRoot,
+  type SnapshotIn,
+  onSnapshot,
+} from "mobx-state-tree";
 import type Sigma from "sigma";
 import {
   setColorByType,
@@ -13,6 +19,7 @@ import { mentionPrefix } from "@/stores/mention.ts";
 import { documentPrefix } from "@/stores/document.ts";
 import { entityPrefix } from "@/stores/entity.ts";
 import { DEFINES } from "@/defines.ts";
+import { loadFromLocalStorage, storeInLocalStorage } from "@/utils/helpers.ts";
 
 export type ConnectionType =
   | "MentionToDocument"
@@ -98,6 +105,7 @@ const UiState = types
   }));
 
 export interface UiStateInstance extends Instance<typeof UiState> {}
+export interface UiStateSnapShotIn extends SnapshotIn<typeof UiState> {}
 
 const RootStore = types
   .model({
@@ -135,6 +143,9 @@ const RootStore = types
     },
   }))
   .actions((self) => ({
+    setUiState(uiState: UiStateSnapShotIn) {
+      self.uiState = UiState.create(uiState);
+    },
     setIsForceAtlasRunning(state: boolean) {
       self.isForceAtlasRunning = state;
     },
@@ -229,7 +240,14 @@ const RootStore = types
 
 export interface RootInstance extends Instance<typeof RootStore> {}
 
-const initialState = RootStore.create({});
+const savedUiState = loadFromLocalStorage<UiStateSnapShotIn>(
+  DEFINES.uiStateStorageKey,
+  {},
+);
+const initialState = RootStore.create({ uiState: savedUiState });
+onSnapshot(initialState.uiState, (snapshot) => {
+  storeInLocalStorage(DEFINES.uiStateStorageKey, snapshot);
+});
 
 export const rootStore = initialState;
 
