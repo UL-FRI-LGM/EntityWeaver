@@ -2,6 +2,9 @@ import { getRoot, type Instance, types } from "mobx-state-tree";
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
 import type Sigma from "sigma";
 import type { EdgeType, NodeType, RootInstance } from "@/stores/rootStore.ts";
+import { DEFINES } from "@/defines.ts";
+
+export type EntityTypes = keyof typeof DEFINES.entityTypes.names;
 
 export const entityPrefix = "Entity-";
 export interface EntityDB {

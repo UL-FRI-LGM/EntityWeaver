@@ -145,16 +145,15 @@ export const GraphEffects = observer(() => {
 
   useEffect(() => {
     const highlightedNodes = new Set<string>();
-    if (rootStore.highlightOnHover && rootStore.hoveredNode)
+    if (rootStore.uiState.highlightOnHover && rootStore.hoveredNode)
       highlightedNodes.add(rootStore.hoveredNode);
-    if (rootStore.highlightOnSelect && rootStore.selectedNode)
+    if (rootStore.uiState.highlightOnSelect && rootStore.selectedNode)
       highlightedNodes.add(rootStore.selectedNode);
     if (rootStore.uiHoveredNode) {
       highlightedNodes.add(rootStore.uiHoveredNode);
     }
 
     const allHighLightedNodes = new Set<string>();
-
     setSettings({
       nodeReducer: (node, data) => {
         const graph = sigma.getGraph();
@@ -163,7 +162,20 @@ export const GraphEffects = observer(() => {
           highlighted: data.highlighted ?? false,
         };
 
-        if (rootStore.entityView && data.nodeType === "Mention") {
+        if (
+          (rootStore.uiState.entityView && data.nodeType === "Mention") ||
+          (!rootStore.uiState.filters.entities && data.nodeType === "Entity") ||
+          (!rootStore.uiState.filters.mentions &&
+            data.nodeType === "Mention") ||
+          (!rootStore.uiState.filters.documents &&
+            data.nodeType === "Document") ||
+          (!rootStore.uiState.filters.people && data.entityType === "PER") ||
+          (!rootStore.uiState.filters.locations && data.entityType === "LOC") ||
+          (!rootStore.uiState.filters.organizations &&
+            data.entityType === "ORG") ||
+          (!rootStore.uiState.filters.miscellaneous &&
+            data.entityType === "MISC")
+        ) {
           newData.hidden = true;
         } else if (highlightedNodes.size > 0) {
           if (
@@ -181,7 +193,7 @@ export const GraphEffects = observer(() => {
         const graph = sigma.getGraph();
 
         if (
-          !rootStore.entityView &&
+          !rootStore.uiState.entityView &&
           data.connectionType === "EntityToDocument"
         ) {
           newData.hidden = true;
@@ -199,11 +211,18 @@ export const GraphEffects = observer(() => {
     });
   }, [
     rootStore.hoveredNode,
-    rootStore.highlightOnHover,
+    rootStore.uiState.highlightOnHover,
     rootStore.selectedNode,
-    rootStore.highlightOnSelect,
+    rootStore.uiState.highlightOnSelect,
     rootStore.uiHoveredNode,
-    rootStore.entityView,
+    rootStore.uiState.entityView,
+    rootStore.uiState.filters.mentions,
+    rootStore.uiState.filters.entities,
+    rootStore.uiState.filters.documents,
+    rootStore.uiState.filters.people,
+    rootStore.uiState.filters.locations,
+    rootStore.uiState.filters.organizations,
+    rootStore.uiState.filters.miscellaneous,
     setSettings,
     sigma,
   ]);

@@ -7,6 +7,7 @@ import "@mantine/core/styles.css";
 import { createTheme, MantineProvider, virtualColor } from "@mantine/core";
 
 const theme = createTheme({
+  cursorType: "pointer",
   colors: {
     primary: virtualColor({
       name: "primary",

@@ -182,6 +182,7 @@ export function updateGraph(
       type: "pictogram",
       borderSize: DEFINES.entity.borderSize,
       nodeType: "Entity",
+      entityType: entity.type,
     });
   });
   dataset.mentions.forEach((mention) => {
@@ -196,6 +197,7 @@ export function updateGraph(
       type: "pictogram",
       borderSize: DEFINES.mention.borderSize,
       nodeType: "Mention",
+      entityType: mention.type,
     });
 
     const document = dataset.documents.get(mention.document.id);

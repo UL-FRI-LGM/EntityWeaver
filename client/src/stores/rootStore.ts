@@ -32,6 +32,7 @@ export interface NodeType {
   pictogramColor: string;
   type: string;
   nodeType: NodeTypes;
+  entityType?: string;
 }
 export interface EdgeType {
   size: number;
@@ -40,10 +41,51 @@ export interface EdgeType {
   hidden?: boolean;
 }
 
+const Filters = types
+  .model({
+    entities: types.optional(types.boolean, true),
+    documents: types.optional(types.boolean, true),
+    mentions: types.optional(types.boolean, true),
+    people: types.optional(types.boolean, true),
+    locations: types.optional(types.boolean, true),
+    organizations: types.optional(types.boolean, true),
+    miscellaneous: types.optional(types.boolean, true),
+  })
+  .actions((self) => ({
+    setEntities(state: boolean) {
+      self.entities = state;
+    },
+    setDocuments(state: boolean) {
+      self.documents = state;
+    },
+    setMentions(state: boolean) {
+      self.mentions = state;
+    },
+    setPeople(state: boolean) {
+      self.people = state;
+    },
+    setLocations(state: boolean) {
+      self.locations = state;
+    },
+    setOrganizations(state: boolean) {
+      self.organizations = state;
+    },
+    setMiscellaneous(state: boolean) {
+      self.miscellaneous = state;
+    },
+  }));
+
+const UiState = types.model({
+  highlightOnSelect: types.optional(types.boolean, true),
+  highlightOnHover: types.optional(types.boolean, true),
+  entityView: types.optional(types.boolean, false),
+  filters: types.optional(Filters, {}),
+});
+
 const RootStore = types
   .model({
     dataset: types.optional(Dataset, {}),
-    isForceAtlasRunning: types.optional(types.boolean, false),
+    uiState: types.optional(UiState, {}),
   })
   .volatile(() => ({
     sigma: null as Sigma<NodeType, EdgeType> | null,
@@ -53,10 +95,8 @@ const RootStore = types
     initialLoad: true,
     runLayout: false,
     layoutInProgress: false,
+    isForceAtlasRunning: false,
     holdingShift: false,
-    highlightOnSelect: true,
-    highlightOnHover: true,
-    entityView: false,
   }))
   .views((self) => ({
     get selectedNodeInstance() {
@@ -116,7 +156,7 @@ const RootStore = types
       }
     },
     setEntityView(state: boolean) {
-      self.entityView = state;
+      self.uiState.entityView = state;
       if (state) {
         updateEntityToDocumentNodes(self.sigma, self.dataset);
       }
@@ -144,10 +184,10 @@ const RootStore = types
       self.holdingShift = state;
     },
     setHighlightOnSelect(state: boolean) {
-      self.highlightOnSelect = state;
+      self.uiState.highlightOnSelect = state;
     },
     setHighlightOnHover(state: boolean) {
-      self.highlightOnHover = state;
+      self.uiState.highlightOnHover = state;
     },
     onFinishRenderingLayout() {
       // const cameraState = self.sigma?.getCamera().getState();

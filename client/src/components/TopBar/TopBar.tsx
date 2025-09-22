@@ -1,33 +1,177 @@
 import { observer } from "mobx-react";
 import classes from "./TopBar.module.css";
-import { Group, Switch } from "@mantine/core";
+import { Button, Group, Menu, Switch } from "@mantine/core";
 import { useMst } from "@/stores/rootStore.ts";
+import {
+  IconAt,
+  IconBorderSides,
+  IconCaretDownFilled,
+  IconCaretUpFilled,
+  IconCloud,
+  IconFile,
+  IconMapPin,
+  IconSitemap,
+  IconUserCircle,
+} from "@tabler/icons-react";
+import { useState } from "react";
 
 const TopBar = observer(() => {
   const rootStore = useMst();
+
+  const [showFilters, setShowFilters] = useState(false);
+
   return (
     <Group justify={"space-between"} className={classes.container}>
-      <Switch
-        label={"Entity View"}
-        checked={rootStore.entityView}
-        className={classes.switch}
-        onChange={(event) =>
-          rootStore.setEntityView(event.currentTarget.checked)
-        }
-      />
-      <Group>
+      <Group gap={30}>
+        <Switch
+          label={"Entity View"}
+          checked={rootStore.uiState.entityView}
+          classNames={{ label: classes.switchLabel }}
+          onChange={(event) =>
+            rootStore.setEntityView(event.currentTarget.checked)
+          }
+        />
+
+        <Menu opened={showFilters} shadow="md" width={200}>
+          <Menu.Target>
+            <Button
+              className={classes.filterButton}
+              classNames={{ label: classes.filterLabel }}
+              variant="subtle"
+              color="gray"
+              rightSection={
+                showFilters ? (
+                  <IconCaretUpFilled size={14} />
+                ) : (
+                  <IconCaretDownFilled size={14} />
+                )
+              }
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              Filters
+            </Button>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Label>Nodes</Menu.Label>
+            <Menu.Item
+              leftSection={<IconBorderSides size={14} />}
+              rightSection={
+                <Switch checked={rootStore.uiState.filters.entities} />
+              }
+              onClick={(event) => {
+                event.preventDefault();
+                rootStore.uiState.filters.setEntities(
+                  !rootStore.uiState.filters.entities,
+                );
+              }}
+            >
+              Entities
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<IconAt size={14} />}
+              rightSection={
+                <Switch checked={rootStore.uiState.filters.mentions} />
+              }
+              onClick={(event) => {
+                event.preventDefault();
+                rootStore.uiState.filters.setMentions(
+                  !rootStore.uiState.filters.mentions,
+                );
+              }}
+            >
+              Mentions
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<IconFile size={14} />}
+              rightSection={
+                <Switch checked={rootStore.uiState.filters.documents} />
+              }
+              onClick={(event) => {
+                event.preventDefault();
+                rootStore.uiState.filters.setDocuments(
+                  !rootStore.uiState.filters.documents,
+                );
+              }}
+            >
+              Documents
+            </Menu.Item>
+
+            <Menu.Divider />
+
+            <Menu.Label>Entity Types</Menu.Label>
+            <Menu.Item
+              leftSection={<IconUserCircle size={14} />}
+              rightSection={
+                <Switch checked={rootStore.uiState.filters.people} />
+              }
+              onClick={(event) => {
+                event.preventDefault();
+                rootStore.uiState.filters.setPeople(
+                  !rootStore.uiState.filters.people,
+                );
+              }}
+            >
+              People
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<IconMapPin size={14} />}
+              rightSection={
+                <Switch checked={rootStore.uiState.filters.locations} />
+              }
+              onClick={(event) => {
+                event.preventDefault();
+                rootStore.uiState.filters.setLocations(
+                  !rootStore.uiState.filters.locations,
+                );
+              }}
+            >
+              Locations
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<IconSitemap size={14} />}
+              rightSection={
+                <Switch checked={rootStore.uiState.filters.organizations} />
+              }
+              onClick={(event) => {
+                event.preventDefault();
+                rootStore.uiState.filters.setOrganizations(
+                  !rootStore.uiState.filters.organizations,
+                );
+              }}
+            >
+              Organizations
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<IconCloud size={14} />}
+              rightSection={
+                <Switch checked={rootStore.uiState.filters.miscellaneous} />
+              }
+              onClick={(event) => {
+                event.preventDefault();
+                rootStore.uiState.filters.setMiscellaneous(
+                  !rootStore.uiState.filters.miscellaneous,
+                );
+              }}
+            >
+              Miscellaneous
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
+      </Group>
+
+      <Group gap={30}>
         <Switch
           label={"Highlight Hovered Node"}
-          checked={rootStore.highlightOnHover}
-          className={classes.switch}
+          checked={rootStore.uiState.highlightOnHover}
+          classNames={{ label: classes.switchLabel }}
           onChange={(event) =>
             rootStore.setHighlightOnHover(event.currentTarget.checked)
           }
         />
         <Switch
           label={"Highlight Selected Node"}
-          checked={rootStore.highlightOnSelect}
-          className={classes.switch}
+          checked={rootStore.uiState.highlightOnSelect}
+          classNames={{ label: classes.switchLabel }}
           onChange={(event) =>
             rootStore.setHighlightOnSelect(event.currentTarget.checked)
           }
