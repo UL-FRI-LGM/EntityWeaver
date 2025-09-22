@@ -82,6 +82,8 @@ const UiState = types.model({
   filters: types.optional(Filters, {}),
 });
 
+export interface UiStateInstance extends Instance<typeof UiState> {}
+
 const RootStore = types
   .model({
     dataset: types.optional(Dataset, {}),

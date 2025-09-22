@@ -27,6 +27,7 @@ import { LoadingOverlay } from "@mantine/core";
 import { DEFINES } from "@/defines.ts";
 import { GraphSearch, type GraphSearchOption } from "@react-sigma/graph-search";
 import "./EntityGraph.css";
+import { isNodeHidden } from "@/utils/graphHelpers.ts";
 
 const sigmaStyle: CSSProperties = {
   display: "flex",
@@ -162,20 +163,7 @@ export const GraphEffects = observer(() => {
           highlighted: data.highlighted ?? false,
         };
 
-        if (
-          (rootStore.uiState.entityView && data.nodeType === "Mention") ||
-          (!rootStore.uiState.filters.entities && data.nodeType === "Entity") ||
-          (!rootStore.uiState.filters.mentions &&
-            data.nodeType === "Mention") ||
-          (!rootStore.uiState.filters.documents &&
-            data.nodeType === "Document") ||
-          (!rootStore.uiState.filters.people && data.entityType === "PER") ||
-          (!rootStore.uiState.filters.locations && data.entityType === "LOC") ||
-          (!rootStore.uiState.filters.organizations &&
-            data.entityType === "ORG") ||
-          (!rootStore.uiState.filters.miscellaneous &&
-            data.entityType === "MISC")
-        ) {
+        if (isNodeHidden(rootStore.uiState, data)) {
           newData.hidden = true;
         } else if (highlightedNodes.size > 0) {
           if (
@@ -225,6 +213,7 @@ export const GraphEffects = observer(() => {
     rootStore.uiState.filters.miscellaneous,
     setSettings,
     sigma,
+    rootStore.uiState,
   ]);
 
   return null;
@@ -291,6 +280,13 @@ const EntityGraph = observer(() => {
 
   const postSearchResult = useCallback(
     (options: GraphSearchOption[]): GraphSearchOption[] => {
+      options = options.filter((option) => {
+        if (option.type === "message") return true;
+        const attributes = sigma?.getGraph().getNodeAttributes(option.id);
+        return attributes
+          ? !isNodeHidden(rootStore.uiState, attributes)
+          : false;
+      });
       return options.length <= 10
         ? options
         : [
@@ -305,7 +301,7 @@ const EntityGraph = observer(() => {
             },
           ];
     },
-    [],
+    [rootStore.uiState, sigma],
   );
 
   return (

@@ -1,7 +1,11 @@
 import { DEFINES } from "../defines.ts";
 import seedrandom, { type PRNG } from "seedrandom";
 import type Sigma from "sigma";
-import type { EdgeType, NodeType } from "@/stores/rootStore.ts";
+import type {
+  EdgeType,
+  NodeType,
+  UiStateInstance,
+} from "@/stores/rootStore.ts";
 import { typeToImage } from "./helpers.ts";
 import type { DatasetInstance } from "@/stores/dataset.ts";
 
@@ -17,6 +21,23 @@ function getNodeSize(edges: number) {
   if (size < DEFINES.minNodeSize) return DEFINES.minNodeSize;
   if (size > DEFINES.maxNodeSize) return DEFINES.maxNodeSize;
   return size;
+}
+
+// TODO should be cached
+export function isNodeHidden(
+  uiState: UiStateInstance,
+  nodeAttributes: NodeType,
+) {
+  return (
+    (uiState.entityView && nodeAttributes.nodeType === "Mention") ||
+    (!uiState.filters.entities && nodeAttributes.nodeType === "Entity") ||
+    (!uiState.filters.mentions && nodeAttributes.nodeType === "Mention") ||
+    (!uiState.filters.documents && nodeAttributes.nodeType === "Document") ||
+    (!uiState.filters.people && nodeAttributes.entityType === "PER") ||
+    (!uiState.filters.locations && nodeAttributes.entityType === "LOC") ||
+    (!uiState.filters.organizations && nodeAttributes.entityType === "ORG") ||
+    (!uiState.filters.miscellaneous && nodeAttributes.entityType === "MISC")
+  );
 }
 
 export function updateNodeProperties(
