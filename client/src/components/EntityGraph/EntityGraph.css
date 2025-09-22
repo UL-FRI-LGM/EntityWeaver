@@ -1,0 +1,7 @@
+.dropdown-indicator {
+  padding: 4px 8px 0;
+}
+
+.react-select__menu {
+  padding-left: 6px !important;
+}

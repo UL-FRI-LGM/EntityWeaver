@@ -13,3 +13,18 @@
 .controls > button:focus-visible {
   outline: none;
 }
+
+.searchContainer {
+  display: flex;
+  width: 30%;
+  min-width: 300px;
+}
+
+.searchBox {
+  flex: 1 1 auto;
+}
+
+.dropdown-indicator {
+  padding: 0 8px;
+  width: 500px;
+}

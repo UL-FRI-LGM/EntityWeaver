@@ -1,4 +1,4 @@
-import { type CSSProperties, useEffect, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useState } from "react";
 import {
   ControlsContainer,
   FullScreenControl,
@@ -25,6 +25,8 @@ import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
 import { isLeftClick } from "@/utils/helpers.ts";
 import { LoadingOverlay } from "@mantine/core";
 import { DEFINES } from "@/defines.ts";
+import { GraphSearch, type GraphSearchOption } from "@react-sigma/graph-search";
+import "./EntityGraph.css";
 
 const sigmaStyle: CSSProperties = {
   display: "flex",
@@ -252,6 +254,41 @@ const EntityGraph = observer(() => {
     }
   }, [rootStore, sigma]);
 
+  const onFocus = useCallback(
+    (value: GraphSearchOption | null) => {
+      if (value === null) rootStore.setUiHoveredNode(null);
+      else if (value.type === "nodes") rootStore.setUiHoveredNode(value.id);
+    },
+    [rootStore],
+  );
+
+  const onChange = useCallback(
+    (value: GraphSearchOption | null) => {
+      if (value === null) rootStore.setSelectedNode(null);
+      else if (value.type === "nodes") rootStore.setSelectedNode(value.id);
+    },
+    [rootStore],
+  );
+
+  const postSearchResult = useCallback(
+    (options: GraphSearchOption[]): GraphSearchOption[] => {
+      return options.length <= 10
+        ? options
+        : [
+            ...options.slice(0, 10),
+            {
+              type: "message",
+              message: (
+                <span className="text-center text-muted">
+                  And {options.length - 10} others
+                </span>
+              ),
+            },
+          ];
+    },
+    [],
+  );
+
   return (
     <SigmaContainer
       ref={(instance) => setSigma(instance as Sigma<NodeType, EdgeType> | null)}
@@ -263,6 +300,30 @@ const EntityGraph = observer(() => {
       <ControlsContainer position={"bottom-right"}>
         <ZoomControl className={classes.controls} />
         <FullScreenControl className={classes.controls} />
+      </ControlsContainer>
+      <ControlsContainer
+        position={"top-right"}
+        className={classes.searchContainer}
+      >
+        {/* In this example we set minisearch options to allow searching on the node's attribute named `tag`.
+            Node & edge attributes are indexed with the prefix `prop_` to avoid name collision. */}
+        <GraphSearch
+          type="nodes"
+          className={classes.searchBox}
+          value={
+            rootStore.selectedNode
+              ? { type: "nodes", id: rootStore.selectedNode }
+              : null
+          }
+          onFocus={onFocus}
+          onChange={onChange}
+          postSearchResult={postSearchResult}
+          minisearchOptions={{ fields: ["prop_name", "prop_title"] }}
+          labels={{
+            type_something_to_search: "Start typing to search",
+            no_result_found: "No results found",
+          }}
+        />
       </ControlsContainer>
       <LoadingOverlay
         visible={rootStore.graphLoading}
