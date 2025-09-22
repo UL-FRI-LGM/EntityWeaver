@@ -154,6 +154,7 @@ const RootStore = types
           borderColor: DEFINES.selection.borderColor,
         });
       }
+      this.setUiHoveredNode(null);
     },
     setHoveredNode(nodeId: string | null) {
       self.hoveredNode = nodeId;
