@@ -6,7 +6,7 @@ import type {
   NodeType,
   UiStateInstance,
 } from "@/stores/rootStore.ts";
-import { typeToImage } from "./helpers.ts";
+import { typeIconToColor, typeToColor, typeToImage } from "./helpers.ts";
 import type { DatasetInstance } from "@/stores/dataset.ts";
 
 function getRandomPosition(generator?: PRNG) {
@@ -38,6 +38,41 @@ export function isNodeHidden(
     (!uiState.filters.organizations && nodeAttributes.entityType === "ORG") ||
     (!uiState.filters.miscellaneous && nodeAttributes.entityType === "MISC")
   );
+}
+
+export function setColorByType(
+  sigma: Sigma<NodeType, EdgeType> | null,
+  state: boolean,
+) {
+  if (!sigma) {
+    return;
+  }
+  const graph = sigma.getGraph();
+  graph.forEachNode((nodeId, attributes) => {
+    if (attributes.nodeType === "Document" || !attributes.entityType) {
+      return;
+    }
+    if (state) {
+      const newColor =
+        typeToColor(attributes.entityType) ?? DEFINES.entityTypes.colors.MISC;
+      graph.setNodeAttribute(nodeId, "color", newColor);
+      const newIconColor =
+        typeIconToColor(attributes.entityType) ??
+        DEFINES.entityTypes.iconColor.MISC;
+      graph.setNodeAttribute(nodeId, "pictogramColor", newIconColor);
+    } else {
+      const newColor =
+        attributes.nodeType === "Entity"
+          ? DEFINES.entity.color
+          : DEFINES.mention.color;
+      graph.setNodeAttribute(nodeId, "color", newColor);
+      const newIconColor =
+        attributes.nodeType === "Entity"
+          ? DEFINES.entity.iconColor
+          : DEFINES.mention.iconColor;
+      graph.setNodeAttribute(nodeId, "pictogramColor", newIconColor);
+    }
+  });
 }
 
 export function updateNodeProperties(

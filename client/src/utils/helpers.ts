@@ -61,6 +61,14 @@ export function typeToColor(type: string) {
   return null;
 }
 
+export function typeIconToColor(type: string) {
+  if (type in DEFINES.entityTypes.iconColor)
+    return DEFINES.entityTypes.iconColor[
+      type as keyof typeof DEFINES.entityTypes.iconColor
+    ];
+  return null;
+}
+
 export function typeToImage(type: string) {
   if (type in DEFINES.entityTypes.images)
     return DEFINES.entityTypes.images[

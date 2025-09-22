@@ -1,7 +1,8 @@
 import { createContext, use } from "react";
-import { types, type Instance } from "mobx-state-tree";
+import { types, type Instance, getRoot } from "mobx-state-tree";
 import type Sigma from "sigma";
 import {
+  setColorByType,
   updateEntityToDocumentNodes,
   updateGraph,
   updateNodeProperties,
@@ -75,12 +76,26 @@ const Filters = types
     },
   }));
 
-const UiState = types.model({
-  highlightOnSelect: types.optional(types.boolean, true),
-  highlightOnHover: types.optional(types.boolean, true),
-  entityView: types.optional(types.boolean, false),
-  filters: types.optional(Filters, {}),
-});
+const UiState = types
+  .model({
+    highlightOnSelect: types.optional(types.boolean, true),
+    highlightOnHover: types.optional(types.boolean, true),
+    entityView: types.optional(types.boolean, false),
+    colorByType: types.optional(types.boolean, false),
+    filters: types.optional(Filters, {}),
+  })
+  .views((self) => ({
+    get sigma(): Sigma<NodeType, EdgeType> | null {
+      const rootStore = getRoot(self) as RootInstance;
+      return rootStore.sigma;
+    },
+  }))
+  .actions((self) => ({
+    setColorByType(state: boolean) {
+      self.colorByType = state;
+      setColorByType(self.sigma, state);
+    },
+  }));
 
 export interface UiStateInstance extends Instance<typeof UiState> {}
 
@@ -129,7 +144,6 @@ const RootStore = types
     },
     setSelectedNode(nodeId: string | null) {
       if (self.selectedNode) {
-        console.log("Deselecting node", self.selectedNode);
         updateNodeProperties(self.sigma, self.selectedNode, {
           borderColor: undefined,
         });

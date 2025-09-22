@@ -29,23 +29,29 @@ export const DEFINES = {
     borderSize: 0.2,
   },
   mentionToDocumentEdge: {
-    color: "#676767",
+    color: "#282828",
     width: edgeWidth,
   },
   mentionToEntityEdge: {
-    color: "rgb(36,180,59)",
+    color: "#a4a4a4",
     width: edgeWidth,
   },
   entityToDocumentEdge: {
-    color: "#676767",
+    color: "#282828",
     width: edgeWidth,
   },
   entityTypes: {
     colors: {
-      PER: "#ff8100",
-      ORG: "#fd4719",
-      LOC: "#36da06",
-      MISC: "#07f8f8",
+      PER: "#ff8200",
+      ORG: "#fa4f40",
+      LOC: "#27a60a",
+      MISC: "#658dfc",
+    },
+    iconColor: {
+      PER: "black",
+      ORG: "black",
+      LOC: "black",
+      MISC: "black",
     },
     names: {
       PER: "Person",

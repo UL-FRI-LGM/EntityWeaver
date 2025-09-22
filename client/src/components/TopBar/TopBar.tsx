@@ -159,7 +159,15 @@ const TopBar = observer(() => {
         </Menu>
       </Group>
 
-      <Group gap={30}>
+      <Group gap={40}>
+        <Switch
+          label={"Color By Entity Type"}
+          checked={rootStore.uiState.colorByType}
+          classNames={{ label: classes.switchLabel }}
+          onChange={(event) =>
+            rootStore.uiState.setColorByType(event.currentTarget.checked)
+          }
+        />
         <Switch
           label={"Highlight Hovered Node"}
           checked={rootStore.uiState.highlightOnHover}
