@@ -216,6 +216,9 @@ const RootStore = types
       if (self.sigma) {
         this.clearGraphState();
         updateGraph(self.sigma, self.dataset, self.uiState.colorByType);
+        if (self.uiState.entityView) {
+          updateEntityViewEdges(self.sigma, self.dataset);
+        }
         self.sigma.getCamera().animatedReset().catch(console.error);
         if (runLayout) self.runLayout = runLayout;
       }
