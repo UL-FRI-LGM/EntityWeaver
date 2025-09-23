@@ -50,6 +50,13 @@ export const Dataset = types
     get collocationsList() {
       return Array.from(self.collocations.values());
     },
+    get hasData() {
+      return (
+        self.entities.size > 0 ||
+        self.mentions.size > 0 ||
+        self.documents.size > 0
+      );
+    },
   }))
   .actions((self) => ({
     toJSON() {

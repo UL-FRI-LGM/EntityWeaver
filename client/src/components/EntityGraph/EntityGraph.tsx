@@ -35,6 +35,7 @@ import { GraphSearch, type GraphSearchOption } from "@react-sigma/graph-search";
 import "./EntityGraph.css";
 import { isNodeHidden } from "@/utils/graphHelpers.ts";
 import type { ForceAtlas2LayoutParameters } from "graphology-layout-forceatlas2";
+import { MiniMap } from "@react-sigma/minimap";
 
 const sigmaStyle: CSSProperties = {
   display: "flex",
@@ -387,6 +388,11 @@ const EntityGraph = observer(() => {
               }}
             />
           </ControlsContainer>
+          {rootStore.dataset.hasData && (
+            <ControlsContainer position={"top-left"}>
+              <MiniMap width="100px" height="100px" debounceTime={5} />
+            </ControlsContainer>
+          )}
         </SigmaContainer>
       </div>
       <LoadingOverlay
