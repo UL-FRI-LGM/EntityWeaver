@@ -27,6 +27,7 @@ import SearchableCombobox, {
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
 import sharedClasses from "../shared.module.css";
 import type { LinkInstance, MentionInstance } from "@/stores/mention.ts";
+import NodeActions from "@/components/RightWidget/NodeActions.tsx";
 
 const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
   ([tag, name]) => (
@@ -262,71 +263,75 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
         },
       }}
     >
-      <TextInput
-        label="Name"
-        value={name}
-        onChange={(event) => setName(event.currentTarget.value)}
-      />
-      <Combobox
-        store={entityTypeCombobox}
-        onOptionSubmit={(val) => {
-          setEntityType(val);
-          entityTypeCombobox.closeDropdown();
-        }}
-      >
-        <Combobox.Target>
-          <InputBase
-            component="button"
-            type="button"
-            label="Entity Type"
-            pointer
-            rightSection={<Combobox.Chevron />}
-            rightSectionPointerEvents="none"
-            onClick={() => entityTypeCombobox.toggleDropdown()}
-          >
-            {typeToString(entityType) || (
-              <Input.Placeholder>Select Entity Type</Input.Placeholder>
-            )}
-          </InputBase>
-        </Combobox.Target>
+      <NodeActions node={mention} />
+      <Stack gap={10}>
+        <TextInput
+          label="Name"
+          value={name}
+          onChange={(event) => setName(event.currentTarget.value)}
+        />
+        <Combobox
+          store={entityTypeCombobox}
+          onOptionSubmit={(val) => {
+            setEntityType(val);
+            entityTypeCombobox.closeDropdown();
+          }}
+        >
+          <Combobox.Target>
+            <InputBase
+              component="button"
+              type="button"
+              label="Entity Type"
+              pointer
+              rightSection={<Combobox.Chevron />}
+              rightSectionPointerEvents="none"
+              onClick={() => entityTypeCombobox.toggleDropdown()}
+            >
+              {typeToString(entityType) || (
+                <Input.Placeholder>Select Entity Type</Input.Placeholder>
+              )}
+            </InputBase>
+          </Combobox.Target>
 
-        <Combobox.Dropdown>
-          <Combobox.Options>{entityTypeDropdownOptions}</Combobox.Options>
-        </Combobox.Dropdown>
-      </Combobox>
-      <DocumentSelector
-        label={"Source Document"}
-        documentId={documentId}
-        onDocumentChange={(id) => {
-          setDocumentId(id);
-        }}
-      />
-      <Button
-        disabled={!canApplyChanges}
-        variant="filled"
-        leftSection={<IconEdit size={14} />}
-        onClick={applyChanges}
-        className={sharedClasses.applyChangesButton}
-      >
-        Apply Changes
-      </Button>
-      {/* TODO disable tooltip if you just clicked apply changes until you move mouse */}
-      {/*<Tooltip*/}
-      {/*  position="bottom"*/}
-      {/*  disabled={canApplyChanges}*/}
-      {/*  label="No changes to apply"*/}
-      {/*  openDelay={2000}*/}
-      {/*>*/}
-      {/*  <Button*/}
-      {/*    disabled={!canApplyChanges}*/}
-      {/*    variant="filled"*/}
-      {/*    leftSection={<IconEdit size={14} />}*/}
-      {/*    onClick={applyChanges}*/}
-      {/*    className={classes.applyChangesButton}*/}
-      {/*  >*/}
-      {/*    Apply Changes*/}
-      {/*  </Button>*/}
-      {/*</Tooltip>*/}
+          <Combobox.Dropdown>
+            <Combobox.Options>{entityTypeDropdownOptions}</Combobox.Options>
+          </Combobox.Dropdown>
+        </Combobox>
+        <DocumentSelector
+          label={"Source Document"}
+          documentId={documentId}
+          onDocumentChange={(id) => {
+            setDocumentId(id);
+          }}
+        />
+        <Button
+          disabled={!canApplyChanges}
+          variant="filled"
+          leftSection={<IconEdit size={14} />}
+          onClick={applyChanges}
+          className={sharedClasses.applyChangesButton}
+        >
+          Apply Changes
+        </Button>
+        {/* TODO disable tooltip if you just clicked apply changes until you move mouse */}
+        {/*<Tooltip*/}
+        {/*  position="bottom"*/}
+        {/*  disabled={canApplyChanges}*/}
+        {/*  label="No changes to apply"*/}
+        {/*  openDelay={2000}*/}
+        {/*>*/}
+        {/*  <Button*/}
+        {/*    disabled={!canApplyChanges}*/}
+        {/*    variant="filled"*/}
+        {/*    leftSection={<IconEdit size={14} />}*/}
+        {/*    onClick={applyChanges}*/}
+        {/*    className={classes.applyChangesButton}*/}
+        {/*  >*/}
+        {/*    Apply Changes*/}
+        {/*  </Button>*/}
+        {/*</Tooltip>*/}
+      </Stack>
+
       <Divider />
       <Stack gap="10px">
         <Group

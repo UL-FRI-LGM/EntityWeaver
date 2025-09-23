@@ -4,12 +4,14 @@ import type Sigma from "sigma";
 import type {
   EdgeType,
   NodeType,
+  RootInstance,
   UiStateInstance,
 } from "@/stores/rootStore.ts";
 import { typeIconToColor, typeToColor, typeToImage } from "./helpers.ts";
 import type { DatasetInstance, GraphNodeType } from "@/stores/dataset.ts";
 import type { MentionInstance } from "@/stores/mention.ts";
 import type Graph from "graphology";
+import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
 
 function getRandomPosition(generator?: PRNG) {
   return generator ? generator() : Math.random();
@@ -24,9 +26,14 @@ function getNodeSize(edges: number) {
 
 // TODO should be cached
 export function isNodeHidden(
-  uiState: UiStateInstance,
+  appState: RootInstance,
+  nodeId: string,
   nodeAttributes: NodeType,
 ) {
+  if (!appState.sigma) return;
+  const uiState = appState.uiState;
+  const graph = appState.sigma.getGraph();
+
   return (
     (uiState.entityView && nodeAttributes.nodeType === "Mention") ||
     (!uiState.filters.entities && nodeAttributes.nodeType === "Entity") ||
@@ -35,7 +42,15 @@ export function isNodeHidden(
     (!uiState.filters.people && nodeAttributes.entityType === "PER") ||
     (!uiState.filters.locations && nodeAttributes.entityType === "LOC") ||
     (!uiState.filters.organizations && nodeAttributes.entityType === "ORG") ||
-    (!uiState.filters.miscellaneous && nodeAttributes.entityType === "MISC")
+    (!uiState.filters.miscellaneous && nodeAttributes.entityType === "MISC") ||
+    (appState.focusedNode &&
+      nodeId !== appState.focusedNode &&
+      !areVisibleNeighbors(
+        graph,
+        appState.uiState,
+        appState.focusedNode,
+        nodeId,
+      ))
   );
 }
 
@@ -53,23 +68,29 @@ export function isEdgeHidden(
   );
 }
 
+function areVisibleNeighbors(
+  graph: Graph<NodeType, EdgeType>,
+  uiState: UiStateInstance,
+  nodeId: string,
+  otherNodeId: string,
+) {
+  const edges =
+    graph.edges(nodeId, otherNodeId) ?? graph.edges(otherNodeId, nodeId);
+  if (edges.length === 0) return false;
+  const edgeId = edges[0];
+  return !isEdgeHidden(uiState, graph.getEdgeAttributes(edgeId));
+}
+
 export function nodeAdjacentToHighlighted(
   graph: Graph<NodeType, EdgeType>,
+  uiState: UiStateInstance,
   node: string,
   highlightedNodes: Set<string>,
-  entityView: boolean,
 ) {
   for (const edge of graph.edges(node)) {
     const neighbor = graph.opposite(node, edge)!;
     if (highlightedNodes.has(neighbor)) {
-      const edgeAttr = graph.getEdgeAttributes(edge);
-      if (
-        entityView ||
-        (edgeAttr.connectionType !== "EntityToDocument" &&
-          edgeAttr.connectionType !== "EntityCollocation")
-      ) {
-        return true;
-      }
+      return !isEdgeHidden(uiState, graph.getEdgeAttributes(edge));
     }
   }
   return false;
@@ -131,6 +152,23 @@ export function updateNodeProperties(
   }
   const graph = sigma.getGraph();
   graph.mergeNodeAttributes(nodeId, properties);
+}
+
+export async function zoomInOnNodeNeighbors(
+  sigma: Sigma<NodeType, EdgeType>,
+  uiState: UiStateInstance,
+  nodeId: string,
+) {
+  const graph = sigma.getGraph();
+  let nodes = graph.neighbors(nodeId);
+  nodes = nodes.filter((n) => areVisibleNeighbors(graph, uiState, nodeId, n));
+  nodes.push(nodeId);
+  const cameraState = getCameraStateToFitViewportToNodes(
+    // @ts-ignore: TS2345
+    sigma,
+    nodes,
+  );
+  await sigma.getCamera().animate(cameraState, { duration: 1000 });
 }
 
 export function updateMentionNode(

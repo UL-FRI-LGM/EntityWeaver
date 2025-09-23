@@ -129,6 +129,7 @@ const RootStore = types
     selectedNode: null as string | null,
     hoveredNode: null as string | null,
     uiHoveredNode: null as string | null,
+    focusedNode: null as string | null,
     runLayout: false,
     layoutInProgress: false,
     isForceAtlasRunning: false,
@@ -200,6 +201,13 @@ const RootStore = types
           borderColor: DEFINES.uiHover.borderColor,
         });
       }
+    },
+    setFocusedNode(nodeId: string | null) {
+      if (nodeId !== null && self.focusedNode !== self.selectedNode) {
+        this.setSelectedNode(nodeId);
+      }
+
+      self.focusedNode = nodeId;
     },
     setEntityView(state: boolean) {
       self.uiState.entityView = state;

@@ -8,6 +8,7 @@ import { DEFINES } from "@/defines.ts";
 import sharedClasses from "../shared.module.css";
 import MentionLinkEditor from "@/components/RightWidget/MentionLinkEditor.tsx";
 import type { DocumentInstance } from "@/stores/document.ts";
+import NodeActions from "@/components/RightWidget/NodeActions.tsx";
 
 const MentionList = observer(({ documentId }: { documentId: string }) => {
   const rootStore = useMst();
@@ -47,6 +48,8 @@ const DocumentEditor = observer(
           },
         }}
       >
+        <NodeActions node={document} />
+
         <TextInput
           label="Title"
           value={title}

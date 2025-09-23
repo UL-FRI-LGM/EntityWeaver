@@ -19,6 +19,7 @@ import { useMst } from "@/stores/rootStore.ts";
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
 import MentionLinkEditor from "@/components/RightWidget/MentionLinkEditor.tsx";
 import type { EntityInstance } from "@/stores/entity.ts";
+import NodeActions from "@/components/RightWidget/NodeActions.tsx";
 
 const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
   ([tag, name]) => (
@@ -69,6 +70,8 @@ const EntityEditor = observer(({ entity }: { entity: EntityInstance }) => {
         },
       }}
     >
+      <NodeActions node={entity} />
+
       <TextInput
         label="Name"
         value={name}

@@ -27,7 +27,6 @@ import { createNodeBorderProgram } from "@sigma/node-border";
 import classes from "./EntityGraph.module.css";
 import type Sigma from "sigma";
 import type { Settings } from "sigma/settings";
-import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
 import { isLeftClick } from "@/utils/helpers.ts";
 import { LoadingOverlay } from "@mantine/core";
 import { DEFINES } from "@/defines.ts";
@@ -37,6 +36,7 @@ import {
   isEdgeHidden,
   isNodeHidden,
   nodeAdjacentToHighlighted,
+  zoomInOnNodeNeighbors,
 } from "@/utils/graphHelpers.ts";
 import type { ForceAtlas2LayoutParameters } from "graphology-layout-forceatlas2";
 import { MiniMap } from "@react-sigma/minimap";
@@ -108,26 +108,11 @@ export const GraphEffects = observer(() => {
       //   if (!dragging.current) rootStore.setSelectedNode(event.node);
       // },
       doubleClickNode: (event) => {
-        console.log(dragging.current);
         if (dragging.current) return;
         rootStore.setSelectedNode(event.node);
         event.preventSigmaDefault();
-        const graph = sigma.getGraph();
-        const nodes = sigma
-          .getGraph()
-          .filterNodes(
-            (nodeId) =>
-              nodeId === event.node ||
-              graph.neighbors(event.node).includes(nodeId),
-          );
-        const cameraState = getCameraStateToFitViewportToNodes(
-          // @ts-ignore: TS2345
-          sigma,
-          nodes,
-        );
-        sigma
-          .getCamera()
-          .animate(cameraState, { duration: 1000 })
+        zoomInOnNodeNeighbors(sigma, rootStore.uiState, event.node)
+          .then(() => console.log(rootStore.sigma?.getCamera()))
           .catch(console.error);
       },
       downNode: (event) => {
@@ -174,15 +159,21 @@ export const GraphEffects = observer(() => {
     }
   }, [rootStore, sigma]);
 
+  // TODO Replace node and edge reducers if focused node for performance
   useEffect(() => {
     if (!sigma) return;
     const highlightedNodes = new Set<string>();
-    if (rootStore.uiState.highlightOnHover && rootStore.hoveredNode)
-      highlightedNodes.add(rootStore.hoveredNode);
-    if (rootStore.uiState.highlightOnSelect && rootStore.selectedNode)
-      highlightedNodes.add(rootStore.selectedNode);
-    if (rootStore.uiHoveredNode) {
-      highlightedNodes.add(rootStore.uiHoveredNode);
+
+    if (rootStore.focusedNode !== null) {
+      highlightedNodes.add(rootStore.focusedNode);
+    } else {
+      if (rootStore.uiState.highlightOnHover && rootStore.hoveredNode)
+        highlightedNodes.add(rootStore.hoveredNode);
+      if (rootStore.uiState.highlightOnSelect && rootStore.selectedNode)
+        highlightedNodes.add(rootStore.selectedNode);
+      if (rootStore.uiHoveredNode) {
+        highlightedNodes.add(rootStore.uiHoveredNode);
+      }
     }
 
     const allHighLightedNodes = new Set<string>();
@@ -194,16 +185,16 @@ export const GraphEffects = observer(() => {
           highlighted: data.highlighted ?? false,
         };
 
-        if (isNodeHidden(rootStore.uiState, data)) {
+        if (isNodeHidden(rootStore, node, data)) {
           newData.hidden = true;
         } else if (highlightedNodes.size > 0) {
           if (
             highlightedNodes.has(node) ||
             nodeAdjacentToHighlighted(
               graph,
+              rootStore.uiState,
               node,
               highlightedNodes,
-              rootStore.uiState.entityView,
             )
           ) {
             newData.highlighted = true;
@@ -239,11 +230,13 @@ export const GraphEffects = observer(() => {
       },
     });
   }, [
+    rootStore,
     rootStore.hoveredNode,
     rootStore.uiState.highlightOnHover,
     rootStore.selectedNode,
     rootStore.uiState.highlightOnSelect,
     rootStore.uiHoveredNode,
+    rootStore.focusedNode,
     rootStore.uiState.entityView,
     rootStore.uiState.filters.mentions,
     rootStore.uiState.filters.entities,
@@ -331,7 +324,7 @@ const EntityGraph = observer(() => {
         if (option.type === "message") return true;
         const attributes = sigma?.getGraph().getNodeAttributes(option.id);
         return attributes
-          ? !isNodeHidden(rootStore.uiState, attributes)
+          ? !isNodeHidden(rootStore, option.id, attributes)
           : false;
       });
       return options.length <= 10
@@ -348,7 +341,7 @@ const EntityGraph = observer(() => {
             },
           ];
     },
-    [rootStore.uiState, sigma],
+    [rootStore, sigma],
   );
 
   return (

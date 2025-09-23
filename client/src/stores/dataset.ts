@@ -7,11 +7,22 @@ import {
   type SnapshotIn,
   types,
 } from "mobx-state-tree";
-import { Mention, type MentionDB, mentionPrefix } from "@/stores/mention.ts";
-import { Entity, type EntityDB, entityPrefix } from "@/stores/entity.ts";
+import {
+  Mention,
+  type MentionDB,
+  type MentionInstance,
+  mentionPrefix,
+} from "@/stores/mention.ts";
+import {
+  Entity,
+  type EntityDB,
+  type EntityInstance,
+  entityPrefix,
+} from "@/stores/entity.ts";
 import {
   Document,
   type DocumentDB,
+  type DocumentInstance,
   documentPrefix,
 } from "@/stores/document.ts";
 import { loadDemo, nextFrame } from "@/utils/helpers.ts";
@@ -19,6 +30,10 @@ import type { RootInstance } from "@/stores/rootStore.ts";
 import { Collocation, type CollocationDB } from "@/stores/collocation.ts";
 
 export type GraphNodeType = "Document" | "Entity" | "Mention";
+export type GraphNodeInstance =
+  | DocumentInstance
+  | EntityInstance
+  | MentionInstance;
 
 export interface DatasetDB {
   mentions: MentionDB[];

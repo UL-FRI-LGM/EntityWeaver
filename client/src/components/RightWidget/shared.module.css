@@ -19,3 +19,15 @@
 .mentionLinkText {
   max-width: 190px;
 }
+
+.actionsContainer {
+  position: absolute;
+  min-height: 0;
+  top: 69px;
+  left: -37px;
+  padding: 4px;
+  background-color: var(--mantine-color-body);
+  border-top: 1px solid var(--mantine-color-dark-light-color);
+  border-bottom: 1px solid var(--mantine-color-dark-light-color);
+  border-left: 1px solid var(--mantine-color-dark-light-color);
+}
