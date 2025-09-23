@@ -36,7 +36,6 @@ import {
   isEdgeHidden,
   isNodeHidden,
   nodeAdjacentToHighlighted,
-  zoomInOnNodeNeighbors,
 } from "@/utils/graphHelpers.ts";
 import type { ForceAtlas2LayoutParameters } from "graphology-layout-forceatlas2";
 import { MiniMap } from "@react-sigma/minimap";
@@ -107,14 +106,15 @@ export const GraphEffects = observer(() => {
       // clickNode: (event) => {
       //   if (!dragging.current) rootStore.setSelectedNode(event.node);
       // },
-      doubleClickNode: (event) => {
-        if (dragging.current) return;
-        rootStore.setSelectedNode(event.node);
-        event.preventSigmaDefault();
-        zoomInOnNodeNeighbors(sigma, rootStore.uiState, event.node)
-          .then(() => console.log(rootStore.sigma?.getCamera()))
-          .catch(console.error);
-      },
+      // TODO figure out why zoom sometimes throws you far off
+      // doubleClickNode: (event) => {
+      //   if (dragging.current) return;
+      //   rootStore.setSelectedNode(event.node);
+      //   event.preventSigmaDefault();
+      //   zoomInOnNodeNeighbors(sigma, rootStore.uiState, event.node)
+      //     .then(() => console.log(rootStore.sigma?.getCamera()))
+      //     .catch(console.error);
+      // },
       downNode: (event) => {
         if (!isLeftClick(event.event.original) || rootStore.layoutInProgress)
           return;

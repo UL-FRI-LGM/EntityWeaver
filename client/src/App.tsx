@@ -41,11 +41,11 @@ const App = observer(() => {
               <LeftClickIcon fill="white" width={25} height={25} />
               <Text>Select Node</Text>
             </Group>
-            <Group className={classes.mouseClickTooltip}>
-              <LeftClickIcon fill="white" width={25} height={25} />
-              <Text>Zoom to Node</Text>
-              <Text className={classes.doubleClockTooltip}>2x</Text>
-            </Group>
+            {/*<Group className={classes.mouseClickTooltip}>*/}
+            {/*  <LeftClickIcon fill="white" width={25} height={25} />*/}
+            {/*  <Text>Zoom to Node</Text>*/}
+            {/*  <Text className={classes.doubleClockTooltip}>2x</Text>*/}
+            {/*</Group>*/}
             <Group className={classes.mouseClickTooltip}>
               <RightClickIcon fill="white" width={25} height={25} />
               <Text>Reset Selection</Text>
