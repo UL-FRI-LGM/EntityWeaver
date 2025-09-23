@@ -30,4 +30,6 @@
   border-top: 1px solid var(--mantine-color-dark-light-color);
   border-bottom: 1px solid var(--mantine-color-dark-light-color);
   border-left: 1px solid var(--mantine-color-dark-light-color);
+  border-top-left-radius: var(--mantine-radius-default);
+  border-bottom-left-radius: var(--mantine-radius-default);
 }

@@ -2,6 +2,7 @@ import {
   flow,
   getRoot,
   getSnapshot,
+  getType,
   type Instance,
   isAlive,
   type SnapshotIn,
@@ -82,6 +83,15 @@ export const Dataset = types
         this.loadDemo().catch((err) => console.error(err));
       }
     },
+    deleteNode(nodeInstance: GraphNodeInstance) {
+      if (getType(nodeInstance) === Document) {
+        self.documents.delete(nodeInstance.id);
+      } else if (getType(nodeInstance) === Entity) {
+        self.entities.delete(nodeInstance.id);
+      } else if (getType(nodeInstance) === Mention) {
+        self.mentions.delete(nodeInstance.id);
+      }
+    },
     setNodePosition(
       nodeId: string,
       nodeType: GraphNodeType,
@@ -151,7 +161,7 @@ export const Dataset = types
               if (!linkedEntity) {
                 throw new Error(`Entity with id ${link.entity_id} not found`);
               }
-              return [linkedEntity.id, { entity: linkedEntity }];
+              return [linkedEntity.id, linkedEntity.id];
             }),
           ),
         });
@@ -170,7 +180,7 @@ export const Dataset = types
             );
             return;
           }
-          if (mention?.document.id !== fullDocumentId) {
+          if (mention?.document?.id !== fullDocumentId) {
             console.warn(
               `Mention with id ${fullMentionId} does not belong to document ${fullDocumentId} for collocation ${collocation.id}`,
             );
@@ -189,8 +199,6 @@ export const Dataset = types
           mentions: Object.fromEntries(mentionsMap),
         });
       });
-
-      console.log(`Added ${self.collocations.size} valid collocations`);
 
       self.fetchingData = false;
 

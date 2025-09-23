@@ -1,9 +1,4 @@
-import {
-  getParentOfType,
-  getRoot,
-  type Instance,
-  types,
-} from "mobx-state-tree";
+import { getRoot, type Instance, types } from "mobx-state-tree";
 import type Sigma from "sigma";
 import type { EdgeType, NodeType, RootInstance } from "@/stores/rootStore.ts";
 import {
@@ -24,18 +19,18 @@ export interface MentionDB {
   }[];
 }
 
-export const Link = types
-  .model({
-    entity: types.reference(types.late(() => Entity)),
-  })
-  .actions((self) => ({
-    remove() {
-      const mention = getParentOfType(self, Mention) as MentionInstance;
-      mention?.removeEntityLink(self.entity.id);
-    },
-  }));
+// export const Link = types
+//   .model({
+//     entity: types.reference(types.late(() => Entity)),
+//   })
+//   .actions((self) => ({
+//     remove() {
+//       const mention = getParentOfType(self, Mention) as MentionInstance;
+//       mention?.removeEntityLink(self.entity.id);
+//     },
+//   }));
 
-export interface LinkInstance extends Instance<typeof Link> {}
+// export interface LinkInstance extends Instance<typeof Link> {}
 
 export const Mention = types
   .model({
@@ -44,8 +39,10 @@ export const Mention = types
     y: types.maybe(types.number),
     name: types.string,
     type: types.string,
-    document: types.reference(types.late(() => Document)),
-    entityLinks: types.map(Link),
+    document: types.safeReference(types.late(() => Document)),
+    entityLinks: types.map(
+      types.safeReference(Entity, { acceptsUndefined: false }),
+    ),
   })
   .views((self) => ({
     get sigma(): Sigma<NodeType, EdgeType> | null {
@@ -100,14 +97,14 @@ export const Mention = types
           self.entityLinks.clear();
         } else {
           self.entityLinks.forEach((link) => {
-            if (link.entity.id !== entityId) {
-              self.entityLinks.delete(link.entity.id);
+            if (link.id !== entityId) {
+              self.entityLinks.delete(link.id);
             }
           });
         }
       }
       if (!alreadyHasLink) {
-        self.entityLinks.set(entityId, { entity: entityId });
+        self.entityLinks.set(entityId, entityId);
       }
       if (self.sigma) {
         updateMentionNode(self.sigma, self.id, {

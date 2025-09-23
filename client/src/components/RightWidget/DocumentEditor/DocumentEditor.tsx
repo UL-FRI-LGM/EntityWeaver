@@ -13,7 +13,7 @@ import NodeActions from "@/components/RightWidget/NodeActions.tsx";
 const MentionList = observer(({ documentId }: { documentId: string }) => {
   const rootStore = useMst();
   const mentions = Array.from(rootStore.dataset.mentions.values()).filter(
-    (mention) => mention.document.id === documentId,
+    (mention) => mention.document?.id === documentId,
   );
 
   return (

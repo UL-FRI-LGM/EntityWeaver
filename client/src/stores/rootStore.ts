@@ -17,6 +17,7 @@ import type { AnimateOptions } from "sigma/utils";
 import {
   Dataset,
   type DatasetSnapShotIn,
+  type GraphNodeInstance,
   type GraphNodeType,
 } from "@/stores/dataset.ts";
 import { mentionPrefix } from "@/stores/mention.ts";
@@ -126,6 +127,7 @@ const RootStore = types
   })
   .volatile(() => ({
     sigma: null as Sigma<NodeType, EdgeType> | null,
+    deleteNodeModalOpen: false,
     selectedNode: null as string | null,
     hoveredNode: null as string | null,
     uiHoveredNode: null as string | null,
@@ -171,6 +173,9 @@ const RootStore = types
     },
     setSigma(sigma: Sigma<NodeType, EdgeType>) {
       self.sigma = sigma;
+    },
+    setDeleteNodeModalOpen(state: boolean) {
+      self.deleteNodeModalOpen = state && self.selectedNode !== null;
     },
     setSelectedNode(nodeId: string | null) {
       if (self.selectedNode) {
@@ -268,6 +273,11 @@ const RootStore = types
     resetCamera(options: Partial<AnimateOptions> = { duration: 1 }) {
       const camera = self.sigma?.getCamera();
       camera?.animatedReset(options).catch(console.error);
+    },
+    deleteNode(nodeInstance: GraphNodeInstance) {
+      this.setSelectedNode(null);
+      self.sigma?.getGraph().dropNode(nodeInstance.id);
+      self.dataset.deleteNode(nodeInstance);
     },
   }));
 

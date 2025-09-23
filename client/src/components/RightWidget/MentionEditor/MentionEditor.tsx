@@ -26,8 +26,9 @@ import SearchableCombobox, {
 } from "../../SearchableCombobox/SearchableCombobox.tsx";
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
 import sharedClasses from "../shared.module.css";
-import type { LinkInstance, MentionInstance } from "@/stores/mention.ts";
+import type { MentionInstance } from "@/stores/mention.ts";
 import NodeActions from "@/components/RightWidget/NodeActions.tsx";
+import type { EntityInstance } from "@/stores/entity.ts";
 
 const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
   ([tag, name]) => (
@@ -166,40 +167,42 @@ const EntitySelector = observer(
   },
 );
 
-const LinkEditor = observer(({ link }: { link: LinkInstance }) => {
-  const rootStore = useMst();
+const LinkEditor = observer(
+  ({ mention, link }: { mention: MentionInstance; link: EntityInstance }) => {
+    const rootStore = useMst();
 
-  return (
-    <Paper
-      className={classes.linkEntry}
-      shadow="xl"
-      withBorder
-      onMouseEnter={() => rootStore.setUiHoveredNode(link.entity.id)}
-      onMouseLeave={() => rootStore.setUiHoveredNode(null)}
-    >
-      <Group
-        wrap={"nowrap"}
-        justify="space-between"
-        gap={0}
-        onMouseEnter={() => rootStore.setUiHoveredNode(link.entity.id)}
+    return (
+      <Paper
+        className={classes.linkEntry}
+        shadow="xl"
+        withBorder
+        onMouseEnter={() => rootStore.setUiHoveredNode(link.id)}
         onMouseLeave={() => rootStore.setUiHoveredNode(null)}
       >
-        <Text truncate="end" component="span" className={classes.linkText}>
-          {link.entity.name}
-        </Text>
-        <ActionIcon variant="default">
-          <IconX onClick={() => link.remove()} />
-        </ActionIcon>
-      </Group>
-    </Paper>
-  );
-});
+        <Group
+          wrap={"nowrap"}
+          justify="space-between"
+          gap={0}
+          onMouseEnter={() => rootStore.setUiHoveredNode(link.id)}
+          onMouseLeave={() => rootStore.setUiHoveredNode(null)}
+        >
+          <Text truncate="end" component="span" className={classes.linkText}>
+            {link.name}
+          </Text>
+          <ActionIcon variant="default">
+            <IconX onClick={() => mention.removeEntityLink(link.id)} />
+          </ActionIcon>
+        </Group>
+      </Paper>
+    );
+  },
+);
 
-const EntityLinkList = observer(({ links }: { links: LinkInstance[] }) => {
+const EntityLinkList = observer(({ mention }: { mention: MentionInstance }) => {
   return (
     <Stack className={classes.linkList}>
-      {links.map((link) => (
-        <LinkEditor key={link.entity.id} link={link} />
+      {mention.entityLinkList.map((link) => (
+        <LinkEditor key={link.id} mention={mention} link={link} />
       ))}
     </Stack>
   );
@@ -212,7 +215,7 @@ const MentionToEntityLinkEditor = observer(
         legend={"Linked Entities"}
         className={classes.linkedEntitiesContainer}
       >
-        <EntityLinkList links={mention.entityLinkList} />
+        <EntityLinkList mention={mention} />
       </Fieldset>
     );
   },
@@ -224,13 +227,17 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
 
   const [name, setName] = useState(mention.name);
   const [entityType, setEntityType] = useState(mention.type);
-  const [documentId, setDocumentId] = useState(mention.document.id);
+  const [documentId, setDocumentId] = useState<string | null>(
+    mention.document?.id ?? null,
+  );
   const [entityId, setEntityId] = useState<string | null>(null);
 
   function applyChanges() {
     mention.setName(name);
     mention.setType(entityType);
-    const document = rootStore.dataset.documents.get(documentId);
+    const document = documentId
+      ? rootStore.dataset.documents.get(documentId)
+      : null;
     if (document) {
       mention.setDocumentId(document);
     }
@@ -244,7 +251,7 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
   const canApplyChanges =
     mention.name !== name ||
     mention.type !== entityType ||
-    mention.document.id !== documentId;
+    mention.document?.id !== documentId;
 
   const canAddEntity =
     entityId !== null &&

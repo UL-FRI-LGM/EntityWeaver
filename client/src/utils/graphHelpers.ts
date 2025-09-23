@@ -275,11 +275,13 @@ export function updateEntityViewEdges(
 
   for (const entity of dataset.entityList) {
     const mentions = dataset.mentionList.filter((mention) =>
-      mention.entityLinkList.some((link) => link.entity.id === entity.id),
+      mention.entityLinkList.some((link) => link.id === entity.id),
     );
     const connectedDocuments = new Set<string>();
     for (const mention of mentions) {
-      connectedDocuments.add(mention.document.id);
+      if (mention.document) {
+        connectedDocuments.add(mention.document.id);
+      }
     }
     for (const documentId of connectedDocuments) {
       graph.addEdge(entity.id, documentId, {
@@ -302,13 +304,13 @@ export function updateEntityViewEdges(
 
     collocatedMentions.forEach((mention) => {
       for (const entityLink of mention.entityLinkList) {
-        if (entityLink.entity.id === entity.id) {
+        if (entityLink.id === entity.id) {
           continue;
         }
-        if (graph.hasEdge(entity.id, entityLink.entity.id)) {
+        if (graph.hasEdge(entity.id, entityLink.id)) {
           continue;
         }
-        graph.addEdge(entity.id, entityLink.entity.id, {
+        graph.addEdge(entity.id, entityLink.id, {
           size: DEFINES.collocationEdge.width,
           color: DEFINES.collocationEdge.color,
           connectionType: "EntityCollocation",
@@ -387,7 +389,9 @@ export function updateGraph(
       zIndex: 20,
     });
 
-    const document = dataset.documents.get(mention.document.id);
+    const document = mention.document
+      ? dataset.documents.get(mention.document.id)
+      : null;
     if (document) {
       graph.addEdge(mention.id, document.id, {
         size: DEFINES.mentionToDocumentEdge.width,
@@ -398,7 +402,7 @@ export function updateGraph(
     }
 
     mention.entityLinks.forEach((link) => {
-      graph.addEdge(mention.id, link.entity.id, {
+      graph.addEdge(mention.id, link.id, {
         size: DEFINES.mentionToEntityEdge.width,
         color: DEFINES.mentionToEntityEdge.color,
         connectionType: "MentionToEntity",

@@ -1,6 +1,10 @@
 import { observer } from "mobx-react";
 import { ActionIcon, Stack, Tooltip } from "@mantine/core";
-import { IconFocusCentered, IconZoomScan } from "@tabler/icons-react";
+import {
+  IconFocusCentered,
+  IconTrash,
+  IconZoomScan,
+} from "@tabler/icons-react";
 import sharedClasses from "@/components/RightWidget/shared.module.css";
 import type { GraphNodeInstance } from "@/stores/dataset.ts";
 import { useMst } from "@/stores/rootStore.ts";
@@ -43,6 +47,15 @@ const NodeActions = observer(({ node }: { node: GraphNodeInstance }) => {
             onClick={onFocusNode}
           >
             <IconFocusCentered />
+          </ActionIcon>
+        </Tooltip>
+        <Tooltip label={"Delete Node"} position="left">
+          <ActionIcon
+            variant={"filled"}
+            color={"var(--mantine-color-red-9)"}
+            onClick={() => rootStore.setDeleteNodeModalOpen(true)}
+          >
+            <IconTrash size={20} />
           </ActionIcon>
         </Tooltip>
       </Stack>

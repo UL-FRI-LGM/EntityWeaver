@@ -39,6 +39,7 @@ import {
 } from "@/utils/graphHelpers.ts";
 import type { ForceAtlas2LayoutParameters } from "graphology-layout-forceatlas2";
 import { MiniMap } from "@react-sigma/minimap";
+import DeleteNodeModal from "@/components/DeleteNodeModal/DeleteNodeModal.tsx";
 
 const sigmaStyle: CSSProperties = {
   display: "flex",
@@ -344,8 +345,38 @@ const EntityGraph = observer(() => {
     [rootStore, sigma],
   );
 
+  function onEscapeClick() {
+    if (rootStore.focusedNode) {
+      rootStore.setFocusedNode(null);
+    } else {
+      rootStore.setSelectedNode(null);
+    }
+  }
+
+  function onDeleteClick() {
+    rootStore.setDeleteNodeModalOpen(true);
+  }
+
+  // function odDeleteClick() {}
+
+  // @ts-ignore TS2315
+  function canvasOnKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    switch (event.key) {
+      case "Escape":
+        onEscapeClick();
+        break;
+      case "Delete":
+        onDeleteClick();
+        break;
+    }
+  }
+
   return (
-    <div className={classes.outerContainer}>
+    <div
+      className={classes.outerContainer}
+      tabIndex={0}
+      onKeyDown={canvasOnKeyDown}
+    >
       <div
         className={classes.innerContainer}
         style={{ opacity: rootStore.graphLoading ? 0 : 1 }}
@@ -405,6 +436,7 @@ const EntityGraph = observer(() => {
         }}
         transitionProps={{ exitDuration: 1000, enterDelay: 0 }}
       />
+      <DeleteNodeModal />
     </div>
   );
 });

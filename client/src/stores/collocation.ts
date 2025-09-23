@@ -11,7 +11,9 @@ export interface CollocationDB {
 export const Collocation = types
   .model({
     id: types.identifier,
-    mentions: types.map(types.reference(Mention)),
+    mentions: types.map(
+      types.safeReference(Mention, { acceptsUndefined: false }),
+    ),
   })
   .views((self) => ({
     get mentionsList() {
