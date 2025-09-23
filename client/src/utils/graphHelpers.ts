@@ -39,6 +39,20 @@ export function isNodeHidden(
   );
 }
 
+export function isEdgeHidden(
+  uiState: UiStateInstance,
+  edgeAttributes: EdgeType,
+) {
+  return (
+    (!uiState.entityView &&
+      (edgeAttributes.connectionType === "EntityToDocument" ||
+        edgeAttributes.connectionType === "EntityCollocation")) ||
+    (!uiState.filters.collocations &&
+      (edgeAttributes.connectionType === "EntityCollocation" ||
+        edgeAttributes.connectionType === "MentionCollocation"))
+  );
+}
+
 export function nodeAdjacentToHighlighted(
   graph: Graph<NodeType, EdgeType>,
   node: string,

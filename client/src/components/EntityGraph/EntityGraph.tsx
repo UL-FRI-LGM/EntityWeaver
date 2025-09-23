@@ -34,6 +34,7 @@ import { DEFINES } from "@/defines.ts";
 import { GraphSearch, type GraphSearchOption } from "@react-sigma/graph-search";
 import "./EntityGraph.css";
 import {
+  isEdgeHidden,
   isNodeHidden,
   nodeAdjacentToHighlighted,
 } from "@/utils/graphHelpers.ts";
@@ -216,11 +217,7 @@ export const GraphEffects = observer(() => {
         const newData = { ...data, hidden: false };
         const graph = sigma.getGraph();
 
-        if (
-          !rootStore.uiState.entityView &&
-          (data.connectionType === "EntityToDocument" ||
-            data.connectionType === "EntityCollocation")
-        ) {
+        if (isEdgeHidden(rootStore.uiState, newData)) {
           newData.hidden = true;
         } else if (allHighLightedNodes.size > 0) {
           let foundOriginalNode = false;
@@ -255,6 +252,7 @@ export const GraphEffects = observer(() => {
     rootStore.uiState.filters.locations,
     rootStore.uiState.filters.organizations,
     rootStore.uiState.filters.miscellaneous,
+    rootStore.uiState.filters.collocations,
     setSettings,
     sigma,
     rootStore.uiState,

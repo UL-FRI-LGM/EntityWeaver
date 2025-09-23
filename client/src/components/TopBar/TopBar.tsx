@@ -13,6 +13,7 @@ import {
   IconFileCode2,
   IconMapPin,
   IconSitemap,
+  IconTextScan2,
   IconUpload,
   IconUserCircle,
 } from "@tabler/icons-react";
@@ -143,6 +144,25 @@ const FiltersMenu = observer(() => {
           }}
         >
           Miscellaneous
+        </Menu.Item>
+
+        <Menu.Divider />
+
+        <Menu.Label>Connections</Menu.Label>
+
+        <Menu.Item
+          leftSection={<IconTextScan2 size={14} />}
+          rightSection={
+            <Switch checked={rootStore.uiState.filters.collocations} />
+          }
+          onClick={(event) => {
+            event.preventDefault();
+            rootStore.uiState.filters.setCollocations(
+              !rootStore.uiState.filters.collocations,
+            );
+          }}
+        >
+          Collocations
         </Menu.Item>
       </Menu.Dropdown>
     </Menu>

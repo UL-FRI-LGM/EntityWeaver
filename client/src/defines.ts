@@ -34,7 +34,7 @@ export const DEFINES = {
     width: edgeWidth,
   },
   mentionToEntityEdge: {
-    color: "#a4a4a4",
+    color: "#767676",
     width: edgeWidth,
   },
   entityToDocumentEdge: {
@@ -74,10 +74,10 @@ export const DEFINES = {
   },
   layout: {
     edgeWeights: {
-      MentionToDocument: 0.5,
+      MentionToDocument: 3,
       MentionToEntity: 1,
       EntityToDocument: 0,
-      MentionCollocation: 2,
+      MentionCollocation: 0,
       EntityCollocation: 0,
     },
   },

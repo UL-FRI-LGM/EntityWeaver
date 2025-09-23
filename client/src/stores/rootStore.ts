@@ -66,6 +66,7 @@ const Filters = types
     locations: types.optional(types.boolean, true),
     organizations: types.optional(types.boolean, true),
     miscellaneous: types.optional(types.boolean, true),
+    collocations: types.optional(types.boolean, false),
   })
   .actions((self) => ({
     setEntities(state: boolean) {
@@ -88,6 +89,9 @@ const Filters = types
     },
     setMiscellaneous(state: boolean) {
       self.miscellaneous = state;
+    },
+    setCollocations(state: boolean) {
+      self.collocations = state;
     },
   }));
 
