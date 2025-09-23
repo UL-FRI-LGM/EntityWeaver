@@ -33,7 +33,10 @@ import { LoadingOverlay } from "@mantine/core";
 import { DEFINES } from "@/defines.ts";
 import { GraphSearch, type GraphSearchOption } from "@react-sigma/graph-search";
 import "./EntityGraph.css";
-import { isNodeHidden } from "@/utils/graphHelpers.ts";
+import {
+  isNodeHidden,
+  nodeAdjacentToHighlighted,
+} from "@/utils/graphHelpers.ts";
 import type { ForceAtlas2LayoutParameters } from "graphology-layout-forceatlas2";
 import { MiniMap } from "@react-sigma/minimap";
 
@@ -195,7 +198,12 @@ export const GraphEffects = observer(() => {
         } else if (highlightedNodes.size > 0) {
           if (
             highlightedNodes.has(node) ||
-            graph.neighbors(node).some((nodeId) => highlightedNodes.has(nodeId))
+            nodeAdjacentToHighlighted(
+              graph,
+              node,
+              highlightedNodes,
+              rootStore.uiState.entityView,
+            )
           ) {
             newData.highlighted = true;
             allHighLightedNodes.add(node);

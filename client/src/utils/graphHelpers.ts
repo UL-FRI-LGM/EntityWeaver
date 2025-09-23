@@ -9,6 +9,7 @@ import type {
 import { typeIconToColor, typeToColor, typeToImage } from "./helpers.ts";
 import type { DatasetInstance, GraphNodeType } from "@/stores/dataset.ts";
 import type { MentionInstance } from "@/stores/mention.ts";
+import type Graph from "graphology";
 
 function getRandomPosition(generator?: PRNG) {
   return generator ? generator() : Math.random();
@@ -36,6 +37,28 @@ export function isNodeHidden(
     (!uiState.filters.organizations && nodeAttributes.entityType === "ORG") ||
     (!uiState.filters.miscellaneous && nodeAttributes.entityType === "MISC")
   );
+}
+
+export function nodeAdjacentToHighlighted(
+  graph: Graph<NodeType, EdgeType>,
+  node: string,
+  highlightedNodes: Set<string>,
+  entityView: boolean,
+) {
+  for (const edge of graph.edges(node)) {
+    const neighbor = graph.opposite(node, edge)!;
+    if (highlightedNodes.has(neighbor)) {
+      const edgeAttr = graph.getEdgeAttributes(edge);
+      if (
+        entityView ||
+        (edgeAttr.connectionType !== "EntityToDocument" &&
+          edgeAttr.connectionType !== "EntityCollocation")
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 function getNodeColors(
