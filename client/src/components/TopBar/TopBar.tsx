@@ -7,7 +7,7 @@ import {
   IconBorderSides,
   IconCaretDownFilled,
   IconCaretUpFilled,
-  IconCloud,
+  IconDotsCircleHorizontal,
   IconDownload,
   IconFile,
   IconFileCode2,
@@ -132,7 +132,7 @@ const FiltersMenu = observer(() => {
           Organizations
         </Menu.Item>
         <Menu.Item
-          leftSection={<IconCloud size={14} />}
+          leftSection={<IconDotsCircleHorizontal size={14} />}
           rightSection={
             <Switch checked={rootStore.uiState.filters.miscellaneous} />
           }
