@@ -3,27 +3,24 @@ import classes from "./DocumentEditor.module.css";
 import { Button, Fieldset, TextInput, Divider, Stack } from "@mantine/core";
 import { useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
-import { useMst } from "@/stores/rootStore.ts";
 import { DEFINES } from "@/defines.ts";
 import sharedClasses from "../shared.module.css";
 import MentionLinkEditor from "@/components/RightWidget/MentionLinkEditor.tsx";
 import type { DocumentInstance } from "@/stores/document.ts";
 import NodeActions from "@/components/RightWidget/NodeActions.tsx";
+import type { MentionInstance } from "@/stores/mention.ts";
 
-const MentionList = observer(({ documentId }: { documentId: string }) => {
-  const rootStore = useMst();
-  const mentions = Array.from(rootStore.dataset.mentions.values()).filter(
-    (mention) => mention.document?.id === documentId,
-  );
-
-  return (
-    <Stack className={classes.linkList}>
-      {mentions.map((mention) => (
-        <MentionLinkEditor key={mention.id} mention={mention} />
-      ))}
-    </Stack>
-  );
-});
+const MentionList = observer(
+  ({ mentions }: { mentions: MentionInstance[] }) => {
+    return (
+      <Stack className={classes.linkList}>
+        {mentions.map((mention) => (
+          <MentionLinkEditor key={mention.id} mention={mention} />
+        ))}
+      </Stack>
+    );
+  },
+);
 
 const DocumentEditor = observer(
   ({ document }: { document: DocumentInstance }) => {
@@ -66,7 +63,7 @@ const DocumentEditor = observer(
         </Button>
         <Stack className={classes.mentionsContainer} gap={6}>
           <Divider label="Mentions" labelPosition={"center"} />
-          <MentionList documentId={document.id} />
+          <MentionList mentions={document.mentionList} />
         </Stack>
         {/*<Fieldset legend="Mentions" className={classes.mentionsContainer}>*/}
         {/*  <MentionList documentId={document.id} />*/}

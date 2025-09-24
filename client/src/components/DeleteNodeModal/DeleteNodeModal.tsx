@@ -1,6 +1,8 @@
 import { observer } from "mobx-react";
-import { Button, Group, Modal, Text } from "@mantine/core";
+import { Button, Group, Modal, Text, Tooltip } from "@mantine/core";
 import { useMst } from "@/stores/rootStore.ts";
+import { getType } from "mobx-state-tree";
+import { Document, type DocumentInstance } from "@/stores/document.ts";
 
 const DeleteNodeModal = observer(() => {
   const rootStore = useMst();
@@ -11,10 +13,15 @@ const DeleteNodeModal = observer(() => {
 
   function onDeleteNode() {
     if (rootStore.selectedNodeInstance) {
-      rootStore.deleteNode(rootStore.selectedNodeInstance);
+      rootStore.dataset.deleteNode(rootStore.selectedNodeInstance);
       rootStore.setDeleteNodeModalOpen(false);
     }
   }
+
+  const canDeleteNode =
+    rootStore.selectedNodeInstance !== null &&
+    (getType(rootStore.selectedNodeInstance) !== Document ||
+      (rootStore.selectedNodeInstance as DocumentInstance).canDelete);
 
   return (
     <Modal
@@ -40,13 +47,20 @@ const DeleteNodeModal = observer(() => {
         >
           Cancel
         </Button>
-        <Button
-          color={"var(--mantine-color-red-9)"}
-          data-autofocus
-          onClick={onDeleteNode}
+        <Tooltip
+          label={"Document can only be deleted if it has attached mentions"}
+          disabled={canDeleteNode}
+          position={"bottom"}
         >
-          Delete {nodeAttributes?.nodeType}
-        </Button>
+          <Button
+            color={"var(--mantine-color-red-9)"}
+            data-autofocus
+            onClick={onDeleteNode}
+            disabled={!canDeleteNode}
+          >
+            Delete {nodeAttributes?.nodeType}
+          </Button>
+        </Tooltip>
       </Group>
     </Modal>
   );

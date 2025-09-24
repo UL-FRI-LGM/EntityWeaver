@@ -19,7 +19,6 @@ import type { AnimateOptions } from "sigma/utils";
 import {
   Dataset,
   type DatasetSnapShotIn,
-  type GraphNodeInstance,
   type GraphNodeType,
 } from "@/stores/dataset.ts";
 import { mentionPrefix } from "@/stores/mention.ts";
@@ -296,10 +295,14 @@ const RootStore = types
       const camera = self.sigma?.getCamera();
       camera?.animatedReset(options).catch(console.error);
     },
-    deleteNode(nodeInstance: GraphNodeInstance) {
-      this.setSelectedNode(null);
-      self.sigma?.getGraph().dropNode(nodeInstance.id);
-      self.dataset.deleteNode(nodeInstance);
+    onNodeDeleted(nodeId: string) {
+      if (nodeId === self.selectedNode) {
+        this.setSelectedNode(null);
+      }
+      if (nodeId === self.selectedNode) {
+        this.setHoveredNode(null);
+      }
+      self.sigma?.getGraph().dropNode(nodeId);
     },
     deleteEdge(edgeId: string) {
       if (!self.sigma) {

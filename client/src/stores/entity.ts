@@ -1,4 +1,4 @@
-import { getRoot, type Instance, types } from "mobx-state-tree";
+import { destroy, getRoot, type Instance, types } from "mobx-state-tree";
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
 import type Sigma from "sigma";
 import type { EdgeType, NodeType, RootInstance } from "@/stores/rootStore.ts";
@@ -43,6 +43,11 @@ export const Entity = types
       if (self.x !== null || self.y !== null) {
         updateNodeProperties(self.sigma, self.id, { x: self.x, y: self.y });
       }
+    },
+    remove() {
+      const rootStore = getRoot(self) as RootInstance;
+      rootStore.onNodeDeleted(self.id);
+      destroy(self);
     },
   }));
 

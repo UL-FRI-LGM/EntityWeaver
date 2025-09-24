@@ -1,4 +1,4 @@
-import { getRoot, type Instance, types } from "mobx-state-tree";
+import { destroy, getRoot, type Instance, types } from "mobx-state-tree";
 import type Sigma from "sigma";
 import type { EdgeType, NodeType, RootInstance } from "@/stores/rootStore.ts";
 import {
@@ -39,7 +39,10 @@ export const Mention = types
     y: types.maybe(types.number),
     name: types.string,
     type: types.string,
-    document: types.safeReference(types.late(() => Document)),
+    document: types.safeReference(
+      types.late(() => Document),
+      { acceptsUndefined: false },
+    ),
     entityLinks: types.map(
       types.safeReference(Entity, { acceptsUndefined: false }),
     ),
@@ -54,6 +57,9 @@ export const Mention = types
     },
   }))
   .actions((self) => ({
+    afterAttach() {
+      self.document.mentions.set(self.id, self);
+    },
     setPosition(position: { x?: number | null; y?: number | null }) {
       self.x = position.x ?? undefined;
       self.y = position.y ?? undefined;
@@ -112,6 +118,11 @@ export const Mention = types
           clearEntityLinks: !keepExisting,
         });
       }
+    },
+    remove() {
+      const rootStore = getRoot(self) as RootInstance;
+      rootStore.onNodeDeleted(self.id);
+      destroy(self);
     },
   }));
 

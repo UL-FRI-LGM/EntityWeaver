@@ -78,18 +78,18 @@ export const Dataset = types
     toJSON() {
       return getSnapshot(self);
     },
-    afterCreate() {
+    afterAttach() {
       if (import.meta.env.VITE_AUTO_LOAD_DEMO === "true") {
         this.loadDemo().catch((err) => console.error(err));
       }
     },
     deleteNode(nodeInstance: GraphNodeInstance) {
       if (getType(nodeInstance) === Document) {
-        self.documents.delete(nodeInstance.id);
+        self.documents.get(nodeInstance.id)?.remove();
       } else if (getType(nodeInstance) === Entity) {
-        self.entities.delete(nodeInstance.id);
+        self.entities.get(nodeInstance.id)?.remove();
       } else if (getType(nodeInstance) === Mention) {
-        self.mentions.delete(nodeInstance.id);
+        self.mentions.get(nodeInstance.id)?.remove();
       }
     },
     setNodePosition(
@@ -180,7 +180,7 @@ export const Dataset = types
             );
             return;
           }
-          if (mention?.document?.id !== fullDocumentId) {
+          if (mention?.document.id !== fullDocumentId) {
             console.warn(
               `Mention with id ${fullMentionId} does not belong to document ${fullDocumentId} for collocation ${collocation.id}`,
             );

@@ -1,7 +1,14 @@
-import { getRoot, type Instance, types } from "mobx-state-tree";
+import {
+  destroy,
+  getRoot,
+  type IAnyModelType,
+  type Instance,
+  types,
+} from "mobx-state-tree";
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
 import type Sigma from "sigma";
 import type { EdgeType, NodeType, RootInstance } from "@/stores/rootStore.ts";
+import { Mention, type MentionInstance } from "@/stores/mention.ts";
 
 export const documentPrefix = "Document-";
 export interface DocumentDB {
@@ -15,11 +22,23 @@ export const Document = types
     x: types.maybe(types.number),
     y: types.maybe(types.number),
     title: types.string,
+    mentions: types.map(
+      types.safeReference(
+        types.late((): IAnyModelType => Mention),
+        { acceptsUndefined: false },
+      ),
+    ),
   })
   .views((self) => ({
     get sigma(): Sigma<NodeType, EdgeType> | null {
       const rootStore = getRoot(self) as RootInstance;
       return rootStore.sigma;
+    },
+    get canDelete(): boolean {
+      return self.mentions.size === 0;
+    },
+    get mentionList(): MentionInstance[] {
+      return Array.from(self.mentions.values());
     },
   }))
   .actions((self) => ({
@@ -32,6 +51,12 @@ export const Document = types
       if (self.x !== null || self.y !== null) {
         updateNodeProperties(self.sigma, self.id, { x: self.x, y: self.y });
       }
+    },
+    remove() {
+      if (!self.canDelete) return;
+      const rootStore = getRoot(self) as RootInstance;
+      rootStore.onNodeDeleted(self.id);
+      destroy(self);
     },
   }));
 

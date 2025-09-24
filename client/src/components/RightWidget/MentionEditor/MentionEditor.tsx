@@ -44,16 +44,14 @@ const DocumentSelector = observer(
     onDocumentChange,
     label,
   }: {
-    documentId: string | null;
+    documentId: string;
     onDocumentChange: (_id: string) => void;
     label: string;
   }) => {
     const rootStore = useMst();
     const { dataset, setSelectedNode } = useMst();
 
-    const selectedDocument = documentId
-      ? dataset.documents.get(documentId)
-      : null;
+    const selectedDocument = dataset.documents.get(documentId);
 
     const [searchValue, setSearchValue] = useState(
       selectedDocument?.title ?? "",
@@ -227,9 +225,7 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
 
   const [name, setName] = useState(mention.name);
   const [entityType, setEntityType] = useState(mention.type);
-  const [documentId, setDocumentId] = useState<string | null>(
-    mention.document?.id ?? null,
-  );
+  const [documentId, setDocumentId] = useState<string>(mention.document.id);
   const [entityId, setEntityId] = useState<string | null>(null);
 
   function applyChanges() {
@@ -251,7 +247,7 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
   const canApplyChanges =
     mention.name !== name ||
     mention.type !== entityType ||
-    mention.document?.id !== documentId;
+    mention.document.id !== documentId;
 
   const canAddEntity =
     entityId !== null &&
