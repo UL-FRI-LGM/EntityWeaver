@@ -44,12 +44,13 @@ import DeleteNodeModal from "@/components/DeleteNodeModal/DeleteNodeModal.tsx";
 const sigmaStyle: CSSProperties = {
   display: "flex",
   overflow: "hidden",
+  backgroundColor: DEFINES.backgroundColor,
 };
 
 const nodeBorderProgram = createNodeBorderProgram({
   borders: [
     {
-      size: { attribute: "borderSize", defaultValue: 0.1 },
+      size: { attribute: "borderSize", defaultValue: 0 },
       color: { attribute: "borderColor", defaultValue: "black" },
     },
     { size: { fill: true }, color: { attribute: "color" } },
@@ -405,6 +406,7 @@ const EntityGraph = observer(() => {
       className={classes.outerContainer}
       tabIndex={0}
       onKeyDown={canvasOnKeyDown}
+      style={{ backgroundColor: DEFINES.backgroundColor }}
     >
       <div
         className={classes.innerContainer}
@@ -449,7 +451,7 @@ const EntityGraph = observer(() => {
           </ControlsContainer>
           {rootStore.dataset.hasData && (
             <ControlsContainer position={"top-left"}>
-              <MiniMap width="100px" height="100px" debounceTime={5} />
+              <MiniMap width="200px" height="200px" debounceTime={5} />
             </ControlsContainer>
           )}
         </SigmaContainer>
@@ -461,7 +463,7 @@ const EntityGraph = observer(() => {
           radius: "sm",
           blur: 2,
           backgroundOpacity: 1,
-          color: "#ffffff",
+          color: DEFINES.backgroundColor,
         }}
         transitionProps={{ exitDuration: 1000, enterDelay: 0 }}
       />
