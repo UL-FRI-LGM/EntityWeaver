@@ -284,8 +284,9 @@ export const GraphEffects = observer(() => {
 
 const forceAtlasOptions: ForceAtlas2LayoutParameters<NodeType, EdgeType> = {
   settings: { slowDown: 10 },
-  getEdgeWeight: (_edge, attributes) =>
-    DEFINES.layout.edgeWeights[attributes.connectionType],
+  getEdgeWeight: (_edge, attributes) => {
+    return attributes.layoutWeight ?? 0;
+  },
 };
 
 const Fa2 = observer(() => {

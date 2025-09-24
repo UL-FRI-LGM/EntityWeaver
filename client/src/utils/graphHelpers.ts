@@ -1,11 +1,12 @@
 import { DEFINES } from "../defines.ts";
 import seedrandom, { type PRNG } from "seedrandom";
 import type Sigma from "sigma";
-import type {
-  EdgeType,
-  NodeType,
-  RootInstance,
-  UiStateInstance,
+import {
+  type EdgeType,
+  type NodeType,
+  type RootInstance,
+  rootStore,
+  type UiStateInstance,
 } from "@/stores/rootStore.ts";
 import {
   edgeTypeToProperties,
@@ -109,6 +110,25 @@ export function nodeAdjacentToHighlighted(
     }
   }
   return false;
+}
+
+export function computeLayoutContribution(sigma: Sigma<NodeType, EdgeType>) {
+  const graph = sigma.getGraph();
+  for (const edge of graph.edges()) {
+    const edgeAttributes = graph.getEdgeAttributes(edge);
+    let edgeWeight = DEFINES.layout.edgeWeights[edgeAttributes.connectionType];
+    if (isEdgeHidden(rootStore.uiState, edgeAttributes)) {
+      edgeWeight = 0;
+    } else {
+      for (const nodeId of graph.extremities(edge)) {
+        if (isNodeHidden(rootStore, nodeId, graph.getNodeAttributes(nodeId))) {
+          edgeWeight = 0;
+          break;
+        }
+      }
+    }
+    graph.mergeEdgeAttributes(edge, { layoutWeight: edgeWeight });
+  }
 }
 
 function getNodeColors(

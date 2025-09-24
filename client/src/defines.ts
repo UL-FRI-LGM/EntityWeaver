@@ -85,7 +85,7 @@ export const DEFINES = {
       MentionToDocument: 3,
       MentionToEntity: 1,
       EntityToDocument: 0,
-      MentionCollocation: 0,
+      MentionCollocation: 1,
       EntityCollocation: 0,
     },
   },

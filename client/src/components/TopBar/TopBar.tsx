@@ -12,6 +12,7 @@ import {
   IconFile,
   IconFileCode2,
   IconMapPin,
+  IconRefresh,
   IconSitemap,
   IconTextScan2,
   IconUpload,
@@ -266,6 +267,7 @@ const TopBar = observer(() => {
 
         <Switch
           label={"Entity View"}
+          disabled={rootStore.graphLoading}
           checked={rootStore.uiState.entityView}
           classNames={{ label: classes.switchLabel }}
           onChange={(event) =>
@@ -274,11 +276,30 @@ const TopBar = observer(() => {
         />
 
         <FiltersMenu />
+
+        <Button
+          variant={"default"}
+          disabled={rootStore.graphLoading || rootStore.layoutInProgress}
+          onClick={() => rootStore.setRunLayout(true)}
+          leftSection={
+            <IconRefresh
+              className={
+                !rootStore.graphLoading && rootStore.isForceAtlasRunning
+                  ? classes.iconSpin
+                  : undefined
+              }
+              size={14}
+            />
+          }
+        >
+          Reset Layout
+        </Button>
       </Group>
 
       <Group gap={40}>
         <Switch
           label={"Color By Entity Type"}
+          disabled={rootStore.graphLoading}
           checked={rootStore.uiState.colorByType}
           classNames={{ label: classes.switchLabel }}
           onChange={(event) =>
@@ -287,6 +308,7 @@ const TopBar = observer(() => {
         />
         <Switch
           label={"Highlight On Hover"}
+          disabled={rootStore.graphLoading}
           checked={rootStore.uiState.highlightOnHover}
           classNames={{ label: classes.switchLabel }}
           onChange={(event) =>
@@ -295,6 +317,7 @@ const TopBar = observer(() => {
         />
         <Switch
           label={"Highlight On Selection"}
+          disabled={rootStore.graphLoading}
           checked={rootStore.uiState.highlightOnSelect}
           classNames={{ label: classes.switchLabel }}
           onChange={(event) =>

@@ -8,6 +8,7 @@ import {
 } from "mobx-state-tree";
 import type Sigma from "sigma";
 import {
+  computeLayoutContribution,
   restoreEdgeProperties,
   setColorByType,
   updateEdgeProperties,
@@ -57,6 +58,7 @@ export interface EdgeType {
   connectionType: ConnectionType;
   hidden?: boolean;
   zIndex?: number;
+  layoutWeight?: number;
 }
 
 const Filters = types
@@ -140,6 +142,7 @@ const RootStore = types
     isForceAtlasRunning: false,
     holdingShift: false,
     loadingData: false,
+    initialLayout: false,
   }))
   .views((self) => ({
     get selectedNodeInstance() {
@@ -156,7 +159,7 @@ const RootStore = types
     },
     get graphLoading() {
       return (
-        self.loadingData || self.dataset.fetchingData || self.layoutInProgress
+        self.loadingData || self.dataset.fetchingData || self.initialLayout
       );
     },
   }))
@@ -258,14 +261,26 @@ const RootStore = types
           updateEntityViewEdges(self.sigma, self.dataset);
         }
         self.sigma.getCamera().animatedReset().catch(console.error);
-        if (runLayout) self.runLayout = runLayout;
+        if (runLayout) {
+          this.setRunLayout(runLayout);
+          self.initialLayout = true;
+        }
       }
     },
     setRunLayout(state: boolean) {
+      if (self.layoutInProgress) {
+        return;
+      }
+      if (self.sigma) {
+        computeLayoutContribution(self.sigma);
+      }
       self.runLayout = state;
     },
     setLayoutInProgress(state: boolean) {
       self.layoutInProgress = state;
+      if (!state) {
+        self.initialLayout = false;
+      }
     },
     setHoldingShift(state: boolean) {
       self.holdingShift = state;
