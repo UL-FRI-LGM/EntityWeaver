@@ -20,7 +20,7 @@ import type Graph from "graphology";
 import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
 
 function getRandomPosition(generator?: PRNG) {
-  return generator ? generator() : Math.random();
+  return generator ? generator() : Math.random() * 100;
 }
 
 function getNodeSize(edges: number) {
@@ -110,6 +110,22 @@ export function nodeAdjacentToHighlighted(
     }
   }
   return false;
+}
+
+export function assignRandomPositions(
+  sigma: Sigma<NodeType, EdgeType>,
+  seed = "hello.",
+) {
+  const rng = seedrandom(seed);
+  for (const node of sigma.getGraph().nodes()) {
+    if (
+      isNodeHidden(rootStore, node, sigma.getGraph().getNodeAttributes(node))
+    ) {
+      continue;
+    }
+    sigma.getGraph().setNodeAttribute(node, "x", getRandomPosition(rng));
+    sigma.getGraph().setNodeAttribute(node, "y", getRandomPosition(rng));
+  }
 }
 
 export function computeLayoutContribution(sigma: Sigma<NodeType, EdgeType>) {

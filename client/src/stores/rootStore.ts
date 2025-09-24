@@ -8,6 +8,7 @@ import {
 } from "mobx-state-tree";
 import type Sigma from "sigma";
 import {
+  assignRandomPositions,
   computeLayoutContribution,
   restoreEdgeProperties,
   setColorByType,
@@ -27,6 +28,7 @@ import { documentPrefix } from "@/stores/document.ts";
 import { entityPrefix } from "@/stores/entity.ts";
 import { DEFINES } from "@/defines.ts";
 import { loadFromLocalStorage, storeInLocalStorage } from "@/utils/helpers.ts";
+import FA2Layout from "graphology-layout-forceatlas2/worker";
 
 export type ConnectionType =
   | "MentionToDocument"
@@ -137,12 +139,11 @@ const RootStore = types
     hoveredEdge: null as string | null,
     uiHoveredNode: null as string | null,
     focusedNode: null as string | null,
-    runLayout: false,
-    layoutInProgress: false,
-    isForceAtlasRunning: false,
     holdingShift: false,
     loadingData: false,
     initialLayout: false,
+    forceAtlasLayout: null as FA2Layout<NodeType, EdgeType> | null,
+    isLayoutInProgress: false,
   }))
   .views((self) => ({
     get selectedNodeInstance() {
@@ -159,7 +160,7 @@ const RootStore = types
     },
     get graphLoading() {
       return (
-        self.loadingData || self.dataset.fetchingData || self.initialLayout
+        self.loadingData || self.dataset.fetchingData || self.isLayoutInProgress
       );
     },
   }))
@@ -174,11 +175,17 @@ const RootStore = types
       self.dataset = Dataset.create(dataset);
       this.runGraphUpdate(false);
     },
-    setIsForceAtlasRunning(state: boolean) {
-      self.isForceAtlasRunning = state;
-    },
     setSigma(sigma: Sigma<NodeType, EdgeType>) {
       self.sigma = sigma;
+      self.forceAtlasLayout = new FA2Layout<NodeType, EdgeType>(
+        self.sigma.getGraph(),
+        {
+          settings: { slowDown: 10, gravity: 0.5 },
+          getEdgeWeight: (_edge, attributes) => {
+            return attributes.layoutWeight ?? 0;
+          },
+        },
+      );
     },
     setDeleteNodeModalOpen(state: boolean) {
       self.deleteNodeModalOpen = state && self.selectedNode !== null;
@@ -262,25 +269,36 @@ const RootStore = types
         }
         self.sigma.getCamera().animatedReset().catch(console.error);
         if (runLayout) {
-          this.setRunLayout(runLayout);
+          this.runLayout();
           self.initialLayout = true;
         }
       }
     },
-    setRunLayout(state: boolean) {
-      if (self.layoutInProgress) {
+    runLayout() {
+      if (!self.forceAtlasLayout || self.forceAtlasLayout.isRunning()) {
         return;
       }
       if (self.sigma) {
         computeLayoutContribution(self.sigma);
+        assignRandomPositions(self.sigma);
       }
-      self.runLayout = state;
+      self.isLayoutInProgress = true;
+      self.forceAtlasLayout.start();
+
+      setTimeout(() => {
+        this.stopLayout();
+      }, DEFINES.layoutRuntimeInMs);
     },
-    setLayoutInProgress(state: boolean) {
-      self.layoutInProgress = state;
-      if (!state) {
-        self.initialLayout = false;
+    stopLayout() {
+      if (!self.forceAtlasLayout?.isRunning()) {
+        return;
       }
+      self.forceAtlasLayout.stop();
+      self.isLayoutInProgress = false;
+      self.sigma?.getGraph().forEachNode((node, attributes) => {
+        self.dataset.setNodePosition(node, attributes.nodeType, attributes);
+      });
+      self.initialLayout = false;
     },
     setHoldingShift(state: boolean) {
       self.holdingShift = state;
@@ -290,21 +308,6 @@ const RootStore = types
     },
     setHighlightOnHover(state: boolean) {
       self.uiState.highlightOnHover = state;
-    },
-    onFinishRenderingLayout() {
-      // const cameraState = self.sigma?.getCamera().getState();
-      // if (!cameraState) return;
-      // if (
-      //   cameraState.x === 0.5 &&
-      //   cameraState.y === 0.5 &&
-      //   cameraState.ratio === 1
-      // ) {
-      //   this.resetCamera();
-      // }
-      self.sigma?.getGraph().forEachNode((node, attributes) => {
-        self.dataset.setNodePosition(node, attributes.nodeType, attributes);
-      });
-      this.setLayoutInProgress(false);
     },
     resetCamera(options: Partial<AnimateOptions> = { duration: 1 }) {
       const camera = self.sigma?.getCamera();

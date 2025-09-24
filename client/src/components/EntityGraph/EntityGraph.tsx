@@ -17,7 +17,6 @@ import {
 import "@react-sigma/core/lib/style.css";
 import { observer } from "mobx-react";
 import { type EdgeType, type NodeType, useMst } from "@/stores/rootStore.ts";
-import { useWorkerLayoutForceAtlas2 } from "@react-sigma/layout-forceatlas2";
 import { createNodeImageProgram } from "@sigma/node-image";
 import {
   createNodeCompoundProgram,
@@ -37,7 +36,6 @@ import {
   isNodeHidden,
   nodeAdjacentToHighlighted,
 } from "@/utils/graphHelpers.ts";
-import type { ForceAtlas2LayoutParameters } from "graphology-layout-forceatlas2";
 import { MiniMap } from "@react-sigma/minimap";
 import DeleteNodeModal from "@/components/DeleteNodeModal/DeleteNodeModal.tsx";
 
@@ -119,7 +117,7 @@ export const GraphEffects = observer(() => {
       //     .catch(console.error);
       // },
       downNode: (event) => {
-        if (!isLeftClick(event.event.original) || rootStore.layoutInProgress)
+        if (!isLeftClick(event.event.original) || rootStore.isLayoutInProgress)
           return;
         setDraggedNode(event.node);
       },
@@ -282,45 +280,6 @@ export const GraphEffects = observer(() => {
   return null;
 });
 
-const forceAtlasOptions: ForceAtlas2LayoutParameters<NodeType, EdgeType> = {
-  settings: { slowDown: 10 },
-  getEdgeWeight: (_edge, attributes) => {
-    return attributes.layoutWeight ?? 0;
-  },
-};
-
-const Fa2 = observer(() => {
-  const rootStore = useMst();
-
-  const { start, stop, kill, isRunning } = useWorkerLayoutForceAtlas2(
-    forceAtlasOptions as ForceAtlas2LayoutParameters,
-  );
-
-  useEffect(() => {
-    if (rootStore.runLayout) {
-      rootStore.setRunLayout(false);
-      rootStore.setLayoutInProgress(true);
-      start();
-
-      setTimeout(() => {
-        stop();
-        rootStore.onFinishRenderingLayout();
-      }, DEFINES.layoutRuntimeInMs);
-    }
-
-    return () => {
-      // This prevents hot reload from working properly
-      // kill();
-    };
-  }, [start, kill, stop, rootStore.runLayout, rootStore]);
-
-  useEffect(() => {
-    rootStore.setIsForceAtlasRunning(isRunning);
-  }, [isRunning, rootStore]);
-
-  return null;
-});
-
 const EntityGraph = observer(() => {
   const rootStore = useMst();
   const [sigma, setSigma] = useState<Sigma<NodeType, EdgeType> | null>(null);
@@ -421,7 +380,6 @@ const EntityGraph = observer(() => {
           style={sigmaStyle}
         >
           <GraphEffects />
-          <Fa2 />
           <ControlsContainer position={"bottom-right"}>
             <ZoomControl className={classes.controls} />
             <FullScreenControl className={classes.controls} />

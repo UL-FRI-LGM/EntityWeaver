@@ -279,12 +279,12 @@ const TopBar = observer(() => {
 
         <Button
           variant={"default"}
-          disabled={rootStore.graphLoading || rootStore.layoutInProgress}
-          onClick={() => rootStore.setRunLayout(true)}
+          disabled={rootStore.graphLoading || rootStore.isLayoutInProgress}
+          onClick={() => rootStore.runLayout()}
           leftSection={
             <IconRefresh
               className={
-                !rootStore.graphLoading && rootStore.isForceAtlasRunning
+                !rootStore.graphLoading && rootStore.isLayoutInProgress
                   ? classes.iconSpin
                   : undefined
               }
