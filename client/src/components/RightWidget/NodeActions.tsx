@@ -15,7 +15,7 @@ const NodeActions = observer(({ node }: { node: GraphNodeInstance }) => {
 
   function onZoomToNode() {
     if (!rootStore.sigma) return;
-    zoomInOnNodeNeighbors(rootStore.sigma, rootStore.uiState, node.id).catch(
+    zoomInOnNodeNeighbors(rootStore.sigma, rootStore, node.id).catch(
       console.error,
     );
   }

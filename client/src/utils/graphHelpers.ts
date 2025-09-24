@@ -203,12 +203,16 @@ export function updateEdgeProperties(
 
 export async function zoomInOnNodeNeighbors(
   sigma: Sigma<NodeType, EdgeType>,
-  uiState: UiStateInstance,
+  appState: RootInstance,
   nodeId: string,
 ) {
   const graph = sigma.getGraph();
   let nodes = graph.neighbors(nodeId);
-  nodes = nodes.filter((n) => areVisibleNeighbors(graph, uiState, nodeId, n));
+  nodes = nodes.filter(
+    (n) =>
+      !isNodeHidden(appState, n, graph.getNodeAttributes(n)) &&
+      areVisibleNeighbors(graph, appState.uiState, nodeId, n),
+  );
   nodes.push(nodeId);
   const cameraState = getCameraStateToFitViewportToNodes(
     // @ts-ignore: TS2345
