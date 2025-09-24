@@ -8,7 +8,9 @@ import {
 } from "mobx-state-tree";
 import type Sigma from "sigma";
 import {
+  restoreEdgeProperties,
   setColorByType,
+  updateEdgeProperties,
   updateEntityViewEdges,
   updateGraph,
   updateNodeProperties,
@@ -129,7 +131,9 @@ const RootStore = types
     sigma: null as Sigma<NodeType, EdgeType> | null,
     deleteNodeModalOpen: false,
     selectedNode: null as string | null,
+    selectedEdge: null as string | null,
     hoveredNode: null as string | null,
+    hoveredEdge: null as string | null,
     uiHoveredNode: null as string | null,
     focusedNode: null as string | null,
     runLayout: false,
@@ -178,11 +182,13 @@ const RootStore = types
       self.deleteNodeModalOpen = state && self.selectedNode !== null;
     },
     setSelectedNode(nodeId: string | null) {
+      if (nodeId === self.selectedNode) return;
       if (self.selectedNode) {
         updateNodeProperties(self.sigma, self.selectedNode, {
           borderColor: undefined,
         });
       }
+      this.setSelectedEdge(null);
       self.selectedNode = nodeId;
       if (nodeId) {
         updateNodeProperties(self.sigma, nodeId, {
@@ -191,8 +197,24 @@ const RootStore = types
       }
       this.setUiHoveredNode(null);
     },
+    setSelectedEdge(edgeId: string | null) {
+      if (edgeId === self.selectedEdge) return;
+      if (self.selectedEdge && self.sigma) {
+        restoreEdgeProperties(self.sigma, self.selectedEdge);
+      }
+      this.setSelectedNode(null);
+      self.selectedEdge = edgeId;
+      if (edgeId && self.sigma) {
+        updateEdgeProperties(self.sigma, edgeId, {
+          color: DEFINES.selection.edgeColor,
+        });
+      }
+    },
     setHoveredNode(nodeId: string | null) {
       self.hoveredNode = nodeId;
+    },
+    setHoveredEdge(edgeId: string | null) {
+      self.hoveredEdge = edgeId;
     },
     setUiHoveredNode(nodeId: string | null) {
       if (self.uiHoveredNode && nodeId === null) {

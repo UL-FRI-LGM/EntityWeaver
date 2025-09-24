@@ -8,6 +8,7 @@ export const DEFINES = {
   layoutRuntimeInMs: 1000,
   selection: {
     borderColor: "#b70000",
+    edgeColor: "#b70000",
   },
   uiHover: {
     borderColor: "#048385",
@@ -29,21 +30,27 @@ export const DEFINES = {
     size: 10,
     borderSize: 0.2,
   },
-  mentionToDocumentEdge: {
-    color: "#282828",
-    width: edgeWidth,
-  },
-  mentionToEntityEdge: {
-    color: "#767676",
-    width: edgeWidth,
-  },
-  entityToDocumentEdge: {
-    color: "#282828",
-    width: edgeWidth,
-  },
-  collocationEdge: {
-    color: "#b0b0b0",
-    width: edgeWidth,
+  edges: {
+    MentionToDocument: {
+      color: "#282828",
+      width: edgeWidth,
+    },
+    MentionToEntity: {
+      color: "#767676",
+      width: edgeWidth,
+    },
+    EntityToDocument: {
+      color: "#282828",
+      width: edgeWidth,
+    },
+    MentionCollocation: {
+      color: "#b0b0b0",
+      width: edgeWidth,
+    },
+    EntityCollocation: {
+      color: "#b0b0b0",
+      width: edgeWidth,
+    },
   },
   entityTypes: {
     colors: {

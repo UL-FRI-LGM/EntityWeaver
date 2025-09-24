@@ -77,6 +77,10 @@ export function typeToImage(type: string) {
   return DEFINES.entityTypes.images.default;
 }
 
+export function edgeTypeToProperties(type: keyof typeof DEFINES.edges) {
+  return DEFINES.edges[type];
+}
+
 export function isLeftClick(event: MouseEvent | TouchEvent) {
   if (event instanceof MouseEvent) {
     const mouseEvent = event as MouseEvent;

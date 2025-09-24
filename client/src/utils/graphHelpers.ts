@@ -7,7 +7,12 @@ import type {
   RootInstance,
   UiStateInstance,
 } from "@/stores/rootStore.ts";
-import { typeIconToColor, typeToColor, typeToImage } from "./helpers.ts";
+import {
+  edgeTypeToProperties,
+  typeIconToColor,
+  typeToColor,
+  typeToImage,
+} from "./helpers.ts";
 import type { DatasetInstance, GraphNodeType } from "@/stores/dataset.ts";
 import type { MentionInstance } from "@/stores/mention.ts";
 import type Graph from "graphology";
@@ -86,11 +91,21 @@ export function nodeAdjacentToHighlighted(
   uiState: UiStateInstance,
   node: string,
   highlightedNodes: Set<string>,
+  highlightedEdges: Set<string>,
 ) {
-  for (const edge of graph.edges(node)) {
-    const neighbor = graph.opposite(node, edge)!;
-    if (highlightedNodes.has(neighbor)) {
-      return !isEdgeHidden(uiState, graph.getEdgeAttributes(edge));
+  if (highlightedNodes.size > 0) {
+    for (const edge of graph.edges(node)) {
+      const neighbor = graph.opposite(node, edge)!;
+      if (highlightedNodes.has(neighbor)) {
+        if (!isEdgeHidden(uiState, graph.getEdgeAttributes(edge))) {
+          return true;
+        }
+      }
+    }
+  }
+  for (const edge of highlightedEdges) {
+    if (graph.hasExtremity(edge, node)) {
+      return true;
     }
   }
   return false;
@@ -154,6 +169,18 @@ export function updateNodeProperties(
   graph.mergeNodeAttributes(nodeId, properties);
 }
 
+export function updateEdgeProperties(
+  sigma: Sigma<NodeType, EdgeType> | null,
+  edgeId: string,
+  properties: Partial<EdgeType>,
+) {
+  if (!sigma) {
+    return;
+  }
+  const graph = sigma.getGraph();
+  graph.mergeEdgeAttributes(edgeId, properties);
+}
+
 export async function zoomInOnNodeNeighbors(
   sigma: Sigma<NodeType, EdgeType>,
   uiState: UiStateInstance,
@@ -208,8 +235,8 @@ export function updateMentionNode(
       }
     });
     graph.addEdge(nodeId, update.documentId, {
-      size: DEFINES.mentionToDocumentEdge.width,
-      color: DEFINES.mentionToDocumentEdge.color,
+      size: DEFINES.edges.MentionToDocument.width,
+      color: DEFINES.edges.MentionToDocument.color,
       connectionType: "MentionToDocument",
     });
   }
@@ -236,8 +263,8 @@ export function updateMentionNode(
         continue;
       }
       graph.addEdge(nodeId, entityId, {
-        size: DEFINES.mentionToEntityEdge.width,
-        color: DEFINES.mentionToEntityEdge.color,
+        size: DEFINES.edges.MentionToEntity.width,
+        color: DEFINES.edges.MentionToEntity.color,
         connectionType: "MentionToEntity",
       });
     }
@@ -254,6 +281,18 @@ export function updateMentionNode(
       }
     }
   }
+}
+
+export function restoreEdgeProperties(
+  sigma: Sigma<NodeType, EdgeType>,
+  edgeId: string,
+) {
+  const attributes = sigma.getGraph().getEdgeAttributes(edgeId);
+  const properties = edgeTypeToProperties(attributes.connectionType);
+  updateEdgeProperties(sigma, edgeId, {
+    color: properties.color,
+    size: properties.width,
+  });
 }
 
 export function updateEntityViewEdges(
@@ -285,8 +324,8 @@ export function updateEntityViewEdges(
     }
     for (const documentId of connectedDocuments) {
       graph.addEdge(entity.id, documentId, {
-        size: DEFINES.entityToDocumentEdge.width,
-        color: DEFINES.entityToDocumentEdge.color,
+        size: DEFINES.edges.EntityToDocument.width,
+        color: DEFINES.edges.EntityToDocument.color,
         connectionType: "EntityToDocument",
       });
     }
@@ -311,8 +350,8 @@ export function updateEntityViewEdges(
           continue;
         }
         graph.addEdge(entity.id, entityLink.id, {
-          size: DEFINES.collocationEdge.width,
-          color: DEFINES.collocationEdge.color,
+          size: DEFINES.edges.MentionCollocation.width,
+          color: DEFINES.edges.MentionCollocation.color,
           connectionType: "EntityCollocation",
         });
       }
@@ -394,8 +433,8 @@ export function updateGraph(
       : null;
     if (document) {
       graph.addEdge(mention.id, document.id, {
-        size: DEFINES.mentionToDocumentEdge.width,
-        color: DEFINES.mentionToDocumentEdge.color,
+        size: DEFINES.edges.MentionToDocument.width,
+        color: DEFINES.edges.MentionToDocument.color,
         connectionType: "MentionToDocument",
         zIndex: 1,
       });
@@ -403,8 +442,8 @@ export function updateGraph(
 
     mention.entityLinks.forEach((link) => {
       graph.addEdge(mention.id, link.id, {
-        size: DEFINES.mentionToEntityEdge.width,
-        color: DEFINES.mentionToEntityEdge.color,
+        size: DEFINES.edges.MentionToEntity.width,
+        color: DEFINES.edges.MentionToEntity.color,
         connectionType: "MentionToEntity",
         zIndex: 2,
       });
@@ -420,8 +459,8 @@ export function updateGraph(
           continue;
         }
         graph.addEdge(mentionA.id, mentionB.id, {
-          size: DEFINES.collocationEdge.width,
-          color: DEFINES.collocationEdge.color,
+          size: DEFINES.edges.MentionCollocation.width,
+          color: DEFINES.edges.MentionCollocation.color,
           connectionType: "MentionCollocation",
         });
       }

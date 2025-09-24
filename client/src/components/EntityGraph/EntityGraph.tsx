@@ -81,6 +81,7 @@ const sigmaSettings: Partial<Settings<NodeType, EdgeType>> = {
   // labelFont: "Lato, sans-serif",
   zIndex: true,
   doubleClickZoomingRatio: 1,
+  enableEdgeEvents: true,
   // defaultDrawNodeHover: () => {
   //   return;
   // },
@@ -151,6 +152,19 @@ export const GraphEffects = observer(() => {
           rootStore.setSelectedNode(draggedNode ?? rootStore.hoveredNode);
         }
       },
+      clickEdge: (event) => {
+        if (draggedNode) return;
+        rootStore.setSelectedEdge(event.edge);
+      },
+      enterEdge(event) {
+        if (draggedNode) return;
+        rootStore.setHoveredEdge(event.edge);
+      },
+      leaveEdge(event) {
+        if (rootStore.hoveredEdge === event.edge) {
+          rootStore.setHoveredEdge(null);
+        }
+      },
     });
   }, [draggedNode, registerEvents, rootStore, rootStore.dataset, sigma]);
 
@@ -164,16 +178,25 @@ export const GraphEffects = observer(() => {
   useEffect(() => {
     if (!sigma) return;
     const highlightedNodes = new Set<string>();
+    const highlightedEdges = new Set<string>();
 
     if (rootStore.focusedNode !== null) {
       highlightedNodes.add(rootStore.focusedNode);
     } else {
-      if (rootStore.uiState.highlightOnHover && rootStore.hoveredNode)
+      if (rootStore.uiState.highlightOnHover && rootStore.hoveredNode) {
         highlightedNodes.add(rootStore.hoveredNode);
-      if (rootStore.uiState.highlightOnSelect && rootStore.selectedNode)
+      }
+      if (rootStore.uiState.highlightOnSelect && rootStore.selectedNode) {
         highlightedNodes.add(rootStore.selectedNode);
+      }
       if (rootStore.uiHoveredNode) {
         highlightedNodes.add(rootStore.uiHoveredNode);
+      }
+      if (rootStore.uiState.highlightOnSelect && rootStore.selectedEdge) {
+        highlightedEdges.add(rootStore.selectedEdge);
+      }
+      if (rootStore.uiState.highlightOnHover && rootStore.hoveredEdge) {
+        highlightedEdges.add(rootStore.hoveredEdge);
       }
     }
 
@@ -188,19 +211,18 @@ export const GraphEffects = observer(() => {
 
         if (isNodeHidden(rootStore, node, data)) {
           newData.hidden = true;
-        } else if (highlightedNodes.size > 0) {
-          if (
-            highlightedNodes.has(node) ||
-            nodeAdjacentToHighlighted(
-              graph,
-              rootStore.uiState,
-              node,
-              highlightedNodes,
-            )
-          ) {
-            newData.highlighted = true;
-            allHighLightedNodes.add(node);
-          }
+        } else if (
+          highlightedNodes.has(node) ||
+          nodeAdjacentToHighlighted(
+            graph,
+            rootStore.uiState,
+            node,
+            highlightedNodes,
+            highlightedEdges,
+          )
+        ) {
+          newData.highlighted = true;
+          allHighLightedNodes.add(node);
         }
 
         return newData;
@@ -209,21 +231,23 @@ export const GraphEffects = observer(() => {
         const newData = { ...data, hidden: false };
         const graph = sigma.getGraph();
 
-        if (isEdgeHidden(rootStore.uiState, newData)) {
-          newData.hidden = true;
-        } else if (allHighLightedNodes.size > 0) {
-          let foundOriginalNode = false;
-          for (const nodeId of graph.extremities(edge)) {
-            if (!allHighLightedNodes.has(nodeId)) {
-              newData.hidden = true;
-              break;
-            }
-            if (highlightedNodes.has(nodeId)) {
-              foundOriginalNode = true;
-            }
-          }
-          if (!foundOriginalNode) {
+        if (!highlightedEdges.has(edge)) {
+          if (isEdgeHidden(rootStore.uiState, newData)) {
             newData.hidden = true;
+          } else if (allHighLightedNodes.size > 0) {
+            let foundOriginalNode = false;
+            for (const nodeId of graph.extremities(edge)) {
+              if (!allHighLightedNodes.has(nodeId)) {
+                newData.hidden = true;
+                break;
+              }
+              if (highlightedNodes.has(nodeId)) {
+                foundOriginalNode = true;
+              }
+            }
+            if (!foundOriginalNode) {
+              newData.hidden = true;
+            }
           }
         }
 
@@ -233,11 +257,13 @@ export const GraphEffects = observer(() => {
   }, [
     rootStore,
     rootStore.hoveredNode,
+    rootStore.hoveredEdge,
     rootStore.uiState.highlightOnHover,
     rootStore.selectedNode,
     rootStore.uiState.highlightOnSelect,
     rootStore.uiHoveredNode,
     rootStore.focusedNode,
+    rootStore.selectedEdge,
     rootStore.uiState.entityView,
     rootStore.uiState.filters.mentions,
     rootStore.uiState.filters.entities,

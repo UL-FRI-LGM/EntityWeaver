@@ -286,7 +286,7 @@ const TopBar = observer(() => {
           }
         />
         <Switch
-          label={"Highlight Hovered Node"}
+          label={"Highlight On Hover"}
           checked={rootStore.uiState.highlightOnHover}
           classNames={{ label: classes.switchLabel }}
           onChange={(event) =>
@@ -294,7 +294,7 @@ const TopBar = observer(() => {
           }
         />
         <Switch
-          label={"Highlight Selected Node"}
+          label={"Highlight On Selection"}
           checked={rootStore.uiState.highlightOnSelect}
           classNames={{ label: classes.switchLabel }}
           onChange={(event) =>

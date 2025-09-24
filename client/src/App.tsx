@@ -28,6 +28,7 @@ const App = observer(() => {
   function onContextMenu(event: MouseEvent) {
     event.preventDefault();
     rootStore.setSelectedNode(null);
+    rootStore.setSelectedEdge(null);
   }
 
   return (
