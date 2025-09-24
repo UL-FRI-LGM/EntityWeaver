@@ -381,6 +381,9 @@ const EntityGraph = observer(() => {
 
   function onDeleteClick() {
     rootStore.setDeleteNodeModalOpen(true);
+    if (rootStore.selectedEdge) {
+      rootStore.deleteEdge(rootStore.selectedEdge);
+    }
   }
 
   // function odDeleteClick() {}

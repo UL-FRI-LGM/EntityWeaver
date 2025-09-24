@@ -104,7 +104,7 @@ export function nodeAdjacentToHighlighted(
     }
   }
   for (const edge of highlightedEdges) {
-    if (graph.hasExtremity(edge, node)) {
+    if (graph.hasEdge(edge) && graph.hasExtremity(edge, node)) {
       return true;
     }
   }

@@ -301,6 +301,26 @@ const RootStore = types
       self.sigma?.getGraph().dropNode(nodeInstance.id);
       self.dataset.deleteNode(nodeInstance);
     },
+    deleteEdge(edgeId: string) {
+      if (!self.sigma) {
+        return;
+      }
+
+      const graph = self.sigma.getGraph();
+      const attributes = graph.getEdgeAttributes(edgeId);
+      if (attributes.connectionType === "MentionToEntity") {
+        if (self.selectedEdge === edgeId) {
+          this.setSelectedEdge(null);
+        }
+        if (self.hoveredNode === edgeId) {
+          this.setHoveredEdge(null);
+        }
+        const mentionId = graph.source(edgeId);
+        const entityId = graph.target(edgeId);
+        const mention = self.dataset.mentions.get(mentionId);
+        mention?.removeEntityLink(entityId);
+      }
+    },
   }));
 
 export interface RootInstance extends Instance<typeof RootStore> {}
