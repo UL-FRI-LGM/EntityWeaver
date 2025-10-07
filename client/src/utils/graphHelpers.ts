@@ -20,15 +20,15 @@ import type Graph from "graphology";
 import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
 
 function getRandomPosition(generator?: PRNG) {
-  return generator ? generator() : Math.random() * 100;
+  return generator ? generator() : Math.random() * 10000;
 }
 
-function getNodeSize(edges: number) {
-  const size = edges * DEFINES.sizePerEdge;
-  if (size < DEFINES.minNodeSize) return DEFINES.minNodeSize;
-  if (size > DEFINES.maxNodeSize) return DEFINES.maxNodeSize;
-  return size;
-}
+// function getNodeSize(edges: number) {
+//   const size = edges * DEFINES.sizePerEdge;
+//   if (size < DEFINES.minNodeSize) return DEFINES.minNodeSize;
+//   if (size > DEFINES.maxNodeSize) return DEFINES.maxNodeSize;
+//   return size;
+// }
 
 // TODO should be cached
 export function isNodeHidden(
@@ -434,7 +434,7 @@ export function updateGraph(
     graph.addNode(entity.id, {
       x: entity.x ?? getRandomPosition(rng),
       y: entity.y ?? getRandomPosition(rng),
-      size: 15,
+      size: DEFINES.entity.size,
       label: entity.name,
       color: color,
       image: entityImage,
@@ -511,10 +511,10 @@ export function updateGraph(
   //   const nodeSize = getNodeSize(graph.edges(document.globalId).length);
   //   graph.updateNodeAttribute(document.globalId, "size", () => nodeSize);
   // }
-  dataset.entities.forEach((entity) => {
-    const nodeSize = getNodeSize(graph.edges(entity.id).length);
-    graph.updateNodeAttribute(entity.id, "size", () => nodeSize);
-  });
+  // dataset.entities.forEach((entity) => {
+  //   const nodeSize = getNodeSize(graph.edges(entity.id).length);
+  //   graph.updateNodeAttribute(entity.id, "size", () => nodeSize);
+  // });
 
   sigma.refresh();
 }

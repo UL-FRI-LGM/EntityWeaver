@@ -189,6 +189,8 @@ const FileMenu = observer(() => {
       const contents = await readFile(graphFile, "text");
       const datasetSnapshot = JSON.parse(contents) as DatasetSnapShotIn;
       rootStore.setDataset(datasetSnapshot);
+      // const dataset = JSON.parse(contents);
+      // rootStore.dataset.loadDataset(dataset);
     } catch (error) {
       console.error(error);
     } finally {

@@ -29,6 +29,7 @@ import { entityPrefix } from "@/stores/entity.ts";
 import { DEFINES } from "@/defines.ts";
 import { loadFromLocalStorage, storeInLocalStorage } from "@/utils/helpers.ts";
 import FA2Layout from "graphology-layout-forceatlas2/worker";
+import NoverlapLayout from "graphology-layout-noverlap/worker";
 
 export type ConnectionType =
   | "MentionToDocument"
@@ -143,7 +144,9 @@ const RootStore = types
     loadingData: false,
     initialLayout: false,
     forceAtlasLayout: null as FA2Layout<NodeType, EdgeType> | null,
-    isLayoutInProgress: false,
+    noOverlapLayout: null as NoverlapLayout | null,
+    atlasLayoutInProgress: false,
+    noverlapLayoutInProgress: false,
   }))
   .views((self) => ({
     get selectedNodeInstance() {
@@ -159,9 +162,13 @@ const RootStore = types
       }
     },
     get graphLoading() {
+      return false;
       return (
-        self.loadingData || self.dataset.fetchingData || self.isLayoutInProgress
+        self.loadingData || self.dataset.fetchingData || this.isLayoutInProgress
       );
+    },
+    get isLayoutInProgress() {
+      return self.atlasLayoutInProgress || self.noverlapLayoutInProgress;
     },
   }))
   .actions((self) => ({
@@ -180,12 +187,20 @@ const RootStore = types
       self.forceAtlasLayout = new FA2Layout<NodeType, EdgeType>(
         self.sigma.getGraph(),
         {
-          settings: { slowDown: 10, gravity: 0.5 },
+          settings: { slowDown: 10, gravity: 0, scalingRatio: 0.001 },
           getEdgeWeight: (_edge, attributes) => {
             return attributes.layoutWeight ?? 0;
           },
         },
       );
+      // self.noOverlapLayout = new NoverlapLayout(self.sigma.getGraph(), {
+      //   inputReducer: (key, attr) => ({
+      //     x: attr.x,
+      //     y: attr.y,
+      //     size: attr.size,
+      //   }),
+      //   settings: { margin: 0, ratio: 0.2 },
+      // });
     },
     setDeleteNodeModalOpen(state: boolean) {
       self.deleteNodeModalOpen = state && self.selectedNode !== null;
@@ -282,22 +297,39 @@ const RootStore = types
         computeLayoutContribution(self.sigma);
         assignRandomPositions(self.sigma);
       }
-      self.isLayoutInProgress = true;
+      self.atlasLayoutInProgress = true;
       self.forceAtlasLayout.start();
 
       setTimeout(() => {
-        this.stopLayout();
+        this.stopAtlasLayout();
       }, DEFINES.layoutRuntimeInMs);
     },
-    stopLayout() {
+    stopAtlasLayout() {
       if (!self.forceAtlasLayout?.isRunning()) {
+        self.atlasLayoutInProgress = false;
         return;
       }
       self.forceAtlasLayout.stop();
-      self.isLayoutInProgress = false;
+      self.atlasLayoutInProgress = false;
+
+      if (self.noOverlapLayout) {
+        self.noverlapLayoutInProgress = true;
+        self.noOverlapLayout?.start();
+        setTimeout(() => {
+          this.stopNoverlapLayout();
+        }, DEFINES.layoutRuntimeInMs);
+      }
+    },
+    stopNoverlapLayout() {
+      if (!self.noOverlapLayout?.isRunning()) {
+        self.noverlapLayoutInProgress = false;
+        return;
+      }
+      self.noOverlapLayout.stop();
       self.sigma?.getGraph().forEachNode((node, attributes) => {
         self.dataset.setNodePosition(node, attributes.nodeType, attributes);
       });
+      self.noverlapLayoutInProgress = false;
       self.initialLayout = false;
     },
     setHoldingShift(state: boolean) {

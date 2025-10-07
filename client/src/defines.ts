@@ -1,4 +1,4 @@
-const edgeWidth = 4;
+const edgeWidth = 2;
 
 export const DEFINES = {
   uiStateStorageKey: "graph-ui-state",
@@ -23,6 +23,7 @@ export const DEFINES = {
   entity: {
     color: "#61b5d4",
     iconColor: "black",
+    size: 15,
     borderSize: 0.15,
   },
   mention: {

@@ -78,11 +78,6 @@ export const Dataset = types
     toJSON() {
       return getSnapshot(self);
     },
-    afterAttach() {
-      if (import.meta.env.VITE_AUTO_LOAD_DEMO === "true") {
-        this.loadDemo().catch((err) => console.error(err));
-      }
-    },
     deleteNode(nodeInstance: GraphNodeInstance) {
       if (getType(nodeInstance) === Document) {
         self.documents.get(nodeInstance.id)?.remove();
@@ -121,20 +116,12 @@ export const Dataset = types
         mention.setPosition(position);
       }
     },
-    loadDemo: flow(function* () {
-      if (self.fetchingData) return;
-      self.fetchingData = true;
-      yield nextFrame();
-
-      const data: DatasetDB = yield loadDemo();
-      if (!isAlive(self)) {
-        return;
-      }
-
+    loadDataset(data: DatasetDB) {
       self.mentions.clear();
       self.documents.clear();
       self.entities.clear();
       self.collocations.clear();
+      console.log(data);
 
       data.documents.forEach((document) => {
         document.id = `${documentPrefix}${document.id}`;
@@ -199,11 +186,28 @@ export const Dataset = types
           mentions: Object.fromEntries(mentionsMap),
         });
       });
-
-      self.fetchingData = false;
-
       const rootStore = getRoot<RootInstance>(self);
       rootStore?.onDatasetUpdate();
+    },
+  }))
+  .actions((self) => ({
+    afterAttach() {
+      if (import.meta.env.VITE_AUTO_LOAD_DEMO === "true") {
+        this.loadDemo().catch((err) => console.error(err));
+      }
+    },
+    loadDemo: flow(function* () {
+      if (self.fetchingData) return;
+      self.fetchingData = true;
+      yield nextFrame();
+
+      const data: DatasetDB = yield loadDemo();
+      if (!isAlive(self)) {
+        return;
+      }
+      self.loadDataset(data);
+
+      self.fetchingData = false;
     }),
   }));
 

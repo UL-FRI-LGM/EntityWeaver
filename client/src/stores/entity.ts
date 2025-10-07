@@ -33,6 +33,7 @@ export const Entity = types
   .actions((self) => ({
     setName(name: string) {
       self.name = name;
+      updateNodeProperties(self.sigma, self.id, { label: name });
     },
     setType(type: string) {
       self.type = type;
