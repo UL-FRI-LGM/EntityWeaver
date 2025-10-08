@@ -1,40 +1,14 @@
-import {
-  flow,
-  getRoot,
-  getSnapshot,
-  getType,
-  type Instance,
-  isAlive,
-  type SnapshotIn,
-  types,
-} from "mobx-state-tree";
-import {
-  Mention,
-  type MentionDB,
-  type MentionInstance,
-  mentionPrefix,
-} from "@/stores/mention.ts";
-import {
-  Entity,
-  type EntityDB,
-  type EntityInstance,
-  entityPrefix,
-} from "@/stores/entity.ts";
-import {
-  Document,
-  type DocumentDB,
-  type DocumentInstance,
-  documentPrefix,
-} from "@/stores/document.ts";
-import { loadDemo, nextFrame } from "@/utils/helpers.ts";
-import type { RootInstance } from "@/stores/rootStore.ts";
+import { Mention, type MentionDB } from "@/stores/mention.ts";
+import { Entity, type EntityDB } from "@/stores/entity.ts";
+import { Document, type DocumentDB } from "@/stores/document.ts";
 import { Collocation, type CollocationDB } from "@/stores/collocation.ts";
+import { makeAutoObservable, runInAction } from "mobx";
+import { appState, type AppState } from "@/stores/rootStore.ts";
+import type { GraphEntity } from "@/stores/graphEntity.ts";
+import { loadDemo, readFile } from "@/utils/helpers.ts";
+import { makePersistable } from "mobx-persist-store";
 
 export type GraphNodeType = "Document" | "Entity" | "Mention";
-export type GraphNodeInstance =
-  | DocumentInstance
-  | EntityInstance
-  | MentionInstance;
 
 export interface DatasetDB {
   mentions: MentionDB[];
@@ -43,173 +17,239 @@ export interface DatasetDB {
   collocations: CollocationDB[];
 }
 
-export const Dataset = types
-  .model({
-    mentions: types.map(Mention),
-    documents: types.map(Document),
-    entities: types.map(Entity),
-    collocations: types.map(Collocation),
-  })
-  .volatile(() => ({
-    fetchingData: false,
-  }))
-  .views((self) => ({
-    get mentionList() {
-      return Array.from(self.mentions.values());
-    },
-    get documentList() {
-      return Array.from(self.documents.values());
-    },
-    get entityList() {
-      return Array.from(self.entities.values());
-    },
-    get collocationsList() {
-      return Array.from(self.collocations.values());
-    },
-    get hasData() {
-      return (
-        self.entities.size > 0 ||
-        self.mentions.size > 0 ||
-        self.documents.size > 0
+export class Dataset {
+  appState: AppState;
+
+  mentions: Map<string, Mention> = new Map<string, Mention>();
+  documents: Map<string, Document> = new Map<string, Document>();
+  entities: Map<string, Entity> = new Map<string, Entity>();
+  collocations: Map<string, Collocation> = new Map<string, Collocation>();
+  fetchingData = false;
+
+  constructor(appState: AppState) {
+    this.appState = appState;
+    makeAutoObservable(this);
+
+    if (import.meta.env.VITE_STORE_GRAPH === "true") {
+      makePersistable(this, {
+        name: "NERVIS-Dataset",
+        properties: [
+          {
+            key: "documents",
+            serialize: (value) => {
+              return Array.from(value.values()).map((value) => value.toJson());
+            },
+            deserialize: (value) => {
+              if (!Array.isArray(value)) return new Map<string, Document>();
+              return new Map(
+                value.map((documentDB: DocumentDB) => {
+                  const document = Document.fromJson(documentDB, this);
+                  return [document.id, document];
+                }),
+              );
+            },
+          },
+          {
+            // @ts-ignore
+            key: "entities",
+            // @ts-ignore
+            serialize: (value) => {
+              return Array.from(value.values()).map((value) => value.toJson());
+            },
+            // @ts-ignore
+            deserialize: (value) => {
+              if (!Array.isArray(value)) return new Map<string, Entity>();
+              return new Map(
+                value.map((entityDB: EntityDB) => {
+                  const entity = Entity.fromJson(entityDB, this);
+                  return [entity.id, entity];
+                }),
+              );
+            },
+          },
+          {
+            // @ts-ignore
+            key: "mentions",
+            // @ts-ignore
+            serialize: (value) => {
+              return Array.from(value.values()).map((value) => value.toJson());
+            },
+            // @ts-ignore
+            deserialize: (value) => {
+              if (!Array.isArray(value)) return new Map<string, Mention>();
+              return new Map(
+                value.map((mentionDB: MentionDB) => {
+                  const mention = Mention.fromJson(mentionDB, this);
+                  return [mention.id, mention];
+                }),
+              );
+            },
+          },
+        ],
+      })
+        .then(() => {
+          if (this.hasData) {
+            appState.runGraphUpdate(false);
+          } else if (import.meta.env.VITE_LOAD_DEMO === "true") {
+            this.loadDemo().catch((error) => console.error(error));
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    } else if (import.meta.env.VITE_LOAD_DEMO === "true") {
+      this.loadDemo().catch((error) => console.error(error));
+    }
+  }
+
+  toJson(): DatasetDB {
+    return {
+      mentions: this.mentionList.map((m) => m.toJson()),
+      entities: this.entityList.map((e) => e.toJson()),
+      documents: this.documentList.map((d) => d.toJson()),
+      collocations: this.collocationsList.map((c) => c.toJson()),
+    };
+  }
+
+  get hasData() {
+    return (
+      this.entities.size > 0 ||
+      this.mentions.size > 0 ||
+      this.documents.size > 0
+    );
+  }
+
+  get mentionList() {
+    return Array.from(this.mentions.values());
+  }
+  get documentList() {
+    return Array.from(this.documents.values());
+  }
+  get entityList() {
+    return Array.from(this.entities.values());
+  }
+  get collocationsList() {
+    return Array.from(this.collocations.values());
+  }
+
+  setNodePosition(
+    nodeId: string,
+    nodeType: GraphNodeType,
+    position: { x?: number | null; y?: number | null },
+  ) {
+    if (nodeType === "Document") {
+      const document = this.documents.get(nodeId);
+      if (!document) {
+        console.warn(`Document with id ${nodeId} not found`);
+        return;
+      }
+      document.setPosition(position);
+      return;
+    } else if (nodeType === "Entity") {
+      const entity = this.entities.get(nodeId);
+      if (!entity) {
+        console.warn(`Entity with id ${nodeId} not found`);
+        return;
+      }
+      entity.setPosition(position);
+    } else if (nodeType === "Mention") {
+      const mention = this.mentions.get(nodeId);
+      if (!mention) {
+        console.warn(`Mention with id ${nodeId} not found`);
+        return;
+      }
+      mention.setPosition(position);
+    }
+  }
+
+  deleteNode(nodeInstance: GraphEntity) {
+    if (nodeInstance instanceof Document) {
+      this.documents.get(nodeInstance.id)?.dispose();
+    } else if (nodeInstance instanceof Entity) {
+      this.entities.get(nodeInstance.id)?.dispose();
+    } else if (nodeInstance instanceof Mention) {
+      this.mentions.get(nodeInstance.id)?.dispose();
+    }
+  }
+
+  async loadDemo() {
+    if (this.fetchingData) return;
+    this.fetchingData = true;
+
+    try {
+      const data: DatasetDB = await loadDemo();
+      this.loadDataset(data);
+    } finally {
+      runInAction(() => {
+        this.fetchingData = false;
+      });
+    }
+  }
+
+  async loadFromFile(file: File) {
+    if (this.fetchingData) return;
+    this.fetchingData = true;
+
+    try {
+      const contents = await readFile(file, "text");
+      const dataset = JSON.parse(contents) as DatasetDB;
+      this.loadDataset(dataset);
+    } finally {
+      runInAction(() => {
+        this.fetchingData = false;
+      });
+    }
+  }
+
+  loadDataset(data: DatasetDB) {
+    this.mentions.clear();
+    this.documents.clear();
+    this.entities.clear();
+    this.collocations.clear();
+
+    data.documents.forEach((document) => {
+      this.documents.set(
+        `${Document.prefix}${document.id}`,
+        Document.fromJson(document, this),
       );
-    },
-  }))
-  .actions((self) => ({
-    toJSON() {
-      return getSnapshot(self);
-    },
-    deleteNode(nodeInstance: GraphNodeInstance) {
-      if (getType(nodeInstance) === Document) {
-        self.documents.get(nodeInstance.id)?.remove();
-      } else if (getType(nodeInstance) === Entity) {
-        self.entities.get(nodeInstance.id)?.remove();
-      } else if (getType(nodeInstance) === Mention) {
-        self.mentions.get(nodeInstance.id)?.remove();
+    });
+
+    data.entities.forEach((entity) => {
+      this.entities.set(
+        `${Entity.prefix}${entity.id}`,
+        Entity.fromJson(entity, this),
+      );
+    });
+
+    data.mentions.forEach((mention) => {
+      this.mentions.set(
+        `${Mention.prefix}${mention.id}`,
+        Mention.fromJson(mention, this),
+      );
+    });
+
+    data.collocations.forEach((collocation) => {
+      try {
+        const collocationInstance = Collocation.fromJson(collocation, this);
+        this.collocations.set(
+          `${Collocation.prefix}${collocation.id}`,
+          collocationInstance,
+        );
+      } catch (error) {
+        console.error(error);
       }
-    },
-    setNodePosition(
-      nodeId: string,
-      nodeType: GraphNodeType,
-      position: { x?: number | null; y?: number | null },
-    ) {
-      if (nodeType === "Document") {
-        const document = self.documents.get(nodeId);
-        if (!document) {
-          console.warn(`Document with id ${nodeId} not found`);
-          return;
-        }
-        document.setPosition(position);
-        return;
-      } else if (nodeType === "Entity") {
-        const entity = self.entities.get(nodeId);
-        if (!entity) {
-          console.warn(`Entity with id ${nodeId} not found`);
-          return;
-        }
-        entity.setPosition(position);
-      } else if (nodeType === "Mention") {
-        const mention = self.mentions.get(nodeId);
-        if (!mention) {
-          console.warn(`Mention with id ${nodeId} not found`);
-          return;
-        }
-        mention.setPosition(position);
-      }
-    },
-    loadDataset(data: DatasetDB) {
-      self.mentions.clear();
-      self.documents.clear();
-      self.entities.clear();
-      self.collocations.clear();
-      console.log(data);
+    });
 
-      data.documents.forEach((document) => {
-        document.id = `${documentPrefix}${document.id}`;
-        self.documents.set(document.id, document);
-      });
+    let recomputeLayout = this.mentionList.some(
+      (mention) => mention.x === undefined || mention.y === undefined,
+    );
+    recomputeLayout ||= this.entityList.some(
+      (entity) => entity.x === undefined || entity.y === undefined,
+    );
+    recomputeLayout ||= this.documentList.some(
+      (document) => document.x === undefined || document.y === undefined,
+    );
 
-      data.entities.forEach((entity) => {
-        entity.id = `${entityPrefix}${entity.id}`;
-        self.entities.set(entity.id, entity);
-      });
-
-      data.mentions.forEach((mention) => {
-        mention.id = `${mentionPrefix}${mention.id}`;
-        mention.document_id = `${documentPrefix}${mention.document_id}`;
-        self.mentions.set(mention.id, {
-          id: mention.id,
-          name: mention.name,
-          type: mention.type,
-          document: mention.document_id,
-          entityLinks: Object.fromEntries(
-            mention.links.map((link) => {
-              link.entity_id = `${entityPrefix}${link.entity_id}`;
-              const linkedEntity = self.entities.get(link.entity_id);
-              if (!linkedEntity) {
-                throw new Error(`Entity with id ${link.entity_id} not found`);
-              }
-              return [linkedEntity.id, linkedEntity.id];
-            }),
-          ),
-        });
-      });
-
-      data.collocations.forEach((collocation) => {
-        collocation.id = `Collocation-${collocation.id}`;
-        const mentionsMap = new Map<string, string>();
-        const fullDocumentId = `${documentPrefix}${collocation.document_id}`;
-        collocation.mentions.forEach((mentionId) => {
-          const fullMentionId = `${mentionPrefix}${mentionId}`;
-          const mention = self.mentions.get(fullMentionId);
-          if (!mention) {
-            console.warn(
-              `Mention with id ${fullMentionId} not found for collocation ${collocation.id}`,
-            );
-            return;
-          }
-          if (mention?.document.id !== fullDocumentId) {
-            console.warn(
-              `Mention with id ${fullMentionId} does not belong to document ${fullDocumentId} for collocation ${collocation.id}`,
-            );
-            return;
-          }
-          mentionsMap.set(mention.id, mention.id);
-        });
-        if (mentionsMap.size < 2) {
-          console.warn(
-            `Collocation with id ${collocation.id} has less than 2 valid mentions, skipping`,
-          );
-          return;
-        }
-        self.collocations.set(collocation.id, {
-          id: collocation.id,
-          mentions: Object.fromEntries(mentionsMap),
-        });
-      });
-      const rootStore = getRoot<RootInstance>(self);
-      rootStore?.onDatasetUpdate();
-    },
-  }))
-  .actions((self) => ({
-    afterAttach() {
-      if (import.meta.env.VITE_AUTO_LOAD_DEMO === "true") {
-        this.loadDemo().catch((err) => console.error(err));
-      }
-    },
-    loadDemo: flow(function* () {
-      if (self.fetchingData) return;
-      self.fetchingData = true;
-      yield nextFrame();
-
-      const data: DatasetDB = yield loadDemo();
-      if (!isAlive(self)) {
-        return;
-      }
-      self.loadDataset(data);
-
-      self.fetchingData = false;
-    }),
-  }));
-
-export interface DatasetInstance extends Instance<typeof Dataset> {}
-export interface DatasetSnapShotIn extends SnapshotIn<typeof Dataset> {}
+    appState.runGraphUpdate(recomputeLayout);
+  }
+}

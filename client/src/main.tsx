@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 // import "./index.css";
 import App from "./App.tsx";
-import { rootStore, RootStoreProvider } from "./stores/rootStore.ts";
+import { appState, AppStateProvider } from "./stores/rootStore.ts";
 import "@mantine/core/styles.css";
 import { createTheme, MantineProvider, virtualColor } from "@mantine/core";
 
@@ -19,10 +19,10 @@ const theme = createTheme({
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RootStoreProvider value={rootStore}>
+    <AppStateProvider value={appState}>
       <MantineProvider defaultColorScheme="dark" theme={theme}>
         <App />
       </MantineProvider>
-    </RootStoreProvider>
+    </AppStateProvider>
   </StrictMode>,
 );

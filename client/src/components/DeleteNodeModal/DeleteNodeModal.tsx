@@ -1,11 +1,10 @@
 import { observer } from "mobx-react";
 import { Button, Group, Modal, Text, Tooltip } from "@mantine/core";
-import { useMst } from "@/stores/rootStore.ts";
-import { getType } from "mobx-state-tree";
-import { Document, type DocumentInstance } from "@/stores/document.ts";
+import { useAppState } from "@/stores/rootStore.ts";
+import { Document } from "@/stores/document.ts";
 
 const DeleteNodeModal = observer(() => {
-  const rootStore = useMst();
+  const rootStore = useAppState();
 
   const nodeAttributes = rootStore.selectedNode
     ? rootStore.sigma?.getGraph().getNodeAttributes(rootStore.selectedNode)
@@ -20,8 +19,9 @@ const DeleteNodeModal = observer(() => {
 
   const canDeleteNode =
     rootStore.selectedNodeInstance !== null &&
-    (getType(rootStore.selectedNodeInstance) !== Document ||
-      (rootStore.selectedNodeInstance as DocumentInstance).canDelete);
+    rootStore.selectedNodeInstance &&
+    (!(rootStore.selectedNodeInstance instanceof Document) ||
+      (rootStore.selectedNodeInstance as Document).canDelete);
 
   return (
     <Modal

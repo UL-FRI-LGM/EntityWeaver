@@ -1,55 +1,70 @@
-import { destroy, getRoot, type Instance, types } from "mobx-state-tree";
-import { updateNodeProperties } from "@/utils/graphHelpers.ts";
-import type Sigma from "sigma";
-import type { EdgeType, NodeType, RootInstance } from "@/stores/rootStore.ts";
 import { DEFINES } from "@/defines.ts";
+import { GraphEntity } from "@/stores/graphEntity.ts";
+import type { Dataset } from "@/stores/dataset.ts";
+import { makeObservable, override } from "mobx";
+import { updateNodeProperties } from "@/utils/graphHelpers.ts";
 
 export type EntityTypes = keyof typeof DEFINES.entityTypes.names;
 
-export const entityPrefix = "Entity-";
 export interface EntityDB {
   id: string;
   name: string;
   type: string;
+  x?: number;
+  y?: number;
 }
 
-export const Entity = types
-  .model({
-    id: types.identifier,
-    x: types.maybe(types.number),
-    y: types.maybe(types.number),
-    name: types.string,
-    type: types.string,
-  })
-  .views((self) => ({
-    get searchString() {
-      return `${self.name} (${self.id})`;
-    },
-    get sigma(): Sigma<NodeType, EdgeType> | null {
-      const rootStore = getRoot(self) as RootInstance;
-      return rootStore.sigma;
-    },
-  }))
-  .actions((self) => ({
-    setName(name: string) {
-      self.name = name;
-      updateNodeProperties(self.sigma, self.id, { label: name });
-    },
-    setType(type: string) {
-      self.type = type;
-    },
-    setPosition(position: { x?: number | null; y?: number | null }) {
-      self.x = position.x ?? undefined;
-      self.y = position.y ?? undefined;
-      if (self.x !== null || self.y !== null) {
-        updateNodeProperties(self.sigma, self.id, { x: self.x, y: self.y });
-      }
-    },
-    remove() {
-      const rootStore = getRoot(self) as RootInstance;
-      rootStore.onNodeDeleted(self.id);
-      destroy(self);
-    },
-  }));
+export class Entity extends GraphEntity {
+  static prefix = "Entity-";
 
-export interface EntityInstance extends Instance<typeof Entity> {}
+  _name: string;
+  type: string;
+
+  constructor(
+    internal_id: string,
+    name: string,
+    type: string,
+    dataset: Dataset,
+    x?: number,
+    y?: number,
+  ) {
+    super(internal_id, Entity.prefix, dataset, x, y);
+    this._name = name;
+    this.type = type;
+
+    makeObservable(this, {
+      _name: true,
+      name: true,
+      type: true,
+      searchString: true,
+      canDelete: override,
+    });
+  }
+
+  static fromJson(data: EntityDB, dataset: Dataset): Entity {
+    return new Entity(data.id, data.name, data.type, dataset, data.x, data.y);
+  }
+
+  toJson(): EntityDB {
+    return {
+      id: this.internal_id,
+      name: this.name,
+      type: this.type,
+      x: this.x,
+      y: this.y,
+    };
+  }
+
+  get name(): string {
+    return this._name;
+  }
+
+  set name(name: string) {
+    this._name = name;
+    updateNodeProperties(this.dataset.appState.sigma, this.id, { label: name });
+  }
+
+  get searchString() {
+    return `${this.name} (${this.internal_id})`;
+  }
+}

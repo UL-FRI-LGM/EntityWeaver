@@ -1,63 +1,57 @@
-import {
-  destroy,
-  getRoot,
-  type IAnyModelType,
-  type Instance,
-  types,
-} from "mobx-state-tree";
-import { updateNodeProperties } from "@/utils/graphHelpers.ts";
-import type Sigma from "sigma";
-import type { EdgeType, NodeType, RootInstance } from "@/stores/rootStore.ts";
-import { Mention, type MentionInstance } from "@/stores/mention.ts";
+import { GraphEntity } from "@/stores/graphEntity.ts";
+import type { Mention } from "@/stores/mention.ts";
+import type { Dataset } from "@/stores/dataset.ts";
+import { computed, makeObservable, observable, override } from "mobx";
 
-export const documentPrefix = "Document-";
 export interface DocumentDB {
   id: string;
   title: string;
+  x?: number;
+  y?: number;
 }
 
-export const Document = types
-  .model({
-    id: types.identifier,
-    x: types.maybe(types.number),
-    y: types.maybe(types.number),
-    title: types.string,
-    mentions: types.map(
-      types.safeReference(
-        types.late((): IAnyModelType => Mention),
-        { acceptsUndefined: false },
-      ),
-    ),
-  })
-  .views((self) => ({
-    get sigma(): Sigma<NodeType, EdgeType> | null {
-      const rootStore = getRoot(self) as RootInstance;
-      return rootStore.sigma;
-    },
-    get canDelete(): boolean {
-      return self.mentions.size === 0;
-    },
-    get mentionList(): MentionInstance[] {
-      return Array.from(self.mentions.values());
-    },
-  }))
-  .actions((self) => ({
-    setTitle(title: string) {
-      self.title = title;
-    },
-    setPosition(position: { x?: number | null; y?: number | null }) {
-      self.x = position.x ?? undefined;
-      self.y = position.y ?? undefined;
-      if (self.x !== null || self.y !== null) {
-        updateNodeProperties(self.sigma, self.id, { x: self.x, y: self.y });
-      }
-    },
-    remove() {
-      if (!self.canDelete) return;
-      const rootStore = getRoot(self) as RootInstance;
-      rootStore.onNodeDeleted(self.id);
-      destroy(self);
-    },
-  }));
+export class Document extends GraphEntity {
+  static prefix = "Document-";
 
-export interface DocumentInstance extends Instance<typeof Document> {}
+  title: string;
+  mentions: Map<string, Mention> = new Map<string, Mention>();
+
+  constructor(
+    internal_id: string,
+    title: string,
+    dataset: Dataset,
+    x?: number,
+    y?: number,
+  ) {
+    super(internal_id, Document.prefix, dataset, x, y);
+    this.title = title;
+
+    makeObservable(this, {
+      title: observable,
+      mentions: observable,
+      mentionList: computed,
+      canDelete: override,
+    });
+  }
+
+  static fromJson(data: DocumentDB, dataset: Dataset): Document {
+    return new Document(data.id, data.title, dataset, data.x, data.y);
+  }
+
+  toJson(): DocumentDB {
+    return {
+      id: this.internal_id,
+      title: this.title,
+      x: this.x,
+      y: this.y,
+    };
+  }
+
+  get mentionList() {
+    return Array.from(this.mentions.values());
+  }
+
+  get canDelete(): boolean {
+    return this.mentions.size === 0;
+  }
+}

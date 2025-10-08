@@ -6,12 +6,12 @@ import {
   IconZoomScan,
 } from "@tabler/icons-react";
 import sharedClasses from "@/components/RightWidget/shared.module.css";
-import type { GraphNodeInstance } from "@/stores/dataset.ts";
-import { useMst } from "@/stores/rootStore.ts";
+import { useAppState } from "@/stores/rootStore.ts";
 import { zoomInOnNodeNeighbors } from "@/utils/graphHelpers.ts";
+import type { GraphEntity } from "@/stores/graphEntity.ts";
 
-const NodeActions = observer(({ node }: { node: GraphNodeInstance }) => {
-  const rootStore = useMst();
+const NodeActions = observer(({ node }: { node: GraphEntity }) => {
+  const rootStore = useAppState();
 
   function onZoomToNode() {
     if (!rootStore.sigma) return;

@@ -2,11 +2,10 @@ import { DEFINES } from "../defines.ts";
 import seedrandom, { type PRNG } from "seedrandom";
 import type Sigma from "sigma";
 import {
+  appState,
+  AppState,
   type EdgeType,
   type NodeType,
-  type RootInstance,
-  rootStore,
-  type UiStateInstance,
 } from "@/stores/rootStore.ts";
 import {
   edgeTypeToProperties,
@@ -14,10 +13,11 @@ import {
   typeToColor,
   typeToImage,
 } from "./helpers.ts";
-import type { DatasetInstance, GraphNodeType } from "@/stores/dataset.ts";
-import type { MentionInstance } from "@/stores/mention.ts";
+import { Dataset, type GraphNodeType } from "@/stores/dataset.ts";
 import type Graph from "graphology";
 import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
+import type { UiState } from "@/stores/uiState.ts";
+import type { Mention } from "@/stores/mention.ts";
 
 function getRandomPosition(generator?: PRNG) {
   return generator ? generator() : Math.random() * 10000;
@@ -32,7 +32,7 @@ function getRandomPosition(generator?: PRNG) {
 
 // TODO should be cached
 export function isNodeHidden(
-  appState: RootInstance,
+  appState: AppState,
   nodeId: string,
   nodeAttributes: NodeType,
 ) {
@@ -60,10 +60,7 @@ export function isNodeHidden(
   );
 }
 
-export function isEdgeHidden(
-  uiState: UiStateInstance,
-  edgeAttributes: EdgeType,
-) {
+export function isEdgeHidden(uiState: UiState, edgeAttributes: EdgeType) {
   return (
     (!uiState.entityView &&
       (edgeAttributes.connectionType === "EntityToDocument" ||
@@ -76,7 +73,7 @@ export function isEdgeHidden(
 
 function areVisibleNeighbors(
   graph: Graph<NodeType, EdgeType>,
-  uiState: UiStateInstance,
+  uiState: UiState,
   nodeId: string,
   otherNodeId: string,
 ) {
@@ -89,7 +86,7 @@ function areVisibleNeighbors(
 
 export function nodeAdjacentToHighlighted(
   graph: Graph<NodeType, EdgeType>,
-  uiState: UiStateInstance,
+  uiState: UiState,
   node: string,
   highlightedNodes: Set<string>,
   highlightedEdges: Set<string>,
@@ -119,7 +116,7 @@ export function assignRandomPositions(
   const rng = seedrandom(seed);
   for (const node of sigma.getGraph().nodes()) {
     if (
-      isNodeHidden(rootStore, node, sigma.getGraph().getNodeAttributes(node))
+      isNodeHidden(appState, node, sigma.getGraph().getNodeAttributes(node))
     ) {
       continue;
     }
@@ -133,11 +130,11 @@ export function computeLayoutContribution(sigma: Sigma<NodeType, EdgeType>) {
   for (const edge of graph.edges()) {
     const edgeAttributes = graph.getEdgeAttributes(edge);
     let edgeWeight = DEFINES.layout.edgeWeights[edgeAttributes.connectionType];
-    if (isEdgeHidden(rootStore.uiState, edgeAttributes)) {
+    if (isEdgeHidden(appState.uiState, edgeAttributes)) {
       edgeWeight = 0;
     } else {
       for (const nodeId of graph.extremities(edge)) {
-        if (isNodeHidden(rootStore, nodeId, graph.getNodeAttributes(nodeId))) {
+        if (isNodeHidden(appState, nodeId, graph.getNodeAttributes(nodeId))) {
           edgeWeight = 0;
           break;
         }
@@ -219,7 +216,7 @@ export function updateEdgeProperties(
 
 export async function zoomInOnNodeNeighbors(
   sigma: Sigma<NodeType, EdgeType>,
-  appState: RootInstance,
+  appState: AppState,
   nodeId: string,
 ) {
   const graph = sigma.getGraph();
@@ -337,7 +334,7 @@ export function restoreEdgeProperties(
 
 export function updateEntityViewEdges(
   sigma: Sigma<NodeType, EdgeType> | null,
-  dataset: DatasetInstance,
+  dataset: Dataset,
 ) {
   if (!sigma) {
     return;
@@ -370,7 +367,7 @@ export function updateEntityViewEdges(
       });
     }
 
-    const collocatedMentions = new Set<MentionInstance>();
+    const collocatedMentions = new Set<Mention>();
     for (const collocation of dataset.collocationsList) {
       for (const mention of collocation.mentionsList) {
         if (mentions.some((m) => m.id === mention.id)) {
@@ -401,7 +398,7 @@ export function updateEntityViewEdges(
 
 export function updateGraph(
   sigma: Sigma<NodeType, EdgeType>,
-  dataset: DatasetInstance,
+  dataset: Dataset,
   colorByEntityType: boolean,
   seed = "hello.",
 ) {
@@ -480,7 +477,7 @@ export function updateGraph(
       });
     }
 
-    mention.entityLinks.forEach((link) => {
+    mention.entities.forEach((link) => {
       graph.addEdge(mention.id, link.id, {
         size: DEFINES.edges.MentionToEntity.width,
         color: DEFINES.edges.MentionToEntity.color,

@@ -16,7 +16,11 @@ import {
 } from "@react-sigma/core";
 import "@react-sigma/core/lib/style.css";
 import { observer } from "mobx-react";
-import { type EdgeType, type NodeType, useMst } from "@/stores/rootStore.ts";
+import {
+  type EdgeType,
+  type NodeType,
+  useAppState,
+} from "@/stores/rootStore.ts";
 import { createNodeImageProgram } from "@sigma/node-image";
 import {
   createNodeCompoundProgram,
@@ -87,7 +91,7 @@ const sigmaSettings: Partial<Settings<NodeType, EdgeType>> = {
 };
 
 export const GraphEffects = observer(() => {
-  const rootStore = useMst();
+  const rootStore = useAppState();
   const sigma = useSigma<NodeType, EdgeType>();
 
   const setSettings = useSetSettings<NodeType, EdgeType>();
@@ -281,7 +285,7 @@ export const GraphEffects = observer(() => {
 });
 
 const EntityGraph = observer(() => {
-  const rootStore = useMst();
+  const rootStore = useAppState();
   const [sigma, setSigma] = useState<Sigma<NodeType, EdgeType> | null>(null);
 
   useEffect(() => {

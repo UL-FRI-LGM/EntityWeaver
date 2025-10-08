@@ -1,29 +1,28 @@
 import { observer } from "mobx-react";
-import { useMst } from "@/stores/rootStore.ts";
+import { useAppState } from "@/stores/rootStore.ts";
 import classes from "./RightWidget.module.css";
-import { getType } from "mobx-state-tree";
 import MentionEditor from "./MentionEditor/MentionEditor.tsx";
 import DocumentEditor from "./DocumentEditor/DocumentEditor.tsx";
 import EntityEditor from "@/components/RightWidget/EntityEditor/EntityEditor.tsx";
-import { Mention, type MentionInstance } from "@/stores/mention.ts";
-import { Entity, type EntityInstance } from "@/stores/entity.ts";
-import { Document, type DocumentInstance } from "@/stores/document.ts";
+import { Mention } from "@/stores/mention.ts";
+import { Entity } from "@/stores/entity.ts";
+import { Document } from "@/stores/document.ts";
 
 const RightWidget = observer(() => {
-  const rootStore = useMst();
+  const rootStore = useAppState();
 
   function NodeEditor() {
     const node = rootStore.selectedNodeInstance;
     if (!node) return null;
 
-    if (getType(node) === Mention) {
-      return <MentionEditor mention={node as MentionInstance} />;
+    if (node instanceof Mention) {
+      return <MentionEditor mention={node as Mention} />;
     }
-    if (getType(node) === Document) {
-      return <DocumentEditor document={node as DocumentInstance} />;
+    if (node instanceof Document) {
+      return <DocumentEditor document={node as Document} />;
     }
-    if (getType(node) === Entity) {
-      return <EntityEditor entity={node as EntityInstance} />;
+    if (node instanceof Entity) {
+      return <EntityEditor entity={node as Entity} />;
     }
   }
 

@@ -6,71 +6,67 @@ import { IconEdit } from "@tabler/icons-react";
 import { DEFINES } from "@/defines.ts";
 import sharedClasses from "../shared.module.css";
 import MentionLinkEditor from "@/components/RightWidget/MentionLinkEditor.tsx";
-import type { DocumentInstance } from "@/stores/document.ts";
 import NodeActions from "@/components/RightWidget/NodeActions.tsx";
-import type { MentionInstance } from "@/stores/mention.ts";
+import type { Mention } from "@/stores/mention.ts";
+import { Document } from "@/stores/document.ts";
 
-const MentionList = observer(
-  ({ mentions }: { mentions: MentionInstance[] }) => {
-    return (
-      <Stack className={classes.linkList}>
-        {mentions.map((mention) => (
-          <MentionLinkEditor key={mention.id} mention={mention} />
-        ))}
-      </Stack>
-    );
-  },
-);
+const MentionList = observer(({ mentions }: { mentions: Mention[] }) => {
+  return (
+    <Stack className={classes.linkList}>
+      {mentions.map((mention) => (
+        <MentionLinkEditor key={mention.id} mention={mention} />
+      ))}
+    </Stack>
+  );
+});
 
-const DocumentEditor = observer(
-  ({ document }: { document: DocumentInstance }) => {
-    const [title, setTitle] = useState(document.title);
+const DocumentEditor = observer(({ document }: { document: Document }) => {
+  const [title, setTitle] = useState(document.title);
 
-    function applyChanges() {
-      document.setTitle(title);
-    }
+  function applyChanges() {
+    document.title = title;
+  }
 
-    const canApplyChanges = document.title !== title;
+  const canApplyChanges = document.title !== title;
 
-    return (
-      <Fieldset
-        className={sharedClasses.editorFieldset}
-        legend={"Document"}
-        styles={{
-          root: {
-            borderColor: DEFINES.document.color,
-          },
-          legend: {
-            color: DEFINES.document.color,
-          },
-        }}
+  return (
+    <Fieldset
+      className={sharedClasses.editorFieldset}
+      legend={"Document"}
+      styles={{
+        root: {
+          borderColor: DEFINES.document.color,
+        },
+        legend: {
+          color: DEFINES.document.color,
+        },
+      }}
+    >
+      <NodeActions node={document} />
+
+      <TextInput
+        label="Title"
+        value={title}
+        onChange={(event) => setTitle(event.currentTarget.value)}
+      />
+      <Button
+        disabled={!canApplyChanges}
+        variant="filled"
+        leftSection={<IconEdit size={14} />}
+        onClick={applyChanges}
+        className={sharedClasses.applyChangesButton}
       >
-        <NodeActions node={document} />
-
-        <TextInput
-          label="Title"
-          value={title}
-          onChange={(event) => setTitle(event.currentTarget.value)}
-        />
-        <Button
-          disabled={!canApplyChanges}
-          variant="filled"
-          leftSection={<IconEdit size={14} />}
-          onClick={applyChanges}
-          className={sharedClasses.applyChangesButton}
-        >
-          Apply Changes
-        </Button>
-        <Stack className={classes.mentionsContainer} gap={6}>
-          <Divider label="Mentions" labelPosition={"center"} />
-          <MentionList mentions={document.mentionList} />
-        </Stack>
-        {/*<Fieldset legend="Mentions" className={classes.mentionsContainer}>*/}
-        {/*  <MentionList documentId={document.id} />*/}
-        {/*</Fieldset>*/}
-      </Fieldset>
-    );
-  },
-);
+        Apply Changes
+      </Button>
+      <Stack className={classes.mentionsContainer} gap={6}>
+        <Divider label="Mentions" labelPosition={"center"} />
+        <MentionList mentions={document.mentionList} />
+      </Stack>
+      {/*<Fieldset legend="Mentions" className={classes.mentionsContainer}>*/}
+      {/*  <MentionList documentId={document.id} />*/}
+      {/*</Fieldset>*/}
+    </Fieldset>
+  );
+});
 
 export default DocumentEditor;

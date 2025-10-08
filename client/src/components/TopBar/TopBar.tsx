@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import classes from "./TopBar.module.css";
 import { Button, Group, Menu, Switch } from "@mantine/core";
-import { useMst } from "@/stores/rootStore.ts";
+import { useAppState } from "@/stores/rootStore.ts";
 import {
   IconAt,
   IconBorderSides,
@@ -19,12 +19,11 @@ import {
   IconUserCircle,
 } from "@tabler/icons-react";
 import { useState } from "react";
-import { downloadTextFile, readFile } from "@/utils/helpers.ts";
 import { useFileDialog } from "@mantine/hooks";
-import type { DatasetSnapShotIn } from "@/stores/dataset.ts";
+import { downloadTextFile } from "@/utils/helpers.ts";
 
 const FiltersMenu = observer(() => {
-  const rootStore = useMst();
+  const rootStore = useAppState();
 
   const [showFilters, setShowFilters] = useState(false);
 
@@ -55,9 +54,8 @@ const FiltersMenu = observer(() => {
           rightSection={<Switch checked={rootStore.uiState.filters.entities} />}
           onClick={(event) => {
             event.preventDefault();
-            rootStore.uiState.filters.setEntities(
-              !rootStore.uiState.filters.entities,
-            );
+            rootStore.uiState.filters.entities =
+              !rootStore.uiState.filters.entities;
           }}
         >
           Entities
@@ -67,9 +65,8 @@ const FiltersMenu = observer(() => {
           rightSection={<Switch checked={rootStore.uiState.filters.mentions} />}
           onClick={(event) => {
             event.preventDefault();
-            rootStore.uiState.filters.setMentions(
-              !rootStore.uiState.filters.mentions,
-            );
+            rootStore.uiState.filters.mentions =
+              !rootStore.uiState.filters.mentions;
           }}
         >
           Mentions
@@ -81,9 +78,8 @@ const FiltersMenu = observer(() => {
           }
           onClick={(event) => {
             event.preventDefault();
-            rootStore.uiState.filters.setDocuments(
-              !rootStore.uiState.filters.documents,
-            );
+            rootStore.uiState.filters.documents =
+              !rootStore.uiState.filters.documents;
           }}
         >
           Documents
@@ -97,9 +93,8 @@ const FiltersMenu = observer(() => {
           rightSection={<Switch checked={rootStore.uiState.filters.people} />}
           onClick={(event) => {
             event.preventDefault();
-            rootStore.uiState.filters.setPeople(
-              !rootStore.uiState.filters.people,
-            );
+            rootStore.uiState.filters.people =
+              !rootStore.uiState.filters.people;
           }}
         >
           People
@@ -111,9 +106,8 @@ const FiltersMenu = observer(() => {
           }
           onClick={(event) => {
             event.preventDefault();
-            rootStore.uiState.filters.setLocations(
-              !rootStore.uiState.filters.locations,
-            );
+            rootStore.uiState.filters.locations =
+              !rootStore.uiState.filters.locations;
           }}
         >
           Locations
@@ -125,9 +119,8 @@ const FiltersMenu = observer(() => {
           }
           onClick={(event) => {
             event.preventDefault();
-            rootStore.uiState.filters.setOrganizations(
-              !rootStore.uiState.filters.organizations,
-            );
+            rootStore.uiState.filters.organizations =
+              !rootStore.uiState.filters.organizations;
           }}
         >
           Organizations
@@ -139,9 +132,8 @@ const FiltersMenu = observer(() => {
           }
           onClick={(event) => {
             event.preventDefault();
-            rootStore.uiState.filters.setMiscellaneous(
-              !rootStore.uiState.filters.miscellaneous,
-            );
+            rootStore.uiState.filters.miscellaneous =
+              !rootStore.uiState.filters.miscellaneous;
           }}
         >
           Miscellaneous
@@ -158,9 +150,8 @@ const FiltersMenu = observer(() => {
           }
           onClick={(event) => {
             event.preventDefault();
-            rootStore.uiState.filters.setCollocations(
-              !rootStore.uiState.filters.collocations,
-            );
+            rootStore.uiState.filters.collocations =
+              !rootStore.uiState.filters.collocations;
           }}
         >
           Collocations
@@ -171,7 +162,7 @@ const FiltersMenu = observer(() => {
 });
 
 const FileMenu = observer(() => {
-  const rootStore = useMst();
+  const rootStore = useAppState();
 
   const [showFileMenu, setShowFileMenu] = useState(false);
 
@@ -184,23 +175,18 @@ const FileMenu = observer(() => {
   async function onImportGraphFromJson(files: FileList | null) {
     try {
       if (!files || files.length === 0) return;
-      rootStore.setLoadingData(true);
       const graphFile = files[0];
-      const contents = await readFile(graphFile, "text");
-      const datasetSnapshot = JSON.parse(contents) as DatasetSnapShotIn;
-      rootStore.setDataset(datasetSnapshot);
+      await rootStore.dataset.loadFromFile(graphFile);
       // const dataset = JSON.parse(contents);
       // rootStore.dataset.loadDataset(dataset);
     } catch (error) {
       console.error(error);
-    } finally {
-      rootStore.setLoadingData(false);
     }
   }
 
   function onExportGraphToJson() {
     try {
-      const dataset = rootStore.dataset.toJSON();
+      const dataset = rootStore.dataset.toJson();
       downloadTextFile(JSON.stringify(dataset, null, 2), "graph.json");
     } catch (error) {
       console.error(error);
@@ -260,7 +246,7 @@ const FileMenu = observer(() => {
 });
 
 const TopBar = observer(() => {
-  const rootStore = useMst();
+  const rootStore = useAppState();
 
   return (
     <Group justify={"space-between"} className={classes.container}>
@@ -305,7 +291,7 @@ const TopBar = observer(() => {
           checked={rootStore.uiState.colorByType}
           classNames={{ label: classes.switchLabel }}
           onChange={(event) =>
-            rootStore.uiState.setColorByType(event.currentTarget.checked)
+            (rootStore.uiState.colorByType = event.currentTarget.checked)
           }
         />
         <Switch

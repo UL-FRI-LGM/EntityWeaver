@@ -1,35 +1,31 @@
-import { createContext, use } from "react";
-import {
-  types,
-  type Instance,
-  getRoot,
-  type SnapshotIn,
-  onSnapshot,
-} from "mobx-state-tree";
 import type Sigma from "sigma";
+import { Dataset, type GraphNodeType } from "@/stores/dataset.ts";
+import { UiState } from "@/stores/uiState.ts";
+import { createContext, use } from "react";
+import { makeAutoObservable } from "mobx";
+import { Mention } from "@/stores/mention.ts";
+import { Document } from "@/stores/document.ts";
+import { Entity } from "@/stores/entity.ts";
+import FA2Layout from "graphology-layout-forceatlas2/worker";
 import {
   assignRandomPositions,
   computeLayoutContribution,
   restoreEdgeProperties,
-  setColorByType,
   updateEdgeProperties,
   updateEntityViewEdges,
   updateGraph,
   updateNodeProperties,
 } from "@/utils/graphHelpers.ts";
-import type { AnimateOptions } from "sigma/utils";
-import {
-  Dataset,
-  type DatasetSnapShotIn,
-  type GraphNodeType,
-} from "@/stores/dataset.ts";
-import { mentionPrefix } from "@/stores/mention.ts";
-import { documentPrefix } from "@/stores/document.ts";
-import { entityPrefix } from "@/stores/entity.ts";
 import { DEFINES } from "@/defines.ts";
-import { loadFromLocalStorage, storeInLocalStorage } from "@/utils/helpers.ts";
-import FA2Layout from "graphology-layout-forceatlas2/worker";
-import NoverlapLayout from "graphology-layout-noverlap/worker";
+import type { AnimateOptions } from "sigma/utils";
+import { configurePersistable } from "mobx-persist-store";
+
+configurePersistable(
+  {
+    storage: window.localStorage,
+  },
+  { delay: 200 },
+);
 
 export type ConnectionType =
   | "MentionToDocument"
@@ -64,336 +60,271 @@ export interface EdgeType {
   layoutWeight?: number;
 }
 
-const Filters = types
-  .model({
-    entities: types.optional(types.boolean, true),
-    documents: types.optional(types.boolean, true),
-    mentions: types.optional(types.boolean, true),
-    people: types.optional(types.boolean, true),
-    locations: types.optional(types.boolean, true),
-    organizations: types.optional(types.boolean, true),
-    miscellaneous: types.optional(types.boolean, true),
-    collocations: types.optional(types.boolean, false),
-  })
-  .actions((self) => ({
-    setEntities(state: boolean) {
-      self.entities = state;
-    },
-    setDocuments(state: boolean) {
-      self.documents = state;
-    },
-    setMentions(state: boolean) {
-      self.mentions = state;
-    },
-    setPeople(state: boolean) {
-      self.people = state;
-    },
-    setLocations(state: boolean) {
-      self.locations = state;
-    },
-    setOrganizations(state: boolean) {
-      self.organizations = state;
-    },
-    setMiscellaneous(state: boolean) {
-      self.miscellaneous = state;
-    },
-    setCollocations(state: boolean) {
-      self.collocations = state;
-    },
-  }));
+export type SigmaGraph = Sigma<NodeType, EdgeType>;
 
-const UiState = types
-  .model({
-    highlightOnSelect: types.optional(types.boolean, true),
-    highlightOnHover: types.optional(types.boolean, true),
-    entityView: types.optional(types.boolean, false),
-    colorByType: types.optional(types.boolean, false),
-    filters: types.optional(Filters, {}),
-  })
-  .views((self) => ({
-    get sigma(): Sigma<NodeType, EdgeType> | null {
-      const rootStore = getRoot(self) as RootInstance;
-      return rootStore.sigma;
-    },
-  }))
-  .actions((self) => ({
-    setColorByType(state: boolean) {
-      self.colorByType = state;
-      setColorByType(self.sigma, state);
-    },
-  }));
+export class AppState {
+  dataset: Dataset = new Dataset(this);
+  uiState: UiState = new UiState(this);
+  private _sigma: SigmaGraph | null = null;
 
-export interface UiStateInstance extends Instance<typeof UiState> {}
-export interface UiStateSnapShotIn extends SnapshotIn<typeof UiState> {}
+  deleteNodeModalOpen = false;
+  selectedNode: string | null = null;
+  selectedEdge: string | null = null;
+  hoveredNode: string | null = null;
+  hoveredEdge: string | null = null;
+  uiHoveredNode: string | null = null;
+  focusedNode: string | null = null;
+  holdingShift = false;
+  loadingData = false;
+  initialLayout = false;
+  forceAtlasLayout: any = null;
+  noOverlapLayout: any = null;
+  atlasLayoutInProgress = false;
+  noverlapLayoutInProgress = false;
 
-const RootStore = types
-  .model({
-    dataset: types.optional(Dataset, {}),
-    uiState: types.optional(UiState, {}),
-  })
-  .volatile(() => ({
-    sigma: null as Sigma<NodeType, EdgeType> | null,
-    deleteNodeModalOpen: false,
-    selectedNode: null as string | null,
-    selectedEdge: null as string | null,
-    hoveredNode: null as string | null,
-    hoveredEdge: null as string | null,
-    uiHoveredNode: null as string | null,
-    focusedNode: null as string | null,
-    holdingShift: false,
-    loadingData: false,
-    initialLayout: false,
-    forceAtlasLayout: null as FA2Layout<NodeType, EdgeType> | null,
-    noOverlapLayout: null as NoverlapLayout | null,
-    atlasLayoutInProgress: false,
-    noverlapLayoutInProgress: false,
-  }))
-  .views((self) => ({
-    get selectedNodeInstance() {
-      if (!self.selectedNode) return null;
-      if (self.selectedNode.startsWith(mentionPrefix)) {
-        return self.dataset.mentions.get(self.selectedNode);
-      } else if (self.selectedNode.startsWith(documentPrefix)) {
-        return self.dataset.documents.get(self.selectedNode);
-      } else if (self.selectedNode.startsWith(entityPrefix)) {
-        return self.dataset.entities.get(self.selectedNode);
-      } else {
-        return null;
-      }
-    },
-    get graphLoading() {
-      return false;
-      return (
-        self.loadingData || self.dataset.fetchingData || this.isLayoutInProgress
-      );
-    },
-    get isLayoutInProgress() {
-      return self.atlasLayoutInProgress || self.noverlapLayoutInProgress;
-    },
-  }))
-  .actions((self) => ({
-    setLoadingData(state: boolean) {
-      self.loadingData = state;
-    },
-    setUiState(uiState: UiStateSnapShotIn) {
-      self.uiState = UiState.create(uiState);
-    },
-    setDataset(dataset: DatasetSnapShotIn) {
-      self.dataset = Dataset.create(dataset);
-      this.runGraphUpdate(false);
-    },
-    setSigma(sigma: Sigma<NodeType, EdgeType>) {
-      self.sigma = sigma;
-      self.forceAtlasLayout = new FA2Layout<NodeType, EdgeType>(
-        self.sigma.getGraph(),
-        {
-          settings: { slowDown: 10, gravity: 0, scalingRatio: 0.001 },
-          getEdgeWeight: (_edge, attributes) => {
-            return attributes.layoutWeight ?? 0;
-          },
+  constructor() {
+    makeAutoObservable(this);
+  }
+
+  get selectedNodeInstance() {
+    if (!this.selectedNode) return undefined;
+    if (this.selectedNode.startsWith(Mention.prefix)) {
+      return this.dataset.mentions.get(this.selectedNode);
+    } else if (this.selectedNode.startsWith(Document.prefix)) {
+      return this.dataset.documents.get(this.selectedNode);
+    } else if (this.selectedNode.startsWith(Entity.prefix)) {
+      return this.dataset.entities.get(this.selectedNode);
+    } else {
+      return undefined;
+    }
+  }
+
+  get graphLoading() {
+    return (
+      this.loadingData || this.dataset.fetchingData || this.isLayoutInProgress
+    );
+  }
+  get isLayoutInProgress() {
+    return this.atlasLayoutInProgress || this.noverlapLayoutInProgress;
+  }
+
+  get sigma() {
+    return this._sigma;
+  }
+
+  setSigma(sigma: SigmaGraph) {
+    this._sigma = sigma;
+    this.forceAtlasLayout = new FA2Layout<NodeType, EdgeType>(
+      sigma.getGraph(),
+      {
+        settings: { slowDown: 10, gravity: 0, scalingRatio: 0.001 },
+        getEdgeWeight: (_edge, attributes) => {
+          return attributes.layoutWeight ?? 0;
         },
-      );
-      // self.noOverlapLayout = new NoverlapLayout(self.sigma.getGraph(), {
-      //   inputReducer: (key, attr) => ({
-      //     x: attr.x,
-      //     y: attr.y,
-      //     size: attr.size,
-      //   }),
-      //   settings: { margin: 0, ratio: 0.2 },
-      // });
-    },
-    setDeleteNodeModalOpen(state: boolean) {
-      self.deleteNodeModalOpen = state && self.selectedNode !== null;
-    },
-    setSelectedNode(nodeId: string | null) {
-      if (nodeId === self.selectedNode) return;
-      if (self.selectedNode) {
-        updateNodeProperties(self.sigma, self.selectedNode, {
-          borderColor: undefined,
-        });
-      }
-      this.setSelectedEdge(null);
-      self.selectedNode = nodeId;
-      if (nodeId) {
-        updateNodeProperties(self.sigma, nodeId, {
-          borderColor: DEFINES.selection.borderColor,
-        });
-      }
-      this.setUiHoveredNode(null);
-    },
-    setSelectedEdge(edgeId: string | null) {
-      if (edgeId === self.selectedEdge) return;
-      if (self.selectedEdge && self.sigma) {
-        restoreEdgeProperties(self.sigma, self.selectedEdge);
-      }
-      this.setSelectedNode(null);
-      self.selectedEdge = edgeId;
-      if (edgeId && self.sigma) {
-        updateEdgeProperties(self.sigma, edgeId, {
-          color: DEFINES.selection.edgeColor,
-        });
-      }
-    },
-    setHoveredNode(nodeId: string | null) {
-      self.hoveredNode = nodeId;
-    },
-    setHoveredEdge(edgeId: string | null) {
-      self.hoveredEdge = edgeId;
-    },
-    setUiHoveredNode(nodeId: string | null) {
-      if (self.uiHoveredNode && nodeId === null) {
-        updateNodeProperties(self.sigma, self.uiHoveredNode, {
-          borderColor: undefined,
-        });
-      }
-      self.uiHoveredNode = nodeId;
-      if (nodeId) {
-        updateNodeProperties(self.sigma, nodeId, {
-          borderColor: DEFINES.uiHover.borderColor,
-        });
-      }
-    },
-    setFocusedNode(nodeId: string | null) {
-      if (nodeId !== null && self.focusedNode !== self.selectedNode) {
-        this.setSelectedNode(nodeId);
-      }
-
-      self.focusedNode = nodeId;
-    },
-    setEntityView(state: boolean) {
-      self.uiState.entityView = state;
-      if (state) {
-        updateEntityViewEdges(self.sigma, self.dataset);
-      }
-    },
-    clearGraphState() {
-      self.selectedNode = null;
-      self.hoveredNode = null;
-      self.uiHoveredNode = null;
-    },
-
-    onDatasetUpdate() {
-      this.runGraphUpdate();
-    },
-    runGraphUpdate(runLayout = true) {
-      if (self.sigma) {
-        this.clearGraphState();
-        updateGraph(self.sigma, self.dataset, self.uiState.colorByType);
-        if (self.uiState.entityView) {
-          updateEntityViewEdges(self.sigma, self.dataset);
-        }
-        self.sigma.getCamera().animatedReset().catch(console.error);
-        if (runLayout) {
-          this.runLayout();
-          self.initialLayout = true;
-        }
-      }
-    },
-    runLayout() {
-      if (!self.forceAtlasLayout || self.forceAtlasLayout.isRunning()) {
-        return;
-      }
-      if (self.sigma) {
-        computeLayoutContribution(self.sigma);
-        assignRandomPositions(self.sigma);
-      }
-      self.atlasLayoutInProgress = true;
-      self.forceAtlasLayout.start();
-
-      setTimeout(() => {
-        this.stopAtlasLayout();
-      }, DEFINES.layoutRuntimeInMs);
-    },
-    stopAtlasLayout() {
-      if (!self.forceAtlasLayout?.isRunning()) {
-        self.atlasLayoutInProgress = false;
-        return;
-      }
-      self.forceAtlasLayout.stop();
-      self.atlasLayoutInProgress = false;
-
-      if (self.noOverlapLayout) {
-        self.noverlapLayoutInProgress = true;
-        self.noOverlapLayout?.start();
-        setTimeout(() => {
-          this.stopNoverlapLayout();
-        }, DEFINES.layoutRuntimeInMs);
-      }
-    },
-    stopNoverlapLayout() {
-      if (!self.noOverlapLayout?.isRunning()) {
-        self.noverlapLayoutInProgress = false;
-        return;
-      }
-      self.noOverlapLayout.stop();
-      self.sigma?.getGraph().forEachNode((node, attributes) => {
-        self.dataset.setNodePosition(node, attributes.nodeType, attributes);
+      },
+    );
+    this.runGraphUpdate(false);
+    // this.noOverlapLayout = new NoverlapLayout(this.sigma.getGraph(), {
+    //   inputReducer: (key, attr) => ({
+    //     x: attr.x,
+    //     y: attr.y,
+    //     size: attr.size,
+    //   }),
+    //   settings: { margin: 0, ratio: 0.2 },
+    // });
+  }
+  setDeleteNodeModalOpen(state: boolean) {
+    this.deleteNodeModalOpen = state && this.selectedNode !== null;
+  }
+  setSelectedNode(nodeId: string | null) {
+    if (nodeId === this.selectedNode) return;
+    if (this.selectedNode) {
+      updateNodeProperties(this.sigma, this.selectedNode, {
+        borderColor: undefined,
       });
-      self.noverlapLayoutInProgress = false;
-      self.initialLayout = false;
-    },
-    setHoldingShift(state: boolean) {
-      self.holdingShift = state;
-    },
-    setHighlightOnSelect(state: boolean) {
-      self.uiState.highlightOnSelect = state;
-    },
-    setHighlightOnHover(state: boolean) {
-      self.uiState.highlightOnHover = state;
-    },
-    resetCamera(options: Partial<AnimateOptions> = { duration: 1 }) {
-      const camera = self.sigma?.getCamera();
-      camera?.animatedReset(options).catch(console.error);
-    },
-    onNodeDeleted(nodeId: string) {
-      if (nodeId === self.selectedNode) {
-        this.setSelectedNode(null);
-      }
-      if (nodeId === self.selectedNode) {
-        this.setHoveredNode(null);
-      }
-      self.sigma?.getGraph().dropNode(nodeId);
-    },
-    deleteEdge(edgeId: string) {
-      if (!self.sigma) {
+    }
+    this.setSelectedEdge(null);
+    this.selectedNode = nodeId;
+    if (nodeId) {
+      updateNodeProperties(this.sigma, nodeId, {
+        borderColor: DEFINES.selection.borderColor,
+      });
+    }
+    this.setUiHoveredNode(null);
+  }
+  setSelectedEdge(edgeId: string | null) {
+    if (edgeId === this.selectedEdge) return;
+    if (this.selectedEdge && this.sigma) {
+      restoreEdgeProperties(this.sigma, this.selectedEdge);
+    }
+    this.setSelectedNode(null);
+    this.selectedEdge = edgeId;
+    if (edgeId && this.sigma) {
+      updateEdgeProperties(this.sigma, edgeId, {
+        color: DEFINES.selection.edgeColor,
+      });
+    }
+  }
+  setHoveredNode(nodeId: string | null) {
+    this.hoveredNode = nodeId;
+  }
+  setHoveredEdge(edgeId: string | null) {
+    this.hoveredEdge = edgeId;
+  }
+  setUiHoveredNode(nodeId: string | null) {
+    if (this.uiHoveredNode && nodeId === null) {
+      updateNodeProperties(this.sigma, this.uiHoveredNode, {
+        borderColor: undefined,
+      });
+    }
+    this.uiHoveredNode = nodeId;
+    if (nodeId) {
+      updateNodeProperties(this.sigma, nodeId, {
+        borderColor: DEFINES.uiHover.borderColor,
+      });
+    }
+  }
+  setFocusedNode(nodeId: string | null) {
+    if (nodeId !== null && this.focusedNode !== this.selectedNode) {
+      this.setSelectedNode(nodeId);
+    }
+
+    this.focusedNode = nodeId;
+  }
+  setEntityView(state: boolean) {
+    this.uiState.entityView = state;
+    if (state) {
+      updateEntityViewEdges(this.sigma, this.dataset);
+    }
+  }
+  clearGraphState() {
+    this.selectedNode = null;
+    this.hoveredNode = null;
+    this.uiHoveredNode = null;
+  }
+  runGraphUpdate(runLayout = true) {
+    if (this.sigma) {
+      this.clearGraphState();
+      if (!this.dataset.hasData) {
         return;
       }
-
-      const graph = self.sigma.getGraph();
-      const attributes = graph.getEdgeAttributes(edgeId);
-      if (attributes.connectionType === "MentionToEntity") {
-        if (self.selectedEdge === edgeId) {
-          this.setSelectedEdge(null);
-        }
-        if (self.hoveredNode === edgeId) {
-          this.setHoveredEdge(null);
-        }
-        const mentionId = graph.source(edgeId);
-        const entityId = graph.target(edgeId);
-        const mention = self.dataset.mentions.get(mentionId);
-        mention?.removeEntityLink(entityId);
+      updateGraph(this.sigma, this.dataset, this.uiState.colorByType);
+      if (this.uiState.entityView) {
+        updateEntityViewEdges(this.sigma, this.dataset);
       }
-    },
-  }));
+      this.sigma.getCamera().animatedReset().catch(console.error);
+      if (runLayout) {
+        this.runLayout();
+        this.initialLayout = true;
+      }
+    }
+  }
+  runLayout() {
+    if (!this.forceAtlasLayout || this.forceAtlasLayout.isRunning()) {
+      return;
+    }
+    if (this.sigma) {
+      computeLayoutContribution(this.sigma);
+      assignRandomPositions(this.sigma);
+    }
+    this.atlasLayoutInProgress = true;
+    this.forceAtlasLayout.start();
 
-export interface RootInstance extends Instance<typeof RootStore> {}
+    setTimeout(() => {
+      this.stopAtlasLayout();
+    }, DEFINES.layoutRuntimeInMs);
+  }
+  stopAtlasLayout() {
+    if (!this.forceAtlasLayout?.isRunning()) {
+      this.atlasLayoutInProgress = false;
+      return;
+    }
+    this.forceAtlasLayout.stop();
+    this.atlasLayoutInProgress = false;
+    this.sigma?.getGraph().forEachNode((nodeId, attr) => {
+      this.dataset.setNodePosition(nodeId, attr.nodeType, attr);
+    });
 
-const savedUiState = loadFromLocalStorage<UiStateSnapShotIn>(
-  DEFINES.uiStateStorageKey,
-  {},
-);
-const initialState = RootStore.create({ uiState: savedUiState });
-onSnapshot(initialState.uiState, (snapshot) => {
-  storeInLocalStorage(DEFINES.uiStateStorageKey, snapshot);
-});
+    if (this.noOverlapLayout) {
+      this.noverlapLayoutInProgress = true;
+      this.noOverlapLayout?.start();
+      setTimeout(() => {
+        this.stopNoverlapLayout();
+      }, DEFINES.layoutRuntimeInMs);
+    }
+  }
+  stopNoverlapLayout() {
+    if (!this.noOverlapLayout?.isRunning()) {
+      this.noverlapLayoutInProgress = false;
+      return;
+    }
+    this.noOverlapLayout.stop();
+    this.sigma?.getGraph().forEachNode((node, attributes) => {
+      this.dataset.setNodePosition(node, attributes.nodeType, attributes);
+    });
+    this.noverlapLayoutInProgress = false;
+    this.initialLayout = false;
+  }
+  setHoldingShift(state: boolean) {
+    this.holdingShift = state;
+  }
+  setHighlightOnSelect(state: boolean) {
+    this.uiState.highlightOnSelect = state;
+  }
+  setHighlightOnHover(state: boolean) {
+    this.uiState.highlightOnHover = state;
+  }
+  resetCamera(options: Partial<AnimateOptions> = { duration: 1 }) {
+    const camera = this.sigma?.getCamera();
+    camera?.animatedReset(options).catch(console.error);
+  }
+  onNodeDeleted(nodeId: string) {
+    if (nodeId === this.selectedNode) {
+      this.setSelectedNode(null);
+    }
+    if (nodeId === this.selectedNode) {
+      this.setHoveredNode(null);
+    }
+    this.sigma?.getGraph().dropNode(nodeId);
+  }
+  deleteEdge(edgeId: string) {
+    if (!this.sigma) {
+      return;
+    }
 
-export const rootStore = initialState;
+    const graph = this.sigma.getGraph();
+    const attributes = graph.getEdgeAttributes(edgeId);
+    if (attributes.connectionType === "MentionToEntity") {
+      if (this.selectedEdge === edgeId) {
+        this.setSelectedEdge(null);
+      }
+      if (this.hoveredNode === edgeId) {
+        this.setHoveredEdge(null);
+      }
+      const mentionId = graph.source(edgeId);
+      const entityId = graph.target(edgeId);
+      const mention = this.dataset.mentions.get(mentionId);
+      mention?.removeEntityLink(entityId);
+    }
+  }
+}
 
-const RootStoreContext = createContext<null | RootInstance>(null);
+// const savedUiState = loadFromLocalStorage<UiStateSnapShotIn>(
+//   DEFINES.uiStateStorageKey,
+//   {},
+// );
+const initialState = new AppState();
+// onSnapshot(initialState.uiState, (snapshot) => {
+//   storeInLocalStorage(DEFINES.uiStateStorageKey, snapshot);
+// });
 
-export const RootStoreProvider = RootStoreContext.Provider;
-export function useMst() {
-  const store = use(RootStoreContext);
+export const appState = initialState;
+
+const AppStateContext = createContext<null | AppState>(null);
+
+export const AppStateProvider = AppStateContext.Provider;
+export function useAppState() {
+  const store = use(AppStateContext);
   if (store === null) {
     throw new Error("Store cannot be null, please add a context provider");
   }

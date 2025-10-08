@@ -20,15 +20,15 @@ import {
 import { useState } from "react";
 import { IconEdit, IconLink, IconLinkPlus, IconX } from "@tabler/icons-react";
 import { DEFINES } from "@/defines.ts";
-import { useMst } from "@/stores/rootStore.ts";
+import { useAppState } from "@/stores/rootStore.ts";
 import SearchableCombobox, {
   type SearchableComboboxOption,
 } from "../../SearchableCombobox/SearchableCombobox.tsx";
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
 import sharedClasses from "../shared.module.css";
-import type { MentionInstance } from "@/stores/mention.ts";
 import NodeActions from "@/components/RightWidget/NodeActions.tsx";
-import type { EntityInstance } from "@/stores/entity.ts";
+import type { Mention } from "@/stores/mention.ts";
+import type { Entity } from "@/stores/entity.ts";
 
 const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
   ([tag, name]) => (
@@ -48,8 +48,8 @@ const DocumentSelector = observer(
     onDocumentChange: (_id: string) => void;
     label: string;
   }) => {
-    const rootStore = useMst();
-    const { dataset, setSelectedNode } = useMst();
+    const rootStore = useAppState();
+    const { dataset, setSelectedNode } = useAppState();
 
     const selectedDocument = dataset.documents.get(documentId);
 
@@ -114,7 +114,7 @@ const EntitySelector = observer(
     onEntityChange: (_id: string) => void;
     label: string;
   }) => {
-    const rootStore = useMst();
+    const rootStore = useAppState();
 
     const selectedEntity = entityId
       ? rootStore.dataset.entities.get(entityId)
@@ -166,8 +166,8 @@ const EntitySelector = observer(
 );
 
 const LinkEditor = observer(
-  ({ mention, link }: { mention: MentionInstance; link: EntityInstance }) => {
-    const rootStore = useMst();
+  ({ mention, link }: { mention: Mention; link: Entity }) => {
+    const rootStore = useAppState();
 
     return (
       <Paper
@@ -196,7 +196,7 @@ const LinkEditor = observer(
   },
 );
 
-const EntityLinkList = observer(({ mention }: { mention: MentionInstance }) => {
+const EntityLinkList = observer(({ mention }: { mention: Mention }) => {
   return (
     <Stack className={classes.linkList}>
       {mention.entityLinkList.map((link) => (
@@ -207,7 +207,7 @@ const EntityLinkList = observer(({ mention }: { mention: MentionInstance }) => {
 });
 
 const MentionToEntityLinkEditor = observer(
-  ({ mention }: { mention: MentionInstance }) => {
+  ({ mention }: { mention: Mention }) => {
     return (
       <Fieldset
         legend={"Linked Entities"}
@@ -219,8 +219,8 @@ const MentionToEntityLinkEditor = observer(
   },
 );
 
-const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
-  const rootStore = useMst();
+const MentionEditor = observer(({ mention }: { mention: Mention }) => {
+  const rootStore = useAppState();
   const entityTypeCombobox = useCombobox();
 
   const [name, setName] = useState(mention.name);
@@ -235,7 +235,7 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
       ? rootStore.dataset.documents.get(documentId)
       : null;
     if (document) {
-      mention.setDocumentId(document);
+      mention.setDocument(document);
     }
   }
 
@@ -251,7 +251,7 @@ const MentionEditor = observer(({ mention }: { mention: MentionInstance }) => {
 
   const canAddEntity =
     entityId !== null &&
-    (!mention.entityLinks.has(entityId) || rootStore.holdingShift);
+    (!mention.entities.has(entityId) || rootStore.holdingShift);
 
   return (
     <Fieldset

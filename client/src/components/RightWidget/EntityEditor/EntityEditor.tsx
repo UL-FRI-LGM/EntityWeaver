@@ -15,11 +15,11 @@ import {
 import { useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
 import { DEFINES } from "@/defines.ts";
-import { useMst } from "@/stores/rootStore.ts";
+import { useAppState } from "@/stores/rootStore.ts";
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
 import MentionLinkEditor from "@/components/RightWidget/MentionLinkEditor.tsx";
-import type { EntityInstance } from "@/stores/entity.ts";
 import NodeActions from "@/components/RightWidget/NodeActions.tsx";
+import type { Entity } from "@/stores/entity.ts";
 
 const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
   ([tag, name]) => (
@@ -30,9 +30,9 @@ const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
 );
 
 const MentionList = observer(({ entityId }: { entityId: string }) => {
-  const rootStore = useMst();
+  const rootStore = useAppState();
   const mentions = Array.from(rootStore.dataset.mentions.values()).filter(
-    (mention) => mention.entityLinks.has(entityId),
+    (mention) => mention.entities.has(entityId),
   );
 
   return (
@@ -44,15 +44,15 @@ const MentionList = observer(({ entityId }: { entityId: string }) => {
   );
 });
 
-const EntityEditor = observer(({ entity }: { entity: EntityInstance }) => {
+const EntityEditor = observer(({ entity }: { entity: Entity }) => {
   const entityTypeCombobox = useCombobox();
 
   const [name, setName] = useState(entity.name);
   const [entityType, setEntityType] = useState(entity.type);
 
   function applyChanges() {
-    entity.setName(name);
-    entity.setType(entityType);
+    entity.name = name;
+    entity.type = entityType;
   }
 
   const canApplyChanges = entity.name !== name || entity.type !== entityType;

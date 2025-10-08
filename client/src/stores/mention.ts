@@ -1,14 +1,10 @@
-import { destroy, getRoot, type Instance, types } from "mobx-state-tree";
-import type Sigma from "sigma";
-import type { EdgeType, NodeType, RootInstance } from "@/stores/rootStore.ts";
-import {
-  updateMentionNode,
-  updateNodeProperties,
-} from "@/utils/graphHelpers.ts";
+import { GraphEntity } from "@/stores/graphEntity.ts";
+import { makeObservable } from "mobx";
+import type { Dataset } from "@/stores/dataset.ts";
+import { updateMentionNode } from "@/utils/graphHelpers.ts";
+import { Document } from "@/stores/document.ts";
 import { Entity } from "@/stores/entity.ts";
-import { Document, type DocumentInstance } from "@/stores/document.ts";
 
-export const mentionPrefix = "Mention-";
 export interface MentionDB {
   id: string;
   name: string;
@@ -17,113 +13,167 @@ export interface MentionDB {
   links: {
     entity_id: string;
   }[];
+  x?: number;
+  y?: number;
 }
 
-// export const Link = types
-//   .model({
-//     entity: types.reference(types.late(() => Entity)),
-//   })
-//   .actions((self) => ({
-//     remove() {
-//       const mention = getParentOfType(self, Mention) as MentionInstance;
-//       mention?.removeEntityLink(self.entity.id);
-//     },
-//   }));
+export class Mention extends GraphEntity {
+  static prefix = "Mention-";
 
-// export interface LinkInstance extends Instance<typeof Link> {}
+  name: string;
+  type: string;
+  entities: Map<string, Entity> = new Map<string, Entity>();
 
-export const Mention = types
-  .model({
-    id: types.identifier,
-    x: types.maybe(types.number),
-    y: types.maybe(types.number),
-    name: types.string,
-    type: types.string,
-    document: types.safeReference(
-      types.late(() => Document),
-      { acceptsUndefined: false },
-    ),
-    entityLinks: types.map(
-      types.safeReference(Entity, { acceptsUndefined: false }),
-    ),
-  })
-  .views((self) => ({
-    get sigma(): Sigma<NodeType, EdgeType> | null {
-      const rootStore = getRoot(self) as RootInstance;
-      return rootStore.sigma;
-    },
-    get entityLinkList() {
-      return Array.from(self.entityLinks.values());
-    },
-  }))
-  .actions((self) => ({
-    afterAttach() {
-      self.document.mentions.set(self.id, self);
-    },
-    setPosition(position: { x?: number | null; y?: number | null }) {
-      self.x = position.x ?? undefined;
-      self.y = position.y ?? undefined;
-      if (self.x !== null || self.y !== null) {
-        updateNodeProperties(self.sigma, self.id, { x: self.x, y: self.y });
+  document: Document;
+
+  constructor(
+    internal_id: string,
+    name: string,
+    type: string,
+    document: Document,
+    dataset: Dataset,
+    entities: Entity[] = [],
+    x?: number,
+    y?: number,
+  ) {
+    super(internal_id, Mention.prefix, dataset, x, y);
+    this.name = name;
+    this.type = type;
+    this.document = document;
+
+    entities.forEach((entity) => {
+      this.entities.set(entity.id, entity);
+    });
+
+    this.document.mentions.set(this.id, this);
+
+    makeObservable(this, {
+      name: true,
+      type: true,
+      document: true,
+      entities: true,
+      entityLinkList: true,
+      setName: true,
+      setType: true,
+      setDocument: true,
+      removeEntityLink: true,
+      setEntityLink: true,
+    });
+  }
+
+  static fromJson(data: MentionDB, dataset: Dataset): Mention {
+    const documentId = Document.prefix + data.document_id;
+    const document = dataset.documents.get(documentId);
+    if (!document) {
+      throw new Error(
+        `Document with id ${data.document_id} not found for Mention ${data.id}`,
+      );
+    }
+    const entities: Entity[] = [];
+    data.links.forEach((link) => {
+      const entityId = Entity.prefix + link.entity_id;
+      const entity = dataset.entities.get(entityId);
+      if (entity) {
+        entities.push(entity);
+      } else {
+        console.warn(
+          `Entity with id ${link.entity_id} not found for Mention ${data.id}`,
+        );
       }
-    },
-    setName(name: string) {
-      self.name = name;
-      if (self.sigma) {
-        updateMentionNode(self.sigma, self.id, { label: name });
-      }
-    },
-    setType(type: string) {
-      self.type = type;
-      if (self.sigma) {
-        updateMentionNode(self.sigma, self.id, { type: type });
-      }
-    },
-    setDocumentId(document: DocumentInstance) {
-      self.document = document;
-      if (self.sigma) {
-        updateMentionNode(self.sigma, self.id, { documentId: document.id });
-      }
-    },
-    removeEntityLink(entityId: string) {
-      self.entityLinks.delete(entityId);
-      if (self.sigma) {
-        updateMentionNode(self.sigma, self.id, {
-          removedEntityLinks: [entityId],
-        });
-      }
-    },
-    setEntityLink(entityId: string, keepExisting = true) {
-      const alreadyHasLink = self.entityLinks.has(entityId);
-      if (keepExisting && alreadyHasLink) {
+    });
+    return new Mention(
+      data.id,
+      data.name,
+      data.type,
+      document,
+      dataset,
+      entities,
+      data.x,
+      data.y,
+    );
+  }
+
+  toJson(): MentionDB {
+    return {
+      id: this.internal_id,
+      name: this.name,
+      type: this.type,
+      document_id: this.document.internal_id,
+      links: this.entityLinkList.map((entity) => ({
+        entity_id: entity.internal_id,
+      })),
+      x: this.x,
+      y: this.y,
+    };
+  }
+
+  get entityLinkList() {
+    return Array.from(this.entities.values());
+  }
+
+  setName(name: string) {
+    this.name = name;
+    if (this.dataset.appState.sigma) {
+      updateMentionNode(this.dataset.appState.sigma, this.id, { label: name });
+    }
+  }
+  setType(type: string) {
+    this.type = type;
+    if (this.dataset.appState.sigma) {
+      updateMentionNode(this.dataset.appState.sigma, this.id, { type: type });
+    }
+  }
+  setDocument(document: Document) {
+    this.document = document;
+    if (this.dataset.appState.sigma) {
+      updateMentionNode(this.dataset.appState.sigma, this.id, {
+        documentId: document.id,
+      });
+    }
+  }
+  removeEntityLink(entityId: string) {
+    this.entities.delete(entityId);
+    if (this.dataset.appState.sigma) {
+      updateMentionNode(this.dataset.appState.sigma, this.id, {
+        removedEntityLinks: [entityId],
+      });
+    }
+  }
+  setEntityLink(entity: Entity | string, keepExisting = true) {
+    let linkedEntity: Entity;
+    if (typeof entity === "string") {
+      const foundEntity = this.dataset.entities.get(entity);
+      if (!foundEntity) {
+        console.warn(`Entity with id ${entity} not found`);
         return;
       }
-      if (!keepExisting) {
-        if (!alreadyHasLink) {
-          self.entityLinks.clear();
-        } else {
-          self.entityLinks.forEach((link) => {
-            if (link.id !== entityId) {
-              self.entityLinks.delete(link.id);
-            }
-          });
-        }
-      }
+      linkedEntity = foundEntity;
+    } else {
+      linkedEntity = entity;
+    }
+    const alreadyHasLink = this.entities.has(linkedEntity.id);
+    if (keepExisting && alreadyHasLink) {
+      return;
+    }
+    if (!keepExisting) {
       if (!alreadyHasLink) {
-        self.entityLinks.set(entityId, entityId);
-      }
-      if (self.sigma) {
-        updateMentionNode(self.sigma, self.id, {
-          addedEntityLinks: [entityId],
-          clearEntityLinks: !keepExisting,
+        this.entities.clear();
+      } else {
+        this.entities.forEach((link) => {
+          if (link.id !== linkedEntity.id) {
+            this.entities.delete(link.id);
+          }
         });
       }
-    },
-    remove() {
-      const rootStore = getRoot(self) as RootInstance;
-      rootStore.onNodeDeleted(self.id);
-      destroy(self);
-    },
-  }));
-
-export interface MentionInstance extends Instance<typeof Mention> {}
+    }
+    if (!alreadyHasLink) {
+      this.entities.set(linkedEntity.id, linkedEntity);
+    }
+    if (this.dataset.appState.sigma) {
+      updateMentionNode(this.dataset.appState.sigma, this.id, {
+        addedEntityLinks: [linkedEntity.id],
+        clearEntityLinks: !keepExisting,
+      });
+    }
+  }
+}
