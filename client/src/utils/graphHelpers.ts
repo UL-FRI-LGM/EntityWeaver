@@ -413,7 +413,7 @@ export function updateGraph(
       size: DEFINES.document.size,
       label: document.title,
       color: DEFINES.document.color,
-      image: "/document.svg",
+      image: DEFINES.document.image,
       pictogramColor: DEFINES.document.iconColor,
       type: "pictogram",
       borderSize: DEFINES.document.borderSize,

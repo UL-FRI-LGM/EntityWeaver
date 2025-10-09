@@ -1,3 +1,10 @@
+import documentImg from "/document.svg?url";
+import locationImg from "/location.svg?url";
+import miscImg from "/miscellaneous.svg?url";
+import organizationImg from "/organization.svg?url";
+import personImg from "/person.svg?url";
+import unknownImg from "/unknown.svg?url";
+
 const edgeWidth = 2;
 
 export const DEFINES = {
@@ -19,6 +26,7 @@ export const DEFINES = {
     iconColor: "black",
     size: 30,
     borderSize: 0.1,
+    image: documentImg,
   },
   entity: {
     color: "#61b5d4",
@@ -74,11 +82,11 @@ export const DEFINES = {
       MISC: "Miscellaneous",
     },
     images: {
-      PER: "/person.svg",
-      ORG: "/organization.svg",
-      LOC: "/location.svg",
-      MISC: "/miscellaneous.svg",
-      default: "/unknown.svg",
+      PER: personImg,
+      ORG: organizationImg,
+      LOC: locationImg,
+      MISC: miscImg,
+      default: unknownImg,
     },
   },
   layout: {
