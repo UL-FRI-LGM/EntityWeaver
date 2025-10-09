@@ -15,7 +15,7 @@ import {
 import { useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
 import { DEFINES } from "@/defines.ts";
-import { useAppState } from "@/stores/rootStore.ts";
+import { useAppState } from "@/stores/appState.ts";
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
 import MentionLinkEditor from "@/components/RightWidget/MentionLinkEditor.tsx";
 import NodeActions from "@/components/RightWidget/NodeActions.tsx";
@@ -30,8 +30,8 @@ const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
 );
 
 const MentionList = observer(({ entityId }: { entityId: string }) => {
-  const rootStore = useAppState();
-  const mentions = Array.from(rootStore.dataset.mentions.values()).filter(
+  const appState = useAppState();
+  const mentions = Array.from(appState.dataset.mentions.values()).filter(
     (mention) => mention.entities.has(entityId),
   );
 

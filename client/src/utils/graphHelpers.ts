@@ -6,7 +6,7 @@ import {
   AppState,
   type EdgeType,
   type NodeType,
-} from "@/stores/rootStore.ts";
+} from "@/stores/appState.ts";
 import {
   edgeTypeToProperties,
   typeIconToColor,

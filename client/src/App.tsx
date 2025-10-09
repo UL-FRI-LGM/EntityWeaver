@@ -4,31 +4,31 @@ import RightWidget from "./components/RightWidget/RightWidget.tsx";
 import TopBar from "./components/TopBar/TopBar.tsx";
 import { useWindowEvent } from "@mantine/hooks";
 import { observer } from "mobx-react";
-import { useAppState } from "./stores/rootStore.ts";
+import { useAppState } from "./stores/appState.ts";
 import { Group, Text } from "@mantine/core";
 import RightClickIcon from "./assets/mouse-right-button.svg?react";
 import LeftClickIcon from "./assets/mouse-left-button.svg?react";
 import { type MouseEvent } from "react";
 
 const App = observer(() => {
-  const rootStore = useAppState();
+  const appState = useAppState();
 
   useWindowEvent("keydown", (event) => {
     if (event.key === "Shift") {
-      rootStore.setHoldingShift(true);
+      appState.setHoldingShift(true);
     }
   });
 
   useWindowEvent("keyup", (event) => {
     if (event.key === "Shift") {
-      rootStore.setHoldingShift(false);
+      appState.setHoldingShift(false);
     }
   });
 
   function onContextMenu(event: MouseEvent) {
     event.preventDefault();
-    rootStore.setSelectedNode(null);
-    rootStore.setSelectedEdge(null);
+    appState.setSelectedNode(null);
+    appState.setSelectedEdge(null);
   }
 
   return (

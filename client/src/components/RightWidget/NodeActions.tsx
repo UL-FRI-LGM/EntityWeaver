@@ -6,26 +6,26 @@ import {
   IconZoomScan,
 } from "@tabler/icons-react";
 import sharedClasses from "@/components/RightWidget/shared.module.css";
-import { useAppState } from "@/stores/rootStore.ts";
+import { useAppState } from "@/stores/appState.ts";
 import { zoomInOnNodeNeighbors } from "@/utils/graphHelpers.ts";
 import type { GraphEntity } from "@/stores/graphEntity.ts";
 
 const NodeActions = observer(({ node }: { node: GraphEntity }) => {
-  const rootStore = useAppState();
+  const appState = useAppState();
 
   function onZoomToNode() {
-    if (!rootStore.sigma) return;
-    zoomInOnNodeNeighbors(rootStore.sigma, rootStore, node.id).catch(
+    if (!appState.sigma) return;
+    zoomInOnNodeNeighbors(appState.sigma, appState, node.id).catch(
       console.error,
     );
   }
 
   function onFocusNode() {
-    if (rootStore.focusedNode === node.id) {
-      rootStore.setFocusedNode(null);
+    if (appState.focusedNode === node.id) {
+      appState.setFocusedNode(null);
       return;
     }
-    rootStore.setFocusedNode(node.id);
+    appState.setFocusedNode(node.id);
   }
 
   return (
@@ -38,12 +38,12 @@ const NodeActions = observer(({ node }: { node: GraphEntity }) => {
         </Tooltip>
         <Tooltip
           label={
-            rootStore.focusedNode !== node.id ? "Focus on Node" : "Unfocus Node"
+            appState.focusedNode !== node.id ? "Focus on Node" : "Unfocus Node"
           }
           position="left"
         >
           <ActionIcon
-            variant={rootStore.focusedNode === node.id ? "filled" : "default"}
+            variant={appState.focusedNode === node.id ? "filled" : "default"}
             onClick={onFocusNode}
           >
             <IconFocusCentered />
@@ -53,7 +53,7 @@ const NodeActions = observer(({ node }: { node: GraphEntity }) => {
           <ActionIcon
             variant={"filled"}
             color={"var(--mantine-color-red-9)"}
-            onClick={() => rootStore.setDeleteNodeModalOpen(true)}
+            onClick={() => appState.setDeleteNodeModalOpen(true)}
           >
             <IconTrash size={20} />
           </ActionIcon>

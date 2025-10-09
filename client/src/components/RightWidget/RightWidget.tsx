@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import { useAppState } from "@/stores/rootStore.ts";
+import { useAppState } from "@/stores/appState.ts";
 import classes from "./RightWidget.module.css";
 import MentionEditor from "./MentionEditor/MentionEditor.tsx";
 import DocumentEditor from "./DocumentEditor/DocumentEditor.tsx";
@@ -9,10 +9,10 @@ import { Entity } from "@/stores/entity.ts";
 import { Document } from "@/stores/document.ts";
 
 const RightWidget = observer(() => {
-  const rootStore = useAppState();
+  const appState = useAppState();
 
   function NodeEditor() {
-    const node = rootStore.selectedNodeInstance;
+    const node = appState.selectedNodeInstance;
     if (!node) return null;
 
     if (node instanceof Mention) {
@@ -29,7 +29,7 @@ const RightWidget = observer(() => {
   return (
     <div className={classes.container}>
       {/*<h4>Selected Entity</h4>*/}
-      {rootStore.selectedNodeInstance && <NodeEditor />}
+      {appState.selectedNodeInstance && <NodeEditor />}
     </div>
   );
 });

@@ -20,7 +20,7 @@ import {
   type EdgeType,
   type NodeType,
   useAppState,
-} from "@/stores/rootStore.ts";
+} from "@/stores/appState.ts";
 import { createNodeImageProgram } from "@sigma/node-image";
 import {
   createNodeCompoundProgram,
@@ -91,7 +91,7 @@ const sigmaSettings: Partial<Settings<NodeType, EdgeType>> = {
 };
 
 export const GraphEffects = observer(() => {
-  const rootStore = useAppState();
+  const appState = useAppState();
   const sigma = useSigma<NodeType, EdgeType>();
 
   const setSettings = useSetSettings<NodeType, EdgeType>();
@@ -103,25 +103,25 @@ export const GraphEffects = observer(() => {
   useEffect(() => {
     registerEvents({
       enterNode: (event) => {
-        if (!draggedNode) rootStore.setHoveredNode(event.node);
+        if (!draggedNode) appState.setHoveredNode(event.node);
       },
       leaveNode: () => {
-        rootStore.setHoveredNode(null);
+        appState.setHoveredNode(null);
       },
       // clickNode: (event) => {
-      //   if (!dragging.current) rootStore.setSelectedNode(event.node);
+      //   if (!dragging.current) appState.setSelectedNode(event.node);
       // },
       // TODO figure out why zoom sometimes throws you far off
       // doubleClickNode: (event) => {
       //   if (dragging.current) return;
-      //   rootStore.setSelectedNode(event.node);
+      //   appState.setSelectedNode(event.node);
       //   event.preventSigmaDefault();
-      //   zoomInOnNodeNeighbors(sigma, rootStore.uiState, event.node)
-      //     .then(() => console.log(rootStore.sigma?.getCamera()))
+      //   zoomInOnNodeNeighbors(sigma, appState.uiState, event.node)
+      //     .then(() => console.log(appState.sigma?.getCamera()))
       //     .catch(console.error);
       // },
       downNode: (event) => {
-        if (!isLeftClick(event.event.original) || rootStore.isLayoutInProgress)
+        if (!isLeftClick(event.event.original) || appState.isLayoutInProgress)
           return;
         setDraggedNode(event.node);
       },
@@ -130,11 +130,7 @@ export const GraphEffects = observer(() => {
         dragging.current = true;
         const pos = sigma.viewportToGraph(event);
         const attributes = sigma.getGraph().getNodeAttributes(draggedNode);
-        rootStore.dataset.setNodePosition(
-          draggedNode,
-          attributes.nodeType,
-          pos,
-        );
+        appState.dataset.setNodePosition(draggedNode, attributes.nodeType, pos);
 
         event.preventSigmaDefault();
         event.original.preventDefault();
@@ -151,31 +147,31 @@ export const GraphEffects = observer(() => {
           Moved here from clickNode since this triggers first,
           and we want to ensure dragged node is selected after drag ends on another node
         */
-        if (draggedNode || rootStore.hoveredNode) {
-          rootStore.setSelectedNode(draggedNode ?? rootStore.hoveredNode);
+        if (draggedNode || appState.hoveredNode) {
+          appState.setSelectedNode(draggedNode ?? appState.hoveredNode);
         }
       },
       clickEdge: (event) => {
         if (draggedNode) return;
-        rootStore.setSelectedEdge(event.edge);
+        appState.setSelectedEdge(event.edge);
       },
       enterEdge(event) {
         if (draggedNode) return;
-        rootStore.setHoveredEdge(event.edge);
+        appState.setHoveredEdge(event.edge);
       },
       leaveEdge(event) {
-        if (rootStore.hoveredEdge === event.edge) {
-          rootStore.setHoveredEdge(null);
+        if (appState.hoveredEdge === event.edge) {
+          appState.setHoveredEdge(null);
         }
       },
     });
-  }, [draggedNode, registerEvents, rootStore, rootStore.dataset, sigma]);
+  }, [draggedNode, registerEvents, appState, appState.dataset, sigma]);
 
   useEffect(() => {
     if (sigma !== null) {
-      rootStore.setSigma(sigma);
+      appState.setSigma(sigma);
     }
-  }, [rootStore, sigma]);
+  }, [appState, sigma]);
 
   // TODO Replace node and edge reducers if focused node for performance
   useEffect(() => {
@@ -183,23 +179,23 @@ export const GraphEffects = observer(() => {
     const highlightedNodes = new Set<string>();
     const highlightedEdges = new Set<string>();
 
-    if (rootStore.focusedNode !== null) {
-      highlightedNodes.add(rootStore.focusedNode);
+    if (appState.focusedNode !== null) {
+      highlightedNodes.add(appState.focusedNode);
     } else {
-      if (rootStore.uiState.highlightOnHover && rootStore.hoveredNode) {
-        highlightedNodes.add(rootStore.hoveredNode);
+      if (appState.uiState.highlightOnHover && appState.hoveredNode) {
+        highlightedNodes.add(appState.hoveredNode);
       }
-      if (rootStore.uiState.highlightOnSelect && rootStore.selectedNode) {
-        highlightedNodes.add(rootStore.selectedNode);
+      if (appState.uiState.highlightOnSelect && appState.selectedNode) {
+        highlightedNodes.add(appState.selectedNode);
       }
-      if (rootStore.uiHoveredNode) {
-        highlightedNodes.add(rootStore.uiHoveredNode);
+      if (appState.uiHoveredNode) {
+        highlightedNodes.add(appState.uiHoveredNode);
       }
-      if (rootStore.uiState.highlightOnSelect && rootStore.selectedEdge) {
-        highlightedEdges.add(rootStore.selectedEdge);
+      if (appState.uiState.highlightOnSelect && appState.selectedEdge) {
+        highlightedEdges.add(appState.selectedEdge);
       }
-      if (rootStore.uiState.highlightOnHover && rootStore.hoveredEdge) {
-        highlightedEdges.add(rootStore.hoveredEdge);
+      if (appState.uiState.highlightOnHover && appState.hoveredEdge) {
+        highlightedEdges.add(appState.hoveredEdge);
       }
     }
 
@@ -212,13 +208,13 @@ export const GraphEffects = observer(() => {
           highlighted: data.highlighted ?? false,
         };
 
-        if (isNodeHidden(rootStore, node, data)) {
+        if (isNodeHidden(appState, node, data)) {
           newData.hidden = true;
         } else if (
           highlightedNodes.has(node) ||
           nodeAdjacentToHighlighted(
             graph,
-            rootStore.uiState,
+            appState.uiState,
             node,
             highlightedNodes,
             highlightedEdges,
@@ -235,7 +231,7 @@ export const GraphEffects = observer(() => {
         const graph = sigma.getGraph();
 
         if (!highlightedEdges.has(edge)) {
-          if (isEdgeHidden(rootStore.uiState, newData)) {
+          if (isEdgeHidden(appState.uiState, newData)) {
             newData.hidden = true;
           } else if (allHighLightedNodes.size > 0) {
             let foundOriginalNode = false;
@@ -258,56 +254,56 @@ export const GraphEffects = observer(() => {
       },
     });
   }, [
-    rootStore,
-    rootStore.hoveredNode,
-    rootStore.hoveredEdge,
-    rootStore.uiState.highlightOnHover,
-    rootStore.selectedNode,
-    rootStore.uiState.highlightOnSelect,
-    rootStore.uiHoveredNode,
-    rootStore.focusedNode,
-    rootStore.selectedEdge,
-    rootStore.uiState.entityView,
-    rootStore.uiState.filters.mentions,
-    rootStore.uiState.filters.entities,
-    rootStore.uiState.filters.documents,
-    rootStore.uiState.filters.people,
-    rootStore.uiState.filters.locations,
-    rootStore.uiState.filters.organizations,
-    rootStore.uiState.filters.miscellaneous,
-    rootStore.uiState.filters.collocations,
+    appState,
+    appState.hoveredNode,
+    appState.hoveredEdge,
+    appState.uiState.highlightOnHover,
+    appState.selectedNode,
+    appState.uiState.highlightOnSelect,
+    appState.uiHoveredNode,
+    appState.focusedNode,
+    appState.selectedEdge,
+    appState.uiState.entityView,
+    appState.uiState.filters.mentions,
+    appState.uiState.filters.entities,
+    appState.uiState.filters.documents,
+    appState.uiState.filters.people,
+    appState.uiState.filters.locations,
+    appState.uiState.filters.organizations,
+    appState.uiState.filters.miscellaneous,
+    appState.uiState.filters.collocations,
     setSettings,
     sigma,
-    rootStore.uiState,
+    appState.uiState,
   ]);
 
   return null;
 });
 
 const EntityGraph = observer(() => {
-  const rootStore = useAppState();
+  const appState = useAppState();
   const [sigma, setSigma] = useState<Sigma<NodeType, EdgeType> | null>(null);
 
   useEffect(() => {
     if (sigma !== null) {
-      rootStore.setSigma(sigma);
+      appState.setSigma(sigma);
     }
-  }, [rootStore, sigma]);
+  }, [appState, sigma]);
 
   const onFocus = useCallback(
     (value: GraphSearchOption | null) => {
-      if (value === null) rootStore.setUiHoveredNode(null);
-      else if (value.type === "nodes") rootStore.setUiHoveredNode(value.id);
+      if (value === null) appState.setUiHoveredNode(null);
+      else if (value.type === "nodes") appState.setUiHoveredNode(value.id);
     },
-    [rootStore],
+    [appState],
   );
 
   const onChange = useCallback(
     (value: GraphSearchOption | null) => {
-      if (value === null) rootStore.setSelectedNode(null);
-      else if (value.type === "nodes") rootStore.setSelectedNode(value.id);
+      if (value === null) appState.setSelectedNode(null);
+      else if (value.type === "nodes") appState.setSelectedNode(value.id);
     },
-    [rootStore],
+    [appState],
   );
 
   const postSearchResult = useCallback(
@@ -316,7 +312,7 @@ const EntityGraph = observer(() => {
         if (option.type === "message") return true;
         const attributes = sigma?.getGraph().getNodeAttributes(option.id);
         return attributes
-          ? !isNodeHidden(rootStore, option.id, attributes)
+          ? !isNodeHidden(appState, option.id, attributes)
           : false;
       });
       return options.length <= 10
@@ -333,21 +329,21 @@ const EntityGraph = observer(() => {
             },
           ];
     },
-    [rootStore, sigma],
+    [appState, sigma],
   );
 
   function onEscapeClick() {
-    if (rootStore.focusedNode) {
-      rootStore.setFocusedNode(null);
+    if (appState.focusedNode) {
+      appState.setFocusedNode(null);
     } else {
-      rootStore.setSelectedNode(null);
+      appState.setSelectedNode(null);
     }
   }
 
   function onDeleteClick() {
-    rootStore.setDeleteNodeModalOpen(true);
-    if (rootStore.selectedEdge) {
-      rootStore.deleteEdge(rootStore.selectedEdge);
+    appState.setDeleteNodeModalOpen(true);
+    if (appState.selectedEdge) {
+      appState.deleteEdge(appState.selectedEdge);
     }
   }
 
@@ -374,7 +370,7 @@ const EntityGraph = observer(() => {
     >
       <div
         className={classes.innerContainer}
-        style={{ opacity: rootStore.graphLoading ? 0 : 1 }}
+        style={{ opacity: appState.graphLoading ? 0 : 1 }}
       >
         <SigmaContainer
           ref={(instance) =>
@@ -398,8 +394,8 @@ const EntityGraph = observer(() => {
               type="nodes"
               className={classes.searchBox}
               value={
-                rootStore.selectedNode
-                  ? { type: "nodes", id: rootStore.selectedNode }
+                appState.selectedNode
+                  ? { type: "nodes", id: appState.selectedNode }
                   : null
               }
               onFocus={onFocus}
@@ -412,7 +408,7 @@ const EntityGraph = observer(() => {
               }}
             />
           </ControlsContainer>
-          {rootStore.dataset.hasData && (
+          {appState.dataset.hasData && (
             <ControlsContainer position={"top-left"}>
               <MiniMap width="200px" height="200px" debounceTime={5} />
             </ControlsContainer>
@@ -420,7 +416,7 @@ const EntityGraph = observer(() => {
         </SigmaContainer>
       </div>
       <LoadingOverlay
-        visible={rootStore.graphLoading}
+        visible={appState.graphLoading}
         zIndex={1000}
         overlayProps={{
           radius: "sm",

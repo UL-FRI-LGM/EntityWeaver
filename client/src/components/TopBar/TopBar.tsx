@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import classes from "./TopBar.module.css";
 import { Button, Group, Menu, Switch } from "@mantine/core";
-import { useAppState } from "@/stores/rootStore.ts";
+import { useAppState } from "@/stores/appState.ts";
 import {
   IconAt,
   IconBorderSides,
@@ -23,7 +23,7 @@ import { useFileDialog } from "@mantine/hooks";
 import { downloadTextFile } from "@/utils/helpers.ts";
 
 const FiltersMenu = observer(() => {
-  const rootStore = useAppState();
+  const appState = useAppState();
 
   const [showFilters, setShowFilters] = useState(false);
 
@@ -51,35 +51,33 @@ const FiltersMenu = observer(() => {
         <Menu.Label>Nodes</Menu.Label>
         <Menu.Item
           leftSection={<IconBorderSides size={14} />}
-          rightSection={<Switch checked={rootStore.uiState.filters.entities} />}
+          rightSection={<Switch checked={appState.uiState.filters.entities} />}
           onClick={(event) => {
             event.preventDefault();
-            rootStore.uiState.filters.entities =
-              !rootStore.uiState.filters.entities;
+            appState.uiState.filters.entities =
+              !appState.uiState.filters.entities;
           }}
         >
           Entities
         </Menu.Item>
         <Menu.Item
           leftSection={<IconAt size={14} />}
-          rightSection={<Switch checked={rootStore.uiState.filters.mentions} />}
+          rightSection={<Switch checked={appState.uiState.filters.mentions} />}
           onClick={(event) => {
             event.preventDefault();
-            rootStore.uiState.filters.mentions =
-              !rootStore.uiState.filters.mentions;
+            appState.uiState.filters.mentions =
+              !appState.uiState.filters.mentions;
           }}
         >
           Mentions
         </Menu.Item>
         <Menu.Item
           leftSection={<IconFile size={14} />}
-          rightSection={
-            <Switch checked={rootStore.uiState.filters.documents} />
-          }
+          rightSection={<Switch checked={appState.uiState.filters.documents} />}
           onClick={(event) => {
             event.preventDefault();
-            rootStore.uiState.filters.documents =
-              !rootStore.uiState.filters.documents;
+            appState.uiState.filters.documents =
+              !appState.uiState.filters.documents;
           }}
         >
           Documents
@@ -90,24 +88,21 @@ const FiltersMenu = observer(() => {
         <Menu.Label>Entity Types</Menu.Label>
         <Menu.Item
           leftSection={<IconUserCircle size={14} />}
-          rightSection={<Switch checked={rootStore.uiState.filters.people} />}
+          rightSection={<Switch checked={appState.uiState.filters.people} />}
           onClick={(event) => {
             event.preventDefault();
-            rootStore.uiState.filters.people =
-              !rootStore.uiState.filters.people;
+            appState.uiState.filters.people = !appState.uiState.filters.people;
           }}
         >
           People
         </Menu.Item>
         <Menu.Item
           leftSection={<IconMapPin size={14} />}
-          rightSection={
-            <Switch checked={rootStore.uiState.filters.locations} />
-          }
+          rightSection={<Switch checked={appState.uiState.filters.locations} />}
           onClick={(event) => {
             event.preventDefault();
-            rootStore.uiState.filters.locations =
-              !rootStore.uiState.filters.locations;
+            appState.uiState.filters.locations =
+              !appState.uiState.filters.locations;
           }}
         >
           Locations
@@ -115,12 +110,12 @@ const FiltersMenu = observer(() => {
         <Menu.Item
           leftSection={<IconSitemap size={14} />}
           rightSection={
-            <Switch checked={rootStore.uiState.filters.organizations} />
+            <Switch checked={appState.uiState.filters.organizations} />
           }
           onClick={(event) => {
             event.preventDefault();
-            rootStore.uiState.filters.organizations =
-              !rootStore.uiState.filters.organizations;
+            appState.uiState.filters.organizations =
+              !appState.uiState.filters.organizations;
           }}
         >
           Organizations
@@ -128,12 +123,12 @@ const FiltersMenu = observer(() => {
         <Menu.Item
           leftSection={<IconDotsCircleHorizontal size={14} />}
           rightSection={
-            <Switch checked={rootStore.uiState.filters.miscellaneous} />
+            <Switch checked={appState.uiState.filters.miscellaneous} />
           }
           onClick={(event) => {
             event.preventDefault();
-            rootStore.uiState.filters.miscellaneous =
-              !rootStore.uiState.filters.miscellaneous;
+            appState.uiState.filters.miscellaneous =
+              !appState.uiState.filters.miscellaneous;
           }}
         >
           Miscellaneous
@@ -146,12 +141,12 @@ const FiltersMenu = observer(() => {
         <Menu.Item
           leftSection={<IconTextScan2 size={14} />}
           rightSection={
-            <Switch checked={rootStore.uiState.filters.collocations} />
+            <Switch checked={appState.uiState.filters.collocations} />
           }
           onClick={(event) => {
             event.preventDefault();
-            rootStore.uiState.filters.collocations =
-              !rootStore.uiState.filters.collocations;
+            appState.uiState.filters.collocations =
+              !appState.uiState.filters.collocations;
           }}
         >
           Collocations
@@ -162,7 +157,7 @@ const FiltersMenu = observer(() => {
 });
 
 const FileMenu = observer(() => {
-  const rootStore = useAppState();
+  const appState = useAppState();
 
   const [showFileMenu, setShowFileMenu] = useState(false);
 
@@ -176,9 +171,7 @@ const FileMenu = observer(() => {
     try {
       if (!files || files.length === 0) return;
       const graphFile = files[0];
-      await rootStore.dataset.loadFromFile(graphFile);
-      // const dataset = JSON.parse(contents);
-      // rootStore.dataset.loadDataset(dataset);
+      await appState.dataset.loadFromFile(graphFile);
     } catch (error) {
       console.error(error);
     }
@@ -186,7 +179,7 @@ const FileMenu = observer(() => {
 
   function onExportGraphToJson() {
     try {
-      const dataset = rootStore.dataset.toJson();
+      const dataset = appState.dataset.toJson();
       downloadTextFile(JSON.stringify(dataset, null, 2), "graph.json");
     } catch (error) {
       console.error(error);
@@ -195,7 +188,7 @@ const FileMenu = observer(() => {
 
   async function loadDemo() {
     try {
-      await rootStore.dataset.loadDemo();
+      await appState.dataset.loadDemo();
     } catch (error) {
       console.error(error);
     }
@@ -246,7 +239,7 @@ const FileMenu = observer(() => {
 });
 
 const TopBar = observer(() => {
-  const rootStore = useAppState();
+  const appState = useAppState();
 
   return (
     <Group justify={"space-between"} className={classes.container}>
@@ -255,11 +248,11 @@ const TopBar = observer(() => {
 
         <Switch
           label={"Entity View"}
-          disabled={rootStore.graphLoading}
-          checked={rootStore.uiState.entityView}
+          disabled={appState.graphLoading}
+          checked={appState.uiState.entityView}
           classNames={{ label: classes.switchLabel }}
           onChange={(event) =>
-            rootStore.setEntityView(event.currentTarget.checked)
+            appState.setEntityView(event.currentTarget.checked)
           }
         />
 
@@ -267,12 +260,12 @@ const TopBar = observer(() => {
 
         <Button
           variant={"default"}
-          disabled={rootStore.graphLoading || rootStore.isLayoutInProgress}
-          onClick={() => rootStore.runLayout()}
+          disabled={appState.graphLoading || appState.isLayoutInProgress}
+          onClick={() => appState.runLayout()}
           leftSection={
             <IconRefresh
               className={
-                !rootStore.graphLoading && rootStore.isLayoutInProgress
+                !appState.graphLoading && appState.isLayoutInProgress
                   ? classes.iconSpin
                   : undefined
               }
@@ -287,29 +280,29 @@ const TopBar = observer(() => {
       <Group gap={40}>
         <Switch
           label={"Color By Entity Type"}
-          disabled={rootStore.graphLoading}
-          checked={rootStore.uiState.colorByType}
+          disabled={appState.graphLoading}
+          checked={appState.uiState.colorByType}
           classNames={{ label: classes.switchLabel }}
           onChange={(event) =>
-            (rootStore.uiState.colorByType = event.currentTarget.checked)
+            (appState.uiState.colorByType = event.currentTarget.checked)
           }
         />
         <Switch
           label={"Highlight On Hover"}
-          disabled={rootStore.graphLoading}
-          checked={rootStore.uiState.highlightOnHover}
+          disabled={appState.graphLoading}
+          checked={appState.uiState.highlightOnHover}
           classNames={{ label: classes.switchLabel }}
           onChange={(event) =>
-            rootStore.setHighlightOnHover(event.currentTarget.checked)
+            appState.setHighlightOnHover(event.currentTarget.checked)
           }
         />
         <Switch
           label={"Highlight On Selection"}
-          disabled={rootStore.graphLoading}
-          checked={rootStore.uiState.highlightOnSelect}
+          disabled={appState.graphLoading}
+          checked={appState.uiState.highlightOnSelect}
           classNames={{ label: classes.switchLabel }}
           onChange={(event) =>
-            rootStore.setHighlightOnSelect(event.currentTarget.checked)
+            appState.setHighlightOnSelect(event.currentTarget.checked)
           }
         />
       </Group>

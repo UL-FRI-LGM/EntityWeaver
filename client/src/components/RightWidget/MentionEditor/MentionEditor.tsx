@@ -20,7 +20,7 @@ import {
 import { useState } from "react";
 import { IconEdit, IconLink, IconLinkPlus, IconX } from "@tabler/icons-react";
 import { DEFINES } from "@/defines.ts";
-import { useAppState } from "@/stores/rootStore.ts";
+import { useAppState } from "@/stores/appState.ts";
 import SearchableCombobox, {
   type SearchableComboboxOption,
 } from "../../SearchableCombobox/SearchableCombobox.tsx";
@@ -48,7 +48,7 @@ const DocumentSelector = observer(
     onDocumentChange: (_id: string) => void;
     label: string;
   }) => {
-    const rootStore = useAppState();
+    const appState = useAppState();
     const { dataset, setSelectedNode } = useAppState();
 
     const selectedDocument = dataset.documents.get(documentId);
@@ -69,8 +69,8 @@ const DocumentSelector = observer(
       val: doc.id,
       display: doc.title,
       props: {
-        onMouseEnter: () => rootStore.setUiHoveredNode(doc.id),
-        onMouseLeave: () => rootStore.setUiHoveredNode(null),
+        onMouseEnter: () => appState.setUiHoveredNode(doc.id),
+        onMouseLeave: () => appState.setUiHoveredNode(null),
       },
     }));
 
@@ -86,8 +86,8 @@ const DocumentSelector = observer(
           options={options}
           textInputProps={{
             style: { flex: 1 },
-            onMouseEnter: () => rootStore.setUiHoveredNode(documentId),
-            onMouseLeave: () => rootStore.setUiHoveredNode(null),
+            onMouseEnter: () => appState.setUiHoveredNode(documentId),
+            onMouseLeave: () => appState.setUiHoveredNode(null),
           }}
         />
         <Tooltip label={"Open Document Editor"}>
@@ -114,10 +114,10 @@ const EntitySelector = observer(
     onEntityChange: (_id: string) => void;
     label: string;
   }) => {
-    const rootStore = useAppState();
+    const appState = useAppState();
 
     const selectedEntity = entityId
-      ? rootStore.dataset.entities.get(entityId)
+      ? appState.dataset.entities.get(entityId)
       : undefined;
 
     const [searchValue, setSearchValue] = useState(
@@ -127,19 +127,19 @@ const EntitySelector = observer(
     const shouldFilterOptions = selectedEntity?.searchString !== searchValue;
 
     const filteredOptions = shouldFilterOptions
-      ? rootStore.dataset.entityList.filter((entity) =>
+      ? appState.dataset.entityList.filter((entity) =>
           entity.searchString
             .toLowerCase()
             .includes(searchValue.toLowerCase().trim()),
         )
-      : rootStore.dataset.entityList;
+      : appState.dataset.entityList;
 
     const options: SearchableComboboxOption[] = filteredOptions.map((item) => ({
       val: item.id,
       display: item.searchString,
       props: {
-        onMouseEnter: () => rootStore.setUiHoveredNode(item.id),
-        onMouseLeave: () => rootStore.setUiHoveredNode(null),
+        onMouseEnter: () => appState.setUiHoveredNode(item.id),
+        onMouseLeave: () => appState.setUiHoveredNode(null),
       },
     }));
 
@@ -157,8 +157,8 @@ const EntitySelector = observer(
         options={options}
         textInputProps={{
           style: { flex: 1 },
-          onMouseEnter: () => rootStore.setUiHoveredNode(entityId),
-          onMouseLeave: () => rootStore.setUiHoveredNode(null),
+          onMouseEnter: () => appState.setUiHoveredNode(entityId),
+          onMouseLeave: () => appState.setUiHoveredNode(null),
         }}
       />
     );
@@ -167,22 +167,22 @@ const EntitySelector = observer(
 
 const LinkEditor = observer(
   ({ mention, link }: { mention: Mention; link: Entity }) => {
-    const rootStore = useAppState();
+    const appState = useAppState();
 
     return (
       <Paper
         className={classes.linkEntry}
         shadow="xl"
         withBorder
-        onMouseEnter={() => rootStore.setUiHoveredNode(link.id)}
-        onMouseLeave={() => rootStore.setUiHoveredNode(null)}
+        onMouseEnter={() => appState.setUiHoveredNode(link.id)}
+        onMouseLeave={() => appState.setUiHoveredNode(null)}
       >
         <Group
           wrap={"nowrap"}
           justify="space-between"
           gap={0}
-          onMouseEnter={() => rootStore.setUiHoveredNode(link.id)}
-          onMouseLeave={() => rootStore.setUiHoveredNode(null)}
+          onMouseEnter={() => appState.setUiHoveredNode(link.id)}
+          onMouseLeave={() => appState.setUiHoveredNode(null)}
         >
           <Text truncate="end" component="span" className={classes.linkText}>
             {link.name}
@@ -220,7 +220,7 @@ const MentionToEntityLinkEditor = observer(
 );
 
 const MentionEditor = observer(({ mention }: { mention: Mention }) => {
-  const rootStore = useAppState();
+  const appState = useAppState();
   const entityTypeCombobox = useCombobox();
 
   const [name, setName] = useState(mention.name);
@@ -232,7 +232,7 @@ const MentionEditor = observer(({ mention }: { mention: Mention }) => {
     mention.setName(name);
     mention.setType(entityType);
     const document = documentId
-      ? rootStore.dataset.documents.get(documentId)
+      ? appState.dataset.documents.get(documentId)
       : null;
     if (document) {
       mention.setDocument(document);
@@ -241,7 +241,7 @@ const MentionEditor = observer(({ mention }: { mention: Mention }) => {
 
   function setLinkedEntity() {
     if (entityId === null) return;
-    mention.setEntityLink(entityId, !rootStore.holdingShift);
+    mention.setEntityLink(entityId, !appState.holdingShift);
   }
 
   const canApplyChanges =
@@ -251,7 +251,7 @@ const MentionEditor = observer(({ mention }: { mention: Mention }) => {
 
   const canAddEntity =
     entityId !== null &&
-    (!mention.entities.has(entityId) || rootStore.holdingShift);
+    (!mention.entities.has(entityId) || appState.holdingShift);
 
   return (
     <Fieldset
@@ -346,7 +346,7 @@ const MentionEditor = observer(({ mention }: { mention: Mention }) => {
         >
           <EntitySelector
             label={
-              rootStore.holdingShift ? "Set Linked Entity" : "Add Linked Entity"
+              appState.holdingShift ? "Set Linked Entity" : "Add Linked Entity"
             }
             entityId={entityId}
             onEntityChange={(id) => {
@@ -368,7 +368,7 @@ const MentionEditor = observer(({ mention }: { mention: Mention }) => {
               disabled={!canAddEntity}
               onClick={setLinkedEntity}
             >
-              {rootStore.holdingShift ? (
+              {appState.holdingShift ? (
                 <IconLink size={28} />
               ) : (
                 <IconLinkPlus size={28} />

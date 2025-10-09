@@ -1,4 +1,4 @@
-import { appState, type AppState } from "@/stores/rootStore.ts";
+import { appState, type AppState } from "@/stores/appState.ts";
 import { makeAutoObservable, observable } from "mobx";
 import { setColorByType } from "@/utils/graphHelpers.ts";
 import { isHydrated, makePersistable } from "mobx-persist-store";

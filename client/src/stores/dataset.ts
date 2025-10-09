@@ -3,7 +3,7 @@ import { Entity, type EntityDB } from "@/stores/entity.ts";
 import { Document, type DocumentDB } from "@/stores/document.ts";
 import { Collocation, type CollocationDB } from "@/stores/collocation.ts";
 import { makeAutoObservable, runInAction } from "mobx";
-import { appState, type AppState } from "@/stores/rootStore.ts";
+import { appState, type AppState } from "@/stores/appState.ts";
 import type { GraphEntity } from "@/stores/graphEntity.ts";
 import { loadDemo, readFile } from "@/utils/helpers.ts";
 import { makePersistable } from "mobx-persist-store";

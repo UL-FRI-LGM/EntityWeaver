@@ -1,33 +1,33 @@
 import { observer } from "mobx-react";
 import { Button, Group, Modal, Text, Tooltip } from "@mantine/core";
-import { useAppState } from "@/stores/rootStore.ts";
+import { useAppState } from "@/stores/appState.ts";
 import { Document } from "@/stores/document.ts";
 
 const DeleteNodeModal = observer(() => {
-  const rootStore = useAppState();
+  const appState = useAppState();
 
-  const nodeAttributes = rootStore.selectedNode
-    ? rootStore.sigma?.getGraph().getNodeAttributes(rootStore.selectedNode)
+  const nodeAttributes = appState.selectedNode
+    ? appState.sigma?.getGraph().getNodeAttributes(appState.selectedNode)
     : null;
 
   function onDeleteNode() {
-    if (rootStore.selectedNodeInstance) {
-      rootStore.dataset.deleteNode(rootStore.selectedNodeInstance);
-      rootStore.setDeleteNodeModalOpen(false);
+    if (appState.selectedNodeInstance) {
+      appState.dataset.deleteNode(appState.selectedNodeInstance);
+      appState.setDeleteNodeModalOpen(false);
     }
   }
 
   const canDeleteNode =
-    rootStore.selectedNodeInstance !== null &&
-    rootStore.selectedNodeInstance &&
-    (!(rootStore.selectedNodeInstance instanceof Document) ||
-      (rootStore.selectedNodeInstance as Document).canDelete);
+    appState.selectedNodeInstance !== null &&
+    appState.selectedNodeInstance &&
+    (!(appState.selectedNodeInstance instanceof Document) ||
+      (appState.selectedNodeInstance as Document).canDelete);
 
   return (
     <Modal
       size="auto"
-      opened={rootStore.deleteNodeModalOpen}
-      onClose={() => rootStore.setDeleteNodeModalOpen(false)}
+      opened={appState.deleteNodeModalOpen}
+      onClose={() => appState.setDeleteNodeModalOpen(false)}
       title={
         <>
           <Text>
@@ -43,7 +43,7 @@ const DeleteNodeModal = observer(() => {
       <Group justify="end" mt={"10px"}>
         <Button
           variant="default"
-          onClick={() => rootStore.setDeleteNodeModalOpen(false)}
+          onClick={() => appState.setDeleteNodeModalOpen(false)}
         >
           Cancel
         </Button>

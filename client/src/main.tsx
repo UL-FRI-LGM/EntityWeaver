@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 // import "./index.css";
 import App from "./App.tsx";
-import { appState, AppStateProvider } from "./stores/rootStore.ts";
+import { appState, AppStateProvider } from "./stores/appState.ts";
 import "@mantine/core/styles.css";
 import { createTheme, MantineProvider, virtualColor } from "@mantine/core";
 
