@@ -151,6 +151,10 @@ export const GraphEffects = observer(() => {
           appState.setSelectedNode(draggedNode ?? appState.hoveredNode);
         }
       },
+      // Disable autoscale at the first down interaction, otherwise dragging node out of bounds will rescale the graph
+      mousedown: () => {
+        if (!sigma.getCustomBBox()) sigma.setCustomBBox(sigma.getBBox());
+      },
       clickEdge: (event) => {
         if (draggedNode) return;
         appState.setSelectedEdge(event.edge);
