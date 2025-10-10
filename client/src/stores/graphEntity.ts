@@ -3,8 +3,8 @@ import type { Dataset } from "@/stores/dataset.ts";
 import { action, computed, makeObservable, observable } from "mobx";
 
 export abstract class GraphEntity {
-  id: string;
-  internal_id: string;
+  readonly id: string;
+  readonly internal_id: string;
   x?: number;
   y?: number;
   dataset: Dataset;

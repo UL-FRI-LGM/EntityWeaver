@@ -4,7 +4,6 @@ import { Document, type DocumentDB } from "@/stores/document.ts";
 import { Collocation, type CollocationDB } from "@/stores/collocation.ts";
 import { computed, makeAutoObservable, runInAction } from "mobx";
 import { appState, type AppState } from "@/stores/appState.ts";
-import type { GraphEntity } from "@/stores/graphEntity.ts";
 import { loadDemo, readFile } from "@/utils/helpers.ts";
 import { makePersistable } from "mobx-persist-store";
 
@@ -135,46 +134,6 @@ export class Dataset {
   }
   get collocationsList() {
     return Array.from(this.collocations.values());
-  }
-
-  setNodePosition(
-    nodeId: string,
-    nodeType: GraphNodeType,
-    position: { x?: number | null; y?: number | null },
-  ) {
-    if (nodeType === "Document") {
-      const document = this.documents.get(nodeId);
-      if (!document) {
-        console.warn(`Document with id ${nodeId} not found`);
-        return;
-      }
-      document.setPosition(position);
-      return;
-    } else if (nodeType === "Entity") {
-      const entity = this.entities.get(nodeId);
-      if (!entity) {
-        console.warn(`Entity with id ${nodeId} not found`);
-        return;
-      }
-      entity.setPosition(position);
-    } else if (nodeType === "Mention") {
-      const mention = this.mentions.get(nodeId);
-      if (!mention) {
-        console.warn(`Mention with id ${nodeId} not found`);
-        return;
-      }
-      mention.setPosition(position);
-    }
-  }
-
-  deleteNode(nodeInstance: GraphEntity) {
-    if (nodeInstance instanceof Document) {
-      this.documents.get(nodeInstance.id)?.dispose();
-    } else if (nodeInstance instanceof Entity) {
-      this.entities.get(nodeInstance.id)?.dispose();
-    } else if (nodeInstance instanceof Mention) {
-      this.mentions.get(nodeInstance.id)?.dispose();
-    }
   }
 
   async loadDemo() {

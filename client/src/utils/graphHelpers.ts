@@ -417,6 +417,7 @@ export function updateGraph(
       borderSize: DEFINES.document.borderSize,
       nodeType: "Document",
       zIndex: 0,
+      source: document,
     });
   });
   dataset.entities.forEach((entity) => {
@@ -439,6 +440,7 @@ export function updateGraph(
       nodeType: "Entity",
       entityType: entity.type,
       zIndex: 10,
+      source: entity,
     });
   });
   dataset.mentions.forEach((mention) => {
@@ -461,19 +463,16 @@ export function updateGraph(
       nodeType: "Mention",
       entityType: mention.type,
       zIndex: 20,
+      source: mention,
     });
 
-    const document = mention.document
-      ? dataset.documents.get(mention.document.id)
-      : null;
-    if (document) {
-      graph.addEdge(mention.id, document.id, {
-        size: DEFINES.edges.MentionToDocument.width,
-        color: DEFINES.edges.MentionToDocument.color,
-        connectionType: "MentionToDocument",
-        zIndex: 1,
-      });
-    }
+    const document = mention.document;
+    graph.addEdge(mention.id, document.id, {
+      size: DEFINES.edges.MentionToDocument.width,
+      color: DEFINES.edges.MentionToDocument.color,
+      connectionType: "MentionToDocument",
+      zIndex: 1,
+    });
 
     mention.entities.forEach((link) => {
       graph.addEdge(mention.id, link.id, {

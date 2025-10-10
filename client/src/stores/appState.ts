@@ -50,6 +50,8 @@ export interface NodeType {
   nodeType: GraphNodeType;
   entityType?: string;
   zIndex?: number;
+
+  source: Entity | Document | Mention;
 }
 export interface EdgeType {
   size: number;
@@ -88,15 +90,7 @@ export class AppState {
 
   get selectedNodeInstance() {
     if (!this.selectedNode) return undefined;
-    if (this.selectedNode.startsWith(Mention.prefix)) {
-      return this.dataset.mentions.get(this.selectedNode);
-    } else if (this.selectedNode.startsWith(Document.prefix)) {
-      return this.dataset.documents.get(this.selectedNode);
-    } else if (this.selectedNode.startsWith(Entity.prefix)) {
-      return this.dataset.entities.get(this.selectedNode);
-    } else {
-      return undefined;
-    }
+    return this._sigma?.getGraph().getNodeAttributes(this.selectedNode).source;
   }
 
   get graphLoading() {
@@ -241,8 +235,8 @@ export class AppState {
     }
     this.forceAtlasLayout.stop();
     this.atlasLayoutInProgress = false;
-    this.sigma?.getGraph().forEachNode((nodeId, attr) => {
-      this.dataset.setNodePosition(nodeId, attr.nodeType, attr);
+    this.sigma?.getGraph().forEachNode((_nodeId, attr) => {
+      attr.source.setPosition(attr);
     });
 
     if (this.noOverlapLayout) {
@@ -259,8 +253,8 @@ export class AppState {
       return;
     }
     this.noOverlapLayout.stop();
-    this.sigma?.getGraph().forEachNode((node, attributes) => {
-      this.dataset.setNodePosition(node, attributes.nodeType, attributes);
+    this.sigma?.getGraph().forEachNode((_node, attributes) => {
+      attributes.source.setPosition(attributes);
     });
     this.noverlapLayoutInProgress = false;
     this.initialLayout = false;

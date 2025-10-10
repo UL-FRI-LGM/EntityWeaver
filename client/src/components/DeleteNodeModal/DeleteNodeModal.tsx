@@ -12,7 +12,7 @@ const DeleteNodeModal = observer(() => {
 
   function onDeleteNode() {
     if (appState.selectedNodeInstance) {
-      appState.dataset.deleteNode(appState.selectedNodeInstance);
+      appState.selectedNodeInstance.dispose();
       appState.setDeleteNodeModalOpen(false);
     }
   }

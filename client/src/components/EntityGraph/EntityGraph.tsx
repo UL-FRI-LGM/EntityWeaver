@@ -130,7 +130,7 @@ export const GraphEffects = observer(() => {
         dragging.current = true;
         const pos = sigma.viewportToGraph(event);
         const attributes = sigma.getGraph().getNodeAttributes(draggedNode);
-        appState.dataset.setNodePosition(draggedNode, attributes.nodeType, pos);
+        attributes.source.setPosition(pos);
 
         event.preventSigmaDefault();
         event.original.preventDefault();
