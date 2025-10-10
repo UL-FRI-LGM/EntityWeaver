@@ -29,7 +29,7 @@ export class Document extends GraphEntity {
     makeObservable(this, {
       title: observable,
       mentions: observable,
-      mentionList: computed,
+      mentionList: computed({ keepAlive: true }),
       canDelete: override,
     });
   }

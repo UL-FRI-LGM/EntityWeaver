@@ -1,6 +1,6 @@
 import { Mention } from "@/stores/mention.ts";
 import { Document } from "@/stores/document.ts";
-import { makeAutoObservable } from "mobx";
+import { computed, makeAutoObservable } from "mobx";
 import type { Dataset } from "@/stores/dataset.ts";
 
 export interface CollocationDB {
@@ -33,7 +33,7 @@ export class Collocation {
       this.mentions.set(mention.id, mention);
     });
 
-    makeAutoObservable(this);
+    makeAutoObservable(this, { mentionsList: computed({ keepAlive: true }) });
   }
 
   static fromJson(data: CollocationDB, dataset: Dataset): Collocation {

@@ -15,7 +15,6 @@ import {
 import { useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
 import { DEFINES } from "@/defines.ts";
-import { useAppState } from "@/stores/appState.ts";
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
 import MentionLinkEditor from "@/components/RightWidget/MentionLinkEditor.tsx";
 import NodeActions from "@/components/RightWidget/NodeActions.tsx";
@@ -29,15 +28,10 @@ const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
   ),
 );
 
-const MentionList = observer(({ entityId }: { entityId: string }) => {
-  const appState = useAppState();
-  const mentions = Array.from(appState.dataset.mentions.values()).filter(
-    (mention) => mention.entities.has(entityId),
-  );
-
+const MentionList = observer(({ entity }: { entity: Entity }) => {
   return (
     <Stack className={classes.linkList}>
-      {mentions.map((mention) => (
+      {entity.mentionList.map((mention) => (
         <MentionLinkEditor key={mention.id} mention={mention} />
       ))}
     </Stack>
@@ -115,7 +109,7 @@ const EntityEditor = observer(({ entity }: { entity: Entity }) => {
       </Button>
       <Stack className={classes.mentionsContainer} gap={6}>
         <Divider label="Mentions" labelPosition={"center"} />
-        <MentionList entityId={entity.id} />
+        <MentionList entity={entity} />
       </Stack>
     </Fieldset>
   );

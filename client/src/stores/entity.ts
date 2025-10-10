@@ -1,8 +1,9 @@
 import { DEFINES } from "@/defines.ts";
 import { GraphEntity } from "@/stores/graphEntity.ts";
 import type { Dataset } from "@/stores/dataset.ts";
-import { makeObservable, override } from "mobx";
+import { computed, makeObservable, override } from "mobx";
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
+import type { Mention } from "@/stores/mention.ts";
 
 export type EntityTypes = keyof typeof DEFINES.entityTypes.names;
 
@@ -17,8 +18,9 @@ export interface EntityDB {
 export class Entity extends GraphEntity {
   static prefix = "Entity-";
 
-  _name: string;
+  private _name: string;
   type: string;
+  mentions: Map<string, Mention> = new Map<string, Mention>();
 
   constructor(
     internal_id: string,
@@ -32,12 +34,16 @@ export class Entity extends GraphEntity {
     this._name = name;
     this.type = type;
 
-    makeObservable(this, {
+    makeObservable<Entity, "_name">(this, {
       _name: true,
       name: true,
       type: true,
       searchString: true,
+      mentionList: computed({ keepAlive: true }),
       canDelete: override,
+
+      onMentionLinked: true,
+      onMentionUnlinked: true,
     });
   }
 
@@ -55,6 +61,10 @@ export class Entity extends GraphEntity {
     };
   }
 
+  get mentionList() {
+    return Array.from(this.mentions.values());
+  }
+
   get name(): string {
     return this._name;
   }
@@ -66,5 +76,13 @@ export class Entity extends GraphEntity {
 
   get searchString() {
     return `${this.name} (${this.internal_id})`;
+  }
+
+  onMentionLinked(mention: Mention) {
+    this.mentions.set(mention.id, mention);
+  }
+
+  onMentionUnlinked(mention: Mention) {
+    this.mentions.delete(mention.id);
   }
 }

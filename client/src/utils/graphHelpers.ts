@@ -350,9 +350,7 @@ export function updateEntityViewEdges(
   });
 
   for (const entity of dataset.entityList) {
-    const mentions = dataset.mentionList.filter((mention) =>
-      mention.entityLinkList.some((link) => link.id === entity.id),
-    );
+    const mentions = entity.mentionList;
     const connectedDocuments = new Set<string>();
     for (const mention of mentions) {
       if (mention.document) {

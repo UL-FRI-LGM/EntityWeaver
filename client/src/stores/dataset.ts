@@ -2,7 +2,7 @@ import { Mention, type MentionDB } from "@/stores/mention.ts";
 import { Entity, type EntityDB } from "@/stores/entity.ts";
 import { Document, type DocumentDB } from "@/stores/document.ts";
 import { Collocation, type CollocationDB } from "@/stores/collocation.ts";
-import { makeAutoObservable, runInAction } from "mobx";
+import { computed, makeAutoObservable, runInAction } from "mobx";
 import { appState, type AppState } from "@/stores/appState.ts";
 import type { GraphEntity } from "@/stores/graphEntity.ts";
 import { loadDemo, readFile } from "@/utils/helpers.ts";
@@ -28,7 +28,12 @@ export class Dataset {
 
   constructor(appState: AppState) {
     this.appState = appState;
-    makeAutoObservable(this);
+    makeAutoObservable(this, {
+      mentionList: computed({ keepAlive: true }),
+      documentList: computed({ keepAlive: true }),
+      entityList: computed({ keepAlive: true }),
+      collocationsList: computed({ keepAlive: true }),
+    });
 
     if (import.meta.env.VITE_STORE_GRAPH === "true") {
       makePersistable(this, {

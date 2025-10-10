@@ -1,5 +1,5 @@
 import { GraphEntity } from "@/stores/graphEntity.ts";
-import { makeObservable } from "mobx";
+import { computed, makeObservable } from "mobx";
 import type { Dataset } from "@/stores/dataset.ts";
 import { updateMentionNode } from "@/utils/graphHelpers.ts";
 import { Document } from "@/stores/document.ts";
@@ -42,20 +42,22 @@ export class Mention extends GraphEntity {
     this.document = document;
 
     entities.forEach((entity) => {
-      this.entities.set(entity.id, entity);
+      this.setEntityLink(entity, true, false);
     });
 
     this.document.mentions.set(this.id, this);
 
-    makeObservable(this, {
+    makeObservable<Mention>(this, {
       name: true,
       type: true,
-      document: true,
       entities: true,
-      entityLinkList: true,
+      document: true,
+
+      entityLinkList: computed({ keepAlive: true }),
       setName: true,
       setType: true,
       setDocument: true,
+
       removeEntityLink: true,
       setEntityLink: true,
     });
@@ -131,15 +133,24 @@ export class Mention extends GraphEntity {
       });
     }
   }
+
   removeEntityLink(entityId: string) {
     this.entities.delete(entityId);
+    const entity = this.dataset.entities.get(entityId);
+    if (entity) {
+      entity.onMentionUnlinked(this);
+    }
     if (this.dataset.appState.sigma) {
       updateMentionNode(this.dataset.appState.sigma, this.id, {
         removedEntityLinks: [entityId],
       });
     }
   }
-  setEntityLink(entity: Entity | string, keepExisting = true) {
+  setEntityLink(
+    entity: Entity | string,
+    keepExisting = true,
+    updateGraph = true,
+  ) {
     let linkedEntity: Entity;
     if (typeof entity === "string") {
       const foundEntity = this.dataset.entities.get(entity);
@@ -168,8 +179,9 @@ export class Mention extends GraphEntity {
     }
     if (!alreadyHasLink) {
       this.entities.set(linkedEntity.id, linkedEntity);
+      linkedEntity.onMentionLinked(this);
     }
-    if (this.dataset.appState.sigma) {
+    if (updateGraph && this.dataset.appState.sigma) {
       updateMentionNode(this.dataset.appState.sigma, this.id, {
         addedEntityLinks: [linkedEntity.id],
         clearEntityLinks: !keepExisting,

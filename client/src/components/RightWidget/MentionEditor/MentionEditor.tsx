@@ -196,16 +196,6 @@ const LinkEditor = observer(
   },
 );
 
-const EntityLinkList = observer(({ mention }: { mention: Mention }) => {
-  return (
-    <Stack className={classes.linkList}>
-      {mention.entityLinkList.map((link) => (
-        <LinkEditor key={link.id} mention={mention} link={link} />
-      ))}
-    </Stack>
-  );
-});
-
 const MentionToEntityLinkEditor = observer(
   ({ mention }: { mention: Mention }) => {
     return (
@@ -213,7 +203,11 @@ const MentionToEntityLinkEditor = observer(
         legend={"Linked Entities"}
         className={classes.linkedEntitiesContainer}
       >
-        <EntityLinkList mention={mention} />
+        <Stack className={classes.linkList}>
+          {mention.entityLinkList.map((link) => (
+            <LinkEditor key={link.id} mention={mention} link={link} />
+          ))}
+        </Stack>
       </Fieldset>
     );
   },
