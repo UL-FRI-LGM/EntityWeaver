@@ -24,7 +24,7 @@ const DocumentEditor = observer(({ document }: { document: Document }) => {
   const [title, setTitle] = useState(document.title);
 
   function applyChanges() {
-    document.title = title;
+    document.setTitle(title);
   }
 
   const canApplyChanges = document.title !== title;

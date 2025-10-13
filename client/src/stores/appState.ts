@@ -67,7 +67,7 @@ export type SigmaGraph = Sigma<NodeType, EdgeType>;
 export class AppState {
   dataset: Dataset = new Dataset(this);
   uiState: UiState = new UiState(this);
-  private _sigma: SigmaGraph | null = null;
+  sigma: SigmaGraph | null = null;
 
   deleteNodeModalOpen = false;
   selectedNode: string | null = null;
@@ -90,7 +90,7 @@ export class AppState {
 
   get selectedNodeInstance() {
     if (!this.selectedNode) return undefined;
-    return this._sigma?.getGraph().getNodeAttributes(this.selectedNode).source;
+    return this.sigma?.getGraph().getNodeAttributes(this.selectedNode).source;
   }
 
   get graphLoading() {
@@ -102,12 +102,8 @@ export class AppState {
     return this.atlasLayoutInProgress || this.noverlapLayoutInProgress;
   }
 
-  get sigma() {
-    return this._sigma;
-  }
-
   setSigma(sigma: SigmaGraph) {
-    this._sigma = sigma;
+    this.sigma = sigma;
     this.forceAtlasLayout = new FA2Layout<NodeType, EdgeType>(
       sigma.getGraph(),
       {

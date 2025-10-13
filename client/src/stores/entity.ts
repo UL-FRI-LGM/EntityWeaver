@@ -18,7 +18,7 @@ export interface EntityDB {
 export class Entity extends GraphEntity {
   static prefix = "Entity-";
 
-  private _name: string;
+  name: string;
   type: string;
   mentions: Map<string, Mention> = new Map<string, Mention>();
 
@@ -31,13 +31,15 @@ export class Entity extends GraphEntity {
     y?: number,
   ) {
     super(internal_id, Entity.prefix, dataset, x, y);
-    this._name = name;
+    this.name = name;
     this.type = type;
 
-    makeObservable<Entity, "_name">(this, {
-      _name: true,
+    makeObservable(this, {
       name: true,
       type: true,
+      setName: true,
+      setType: true,
+
       searchString: true,
       mentionList: computed({ keepAlive: true }),
       canDelete: override,
@@ -65,13 +67,14 @@ export class Entity extends GraphEntity {
     return Array.from(this.mentions.values());
   }
 
-  get name(): string {
-    return this._name;
+  setName(name: string) {
+    this.name = name;
+    updateNodeProperties(this.dataset.appState.sigma, this.id, { label: name });
   }
 
-  set name(name: string) {
-    this._name = name;
-    updateNodeProperties(this.dataset.appState.sigma, this.id, { label: name });
+  setType(type: string) {
+    this.type = type;
+    updateNodeProperties(this.dataset.appState.sigma, this.id, { type: type });
   }
 
   get searchString() {

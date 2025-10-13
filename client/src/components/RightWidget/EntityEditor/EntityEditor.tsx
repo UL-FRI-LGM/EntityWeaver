@@ -45,8 +45,8 @@ const EntityEditor = observer(({ entity }: { entity: Entity }) => {
   const [entityType, setEntityType] = useState(entity.type);
 
   function applyChanges() {
-    entity.name = name;
-    entity.type = entityType;
+    entity.setName(name);
+    entity.setType(entityType);
   }
 
   const canApplyChanges = entity.name !== name || entity.type !== entityType;

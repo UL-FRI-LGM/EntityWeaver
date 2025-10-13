@@ -54,8 +54,7 @@ const FiltersMenu = observer(() => {
           rightSection={<Switch checked={appState.uiState.filters.entities} />}
           onClick={(event) => {
             event.preventDefault();
-            appState.uiState.filters.entities =
-              !appState.uiState.filters.entities;
+            appState.uiState.toggleFilter("entities");
           }}
         >
           Entities
@@ -65,8 +64,7 @@ const FiltersMenu = observer(() => {
           rightSection={<Switch checked={appState.uiState.filters.mentions} />}
           onClick={(event) => {
             event.preventDefault();
-            appState.uiState.filters.mentions =
-              !appState.uiState.filters.mentions;
+            appState.uiState.toggleFilter("mentions");
           }}
         >
           Mentions
@@ -76,8 +74,7 @@ const FiltersMenu = observer(() => {
           rightSection={<Switch checked={appState.uiState.filters.documents} />}
           onClick={(event) => {
             event.preventDefault();
-            appState.uiState.filters.documents =
-              !appState.uiState.filters.documents;
+            appState.uiState.toggleFilter("documents");
           }}
         >
           Documents
@@ -91,7 +88,7 @@ const FiltersMenu = observer(() => {
           rightSection={<Switch checked={appState.uiState.filters.people} />}
           onClick={(event) => {
             event.preventDefault();
-            appState.uiState.filters.people = !appState.uiState.filters.people;
+            appState.uiState.toggleFilter("people");
           }}
         >
           People
@@ -101,8 +98,7 @@ const FiltersMenu = observer(() => {
           rightSection={<Switch checked={appState.uiState.filters.locations} />}
           onClick={(event) => {
             event.preventDefault();
-            appState.uiState.filters.locations =
-              !appState.uiState.filters.locations;
+            appState.uiState.toggleFilter("locations");
           }}
         >
           Locations
@@ -114,8 +110,7 @@ const FiltersMenu = observer(() => {
           }
           onClick={(event) => {
             event.preventDefault();
-            appState.uiState.filters.organizations =
-              !appState.uiState.filters.organizations;
+            appState.uiState.toggleFilter("organizations");
           }}
         >
           Organizations
@@ -127,8 +122,7 @@ const FiltersMenu = observer(() => {
           }
           onClick={(event) => {
             event.preventDefault();
-            appState.uiState.filters.miscellaneous =
-              !appState.uiState.filters.miscellaneous;
+            appState.uiState.toggleFilter("miscellaneous");
           }}
         >
           Miscellaneous
@@ -145,8 +139,7 @@ const FiltersMenu = observer(() => {
           }
           onClick={(event) => {
             event.preventDefault();
-            appState.uiState.filters.collocations =
-              !appState.uiState.filters.collocations;
+            appState.uiState.toggleFilter("collocations");
           }}
         >
           Collocations
@@ -284,7 +277,7 @@ const TopBar = observer(() => {
           checked={appState.uiState.colorByType}
           classNames={{ label: classes.switchLabel }}
           onChange={(event) =>
-            (appState.uiState.colorByType = event.currentTarget.checked)
+            appState.uiState.setColorByType(event.currentTarget.checked)
           }
         />
         <Switch

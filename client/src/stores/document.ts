@@ -2,6 +2,7 @@ import { GraphEntity } from "@/stores/graphEntity.ts";
 import type { Mention } from "@/stores/mention.ts";
 import type { Dataset } from "@/stores/dataset.ts";
 import { computed, makeObservable, observable, override } from "mobx";
+import { updateNodeProperties } from "@/utils/graphHelpers.ts";
 
 export interface DocumentDB {
   id: string;
@@ -28,6 +29,7 @@ export class Document extends GraphEntity {
 
     makeObservable(this, {
       title: observable,
+      setTitle: true,
       mentions: observable,
       mentionList: computed({ keepAlive: true }),
       canDelete: override,
@@ -45,6 +47,13 @@ export class Document extends GraphEntity {
       x: this.x,
       y: this.y,
     };
+  }
+
+  setTitle(title: string) {
+    this.title = title;
+    updateNodeProperties(this.dataset.appState.sigma, this.id, {
+      label: this.title,
+    });
   }
 
   get mentionList() {

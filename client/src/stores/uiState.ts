@@ -1,7 +1,18 @@
 import { appState, type AppState } from "@/stores/appState.ts";
-import { makeAutoObservable, observable } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { setColorByType } from "@/utils/graphHelpers.ts";
 import { isHydrated, makePersistable } from "mobx-persist-store";
+
+interface Filters {
+  entities: boolean;
+  documents: boolean;
+  mentions: boolean;
+  people: boolean;
+  locations: boolean;
+  organizations: boolean;
+  miscellaneous: boolean;
+  collocations: boolean;
+}
 
 export class UiState {
   appState: AppState;
@@ -9,8 +20,8 @@ export class UiState {
   highlightOnSelect = true;
   highlightOnHover = true;
   entityView = false;
-  _colorByType = false;
-  filters = {
+  colorByType = false;
+  filters: Filters = {
     entities: true,
     documents: true,
     mentions: true,
@@ -23,7 +34,7 @@ export class UiState {
 
   constructor(appState: AppState) {
     this.appState = appState;
-    makeAutoObservable(this, { filters: observable.struct });
+    makeAutoObservable(this);
 
     makePersistable(this, {
       name: "NERVIS-UIState",
@@ -31,7 +42,7 @@ export class UiState {
         "highlightOnSelect",
         "highlightOnHover",
         "entityView",
-        "_colorByType",
+        "colorByType",
         "filters",
       ],
     }).catch((error) => {
@@ -39,16 +50,16 @@ export class UiState {
     });
   }
 
+  toggleFilter<Key extends keyof Filters>(key: Key) {
+    this.filters[key] = !this.filters[key];
+  }
+
   get isReloading() {
     return isHydrated(this);
   }
 
-  get colorByType() {
-    return this._colorByType;
-  }
-
-  set colorByType(state: boolean) {
-    this._colorByType = state;
+  setColorByType(state: boolean) {
+    this.colorByType = state;
     setColorByType(appState.sigma, state);
   }
 }
