@@ -94,14 +94,14 @@ export class Dataset {
         .then(() => {
           if (this.hasData) {
             appState.runGraphUpdate(false);
-          } else if (import.meta.env.VITE_LOAD_DEMO === "true") {
+          } else if (import.meta.env.VITE_AUTO_LOAD_DEMO === "true") {
             this.loadDemo().catch((error) => console.error(error));
           }
         })
         .catch((error) => {
           console.error(error);
         });
-    } else if (import.meta.env.VITE_LOAD_DEMO === "true") {
+    } else if (import.meta.env.VITE_AUTO_LOAD_DEMO === "true") {
       this.loadDemo().catch((error) => console.error(error));
     }
   }
