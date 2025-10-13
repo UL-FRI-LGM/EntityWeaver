@@ -65,48 +65,49 @@ const EntityEditor = observer(({ entity }: { entity: Entity }) => {
       }}
     >
       <NodeActions node={entity} />
+      <Stack gap={10}>
+        <TextInput
+          label="Name"
+          value={name}
+          onChange={(event) => setName(event.currentTarget.value)}
+        />
+        <Combobox
+          store={entityTypeCombobox}
+          onOptionSubmit={(val) => {
+            setEntityType(val);
+            entityTypeCombobox.closeDropdown();
+          }}
+        >
+          <Combobox.Target>
+            <InputBase
+              component="button"
+              type="button"
+              label="Entity Type"
+              pointer
+              rightSection={<Combobox.Chevron />}
+              rightSectionPointerEvents="none"
+              onClick={() => entityTypeCombobox.toggleDropdown()}
+            >
+              {typeToString(entityType) || (
+                <Input.Placeholder>Select Entity Type</Input.Placeholder>
+              )}
+            </InputBase>
+          </Combobox.Target>
 
-      <TextInput
-        label="Name"
-        value={name}
-        onChange={(event) => setName(event.currentTarget.value)}
-      />
-      <Combobox
-        store={entityTypeCombobox}
-        onOptionSubmit={(val) => {
-          setEntityType(val);
-          entityTypeCombobox.closeDropdown();
-        }}
-      >
-        <Combobox.Target>
-          <InputBase
-            component="button"
-            type="button"
-            label="Entity Type"
-            pointer
-            rightSection={<Combobox.Chevron />}
-            rightSectionPointerEvents="none"
-            onClick={() => entityTypeCombobox.toggleDropdown()}
-          >
-            {typeToString(entityType) || (
-              <Input.Placeholder>Select Entity Type</Input.Placeholder>
-            )}
-          </InputBase>
-        </Combobox.Target>
-
-        <Combobox.Dropdown>
-          <Combobox.Options>{entityTypeDropdownOptions}</Combobox.Options>
-        </Combobox.Dropdown>
-      </Combobox>
-      <Button
-        disabled={!canApplyChanges}
-        variant="filled"
-        leftSection={<IconEdit size={14} />}
-        onClick={applyChanges}
-        className={sharedClasses.applyChangesButton}
-      >
-        Apply Changes
-      </Button>
+          <Combobox.Dropdown>
+            <Combobox.Options>{entityTypeDropdownOptions}</Combobox.Options>
+          </Combobox.Dropdown>
+        </Combobox>
+        <Button
+          disabled={!canApplyChanges}
+          variant="filled"
+          leftSection={<IconEdit size={14} />}
+          onClick={applyChanges}
+          className={sharedClasses.applyChangesButton}
+        >
+          Apply Changes
+        </Button>
+      </Stack>
       <Stack className={classes.mentionsContainer} gap={6}>
         <Divider label="Mentions" labelPosition={"center"} />
         <MentionList entity={entity} />

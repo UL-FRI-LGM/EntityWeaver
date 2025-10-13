@@ -8,6 +8,7 @@ import unknownImg from "/unknown.svg?url";
 const edgeWidth = 2;
 
 export const DEFINES = {
+  contextWindow: 30,
   uiStateStorageKey: "graph-ui-state",
   sizePerEdge: 5,
   minNodeSize: 15,

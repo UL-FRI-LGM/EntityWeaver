@@ -43,21 +43,22 @@ const DocumentEditor = observer(({ document }: { document: Document }) => {
       }}
     >
       <NodeActions node={document} />
-
-      <TextInput
-        label="Title"
-        value={title}
-        onChange={(event) => setTitle(event.currentTarget.value)}
-      />
-      <Button
-        disabled={!canApplyChanges}
-        variant="filled"
-        leftSection={<IconEdit size={14} />}
-        onClick={applyChanges}
-        className={sharedClasses.applyChangesButton}
-      >
-        Apply Changes
-      </Button>
+      <Stack gap={10}>
+        <TextInput
+          label="Title"
+          value={title}
+          onChange={(event) => setTitle(event.currentTarget.value)}
+        />
+        <Button
+          disabled={!canApplyChanges}
+          variant="filled"
+          leftSection={<IconEdit size={14} />}
+          onClick={applyChanges}
+          className={sharedClasses.applyChangesButton}
+        >
+          Apply Changes
+        </Button>
+      </Stack>
       <Stack className={classes.mentionsContainer} gap={6}>
         <Divider label="Mentions" labelPosition={"center"} />
         <MentionList mentions={document.mentionList} />

@@ -29,6 +29,7 @@ import sharedClasses from "../shared.module.css";
 import NodeActions from "@/components/RightWidget/NodeActions.tsx";
 import type { Mention } from "@/stores/mention.ts";
 import type { Entity } from "@/stores/entity.ts";
+import ContextView from "@/components/RightWidget/MentionEditor/ContextView.tsx";
 
 const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
   ([tag, name]) => (
@@ -327,50 +328,54 @@ const MentionEditor = observer(({ mention }: { mention: Mention }) => {
         {/*  </Button>*/}
         {/*</Tooltip>*/}
       </Stack>
-
-      <Divider />
-      <Stack gap="10px">
-        <Group
-          preventGrowOverflow={false}
-          wrap="nowrap"
-          align={"end"}
-          gap={12}
-          justify="space-between"
-        >
-          <EntitySelector
-            label={
-              appState.holdingShift ? "Set Linked Entity" : "Add Linked Entity"
-            }
-            entityId={entityId}
-            onEntityChange={(id) => {
-              setEntityId(id);
-            }}
-          />
-          <Tooltip
-            position="bottom"
-            label={
-              <Text style={{ maxWidth: 220, textWrap: "wrap" }}>
-                Link a Mention to an Entity. Hold{" "}
-                <Code color="gray.5">SHIFT</Code> to overwrite all current
-                links.
-              </Text>
-            }
+      <ContextView mention={mention} />
+      <div>
+        <Divider label="Linked Entities" />
+        <Stack gap="10px">
+          <Group
+            preventGrowOverflow={false}
+            wrap="nowrap"
+            align={"end"}
+            gap={12}
+            justify="space-between"
           >
-            <ActionIcon
-              size={36}
-              disabled={!canAddEntity}
-              onClick={setLinkedEntity}
+            <EntitySelector
+              label={
+                appState.holdingShift
+                  ? "Set Linked Entity"
+                  : "Add Linked Entity"
+              }
+              entityId={entityId}
+              onEntityChange={(id) => {
+                setEntityId(id);
+              }}
+            />
+            <Tooltip
+              position="bottom"
+              label={
+                <Text style={{ maxWidth: 220, textWrap: "wrap" }}>
+                  Link a Mention to an Entity. Hold{" "}
+                  <Code color="gray.5">SHIFT</Code> to overwrite all current
+                  links.
+                </Text>
+              }
             >
-              {appState.holdingShift ? (
-                <IconLink size={28} />
-              ) : (
-                <IconLinkPlus size={28} />
-              )}
-            </ActionIcon>
-          </Tooltip>
-        </Group>
-        <MentionToEntityLinkEditor mention={mention} />
-      </Stack>
+              <ActionIcon
+                size={36}
+                disabled={!canAddEntity}
+                onClick={setLinkedEntity}
+              >
+                {appState.holdingShift ? (
+                  <IconLink size={28} />
+                ) : (
+                  <IconLinkPlus size={28} />
+                )}
+              </ActionIcon>
+            </Tooltip>
+          </Group>
+          <MentionToEntityLinkEditor mention={mention} />
+        </Stack>
+      </div>
     </Fieldset>
   );
 });

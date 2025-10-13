@@ -2,19 +2,23 @@
   "documents": [
     {
       "id": "doc_1",
-      "title": "Tech Industry Report 2025"
+      "title": "Tech Industry Report 2025",
+      "text": "Alice Johnson and Bob Smith met with representatives from Acme Corp and Delta Inc during the Tech Summit held in San Francisco and Paris. Laura White was also present at the event. The discussions touched on emerging AI trends, and the Cup Final was mentioned as a cultural highlight. The Festival celebrations added a festive atmosphere to the summit, making the gathering both productive and memorable. White later reflected on the significance of AI in shaping future strategies."
     },
     {
       "id": "doc_2",
-      "title": "European Political Developments"
+      "title": "European Political Developments",
+      "text": "Johnson and Smith participated in a series of meetings alongside Charlie Kim and Sophia Müller in Berlin and London. Acme, Delta, Omega Corp, and Zeta LLC were key organizational players, while the European Union had a strong presence as well. The Summit was followed by the Climate Conference 2025, which attracted international attention. Johnson’s remarks emphasized collaboration between entities such as Acme and the EU to address global challenges."
     },
     {
       "id": "doc_3",
-      "title": "Global Economic Outlook"
+      "title": "Global Economic Outlook",
+      "text": "C. Kim traveled with Müller and Oliver O'Neil to London and Tokyo for a series of events, including the Climate Conference and the Annual Economic Forum. Michael Green also joined them. Omega, Zeta, and the European Union were prominently represented, and the United Nations played a significant role in the proceedings. The Conference gathered experts from around the world to discuss critical topics."
     },
     {
       "id": "doc_4",
-      "title": "Cultural Events Around the World"
+      "title": "Cultural Events Around the World",
+      "text": "O'Neil and M. Green attended the Spring Festival in New York City and Paris, accompanied by Laura White. Green delivered a keynote address on global economic trends during the Economic Forum, highlighting the role of the United Nations. Later, the group attended the World Cup and the Art Biennale, celebrating cultural exchange and international cooperation."
     }
   ],
   "entities": [
@@ -155,7 +159,9 @@
           "entity_id": "entity_1",
           "confidence": 0.95
         }
-      ]
+      ],
+      "start_index": 0,
+      "end_index": 13
     },
     {
       "id": "mention_2",
@@ -167,7 +173,9 @@
           "entity_id": "entity_1",
           "confidence": 0.85
         }
-      ]
+      ],
+      "start_index": 0,
+      "end_index": 7
     },
     {
       "id": "mention_3",
@@ -179,7 +187,9 @@
           "entity_id": "entity_2",
           "confidence": 0.9
         }
-      ]
+      ],
+      "start_index": 18,
+      "end_index": 27
     },
     {
       "id": "mention_4",
@@ -191,7 +201,9 @@
           "entity_id": "entity_2",
           "confidence": 0.8
         }
-      ]
+      ],
+      "start_index": 12,
+      "end_index": 17
     },
     {
       "id": "mention_5",
@@ -203,7 +215,9 @@
           "entity_id": "entity_3",
           "confidence": 0.92
         }
-      ]
+      ],
+      "start_index": 65,
+      "end_index": 76
     },
     {
       "id": "mention_6",
@@ -215,7 +229,9 @@
           "entity_id": "entity_3",
           "confidence": 0.88
         }
-      ]
+      ],
+      "start_index": 0,
+      "end_index": 6
     },
     {
       "id": "mention_7",
@@ -227,7 +243,9 @@
           "entity_id": "entity_4",
           "confidence": 0.94
         }
-      ]
+      ],
+      "start_index": 81,
+      "end_index": 94
     },
     {
       "id": "mention_8",
@@ -239,7 +257,9 @@
           "entity_id": "entity_4",
           "confidence": 0.86
         }
-      ]
+      ],
+      "start_index": 21,
+      "end_index": 27
     },
     {
       "id": "mention_9",
@@ -251,7 +271,9 @@
           "entity_id": "entity_5",
           "confidence": 0.9
         }
-      ]
+      ],
+      "start_index": 32,
+      "end_index": 45
     },
     {
       "id": "mention_10",
@@ -263,7 +285,9 @@
           "entity_id": "entity_5",
           "confidence": 0.85
         }
-      ]
+      ],
+      "start_index": 0,
+      "end_index": 6
     },
     {
       "id": "mention_11",
@@ -275,7 +299,9 @@
           "entity_id": "entity_6",
           "confidence": 0.91
         }
-      ]
+      ],
+      "start_index": 154,
+      "end_index": 167
     },
     {
       "id": "mention_12",
@@ -287,7 +313,9 @@
           "entity_id": "entity_6",
           "confidence": 0.87
         }
-      ]
+      ],
+      "start_index": 11,
+      "end_index": 19
     },
     {
       "id": "mention_13",
@@ -299,7 +327,9 @@
           "entity_id": "entity_7",
           "confidence": 0.93
         }
-      ]
+      ],
+      "start_index": 92,
+      "end_index": 103
     },
     {
       "id": "mention_14",
@@ -311,7 +341,9 @@
           "entity_id": "entity_7",
           "confidence": 0.82
         }
-      ]
+      ],
+      "start_index": 144,
+      "end_index": 149
     },
     {
       "id": "mention_15",
@@ -323,7 +355,9 @@
           "entity_id": "entity_8",
           "confidence": 0.96
         }
-      ]
+      ],
+      "start_index": 58,
+      "end_index": 67
     },
     {
       "id": "mention_16",
@@ -335,7 +369,9 @@
           "entity_id": "entity_8",
           "confidence": 0.87
         }
-      ]
+      ],
+      "start_index": 117,
+      "end_index": 121
     },
     {
       "id": "mention_17",
@@ -347,7 +383,9 @@
           "entity_id": "entity_9",
           "confidence": 0.92
         }
-      ]
+      ],
+      "start_index": 72,
+      "end_index": 81
     },
     {
       "id": "mention_18",
@@ -359,7 +397,9 @@
           "entity_id": "entity_9",
           "confidence": 0.89
         }
-      ]
+      ],
+      "start_index": 123,
+      "end_index": 128
     },
     {
       "id": "mention_19",
@@ -371,7 +411,9 @@
           "entity_id": "entity_10",
           "confidence": 0.9
         }
-      ]
+      ],
+      "start_index": 130,
+      "end_index": 140
     },
     {
       "id": "mention_20",
@@ -383,7 +425,9 @@
           "entity_id": "entity_10",
           "confidence": 0.84
         }
-      ]
+      ],
+      "start_index": 186,
+      "end_index": 191
     },
     {
       "id": "mention_21",
@@ -395,7 +439,9 @@
           "entity_id": "entity_11",
           "confidence": 0.91
         }
-      ]
+      ],
+      "start_index": 146,
+      "end_index": 154
     },
     {
       "id": "mention_22",
@@ -407,7 +453,9 @@
           "entity_id": "entity_11",
           "confidence": 0.85
         }
-      ]
+      ],
+      "start_index": 193,
+      "end_index": 197
     },
     {
       "id": "mention_23",
@@ -419,7 +467,9 @@
           "entity_id": "entity_12",
           "confidence": 0.96
         }
-      ]
+      ],
+      "start_index": 198,
+      "end_index": 212
     },
     {
       "id": "mention_24",
@@ -431,7 +481,9 @@
           "entity_id": "entity_12",
           "confidence": 0.9
         }
-      ]
+      ],
+      "start_index": 207,
+      "end_index": 209
     },
     {
       "id": "mention_25",
@@ -443,7 +495,9 @@
           "entity_id": "entity_13",
           "confidence": 0.95
         }
-      ]
+      ],
+      "start_index": 260,
+      "end_index": 274
     },
     {
       "id": "mention_26",
@@ -455,7 +509,9 @@
           "entity_id": "entity_13",
           "confidence": 0.88
         }
-      ]
+      ],
+      "start_index": 221,
+      "end_index": 223
     },
     {
       "id": "mention_27",
@@ -467,7 +523,9 @@
           "entity_id": "entity_14",
           "confidence": 0.95
         }
-      ]
+      ],
+      "start_index": 113,
+      "end_index": 126
     },
     {
       "id": "mention_28",
@@ -479,7 +537,9 @@
           "entity_id": "entity_15",
           "confidence": 0.96
         }
-      ]
+      ],
+      "start_index": 98,
+      "end_index": 104
     },
     {
       "id": "mention_29",
@@ -491,7 +551,9 @@
           "entity_id": "entity_16",
           "confidence": 0.95
         }
-      ]
+      ],
+      "start_index": 109,
+      "end_index": 115
     },
     {
       "id": "mention_30",
@@ -503,7 +565,9 @@
           "entity_id": "entity_16",
           "confidence": 0.9
         }
-      ]
+      ],
+      "start_index": 49,
+      "end_index": 55
     },
     {
       "id": "mention_31",
@@ -515,7 +579,9 @@
           "entity_id": "entity_17",
           "confidence": 0.95
         }
-      ]
+      ],
+      "start_index": 60,
+      "end_index": 65
     },
     {
       "id": "mention_32",
@@ -527,7 +593,9 @@
           "entity_id": "entity_18",
           "confidence": 0.94
         }
-      ]
+      ],
+      "start_index": 52,
+      "end_index": 65
     },
     {
       "id": "mention_33",
@@ -539,7 +607,9 @@
           "entity_id": "entity_19",
           "confidence": 0.95
         }
-      ]
+      ],
+      "start_index": 70,
+      "end_index": 75
     },
     {
       "id": "mention_34",
@@ -551,7 +621,9 @@
           "entity_id": "entity_19",
           "confidence": 0.9
         }
-      ]
+      ],
+      "start_index": 131,
+      "end_index": 136
     },
     {
       "id": "mention_35",
@@ -563,7 +635,9 @@
           "entity_id": "entity_20",
           "confidence": 0.97
         }
-      ]
+      ],
+      "start_index": 93,
+      "end_index": 104
     },
     {
       "id": "mention_36",
@@ -575,7 +649,9 @@
           "entity_id": "entity_20",
           "confidence": 0.85
         }
-      ]
+      ],
+      "start_index": 248,
+      "end_index": 254
     },
     {
       "id": "mention_37",
@@ -587,7 +663,9 @@
           "entity_id": "entity_21",
           "confidence": 0.95
         }
-      ]
+      ],
+      "start_index": 33,
+      "end_index": 48
     },
     {
       "id": "mention_38",
@@ -599,7 +677,9 @@
           "entity_id": "entity_21",
           "confidence": 0.86
         }
-      ]
+      ],
+      "start_index": 289,
+      "end_index": 297
     },
     {
       "id": "mention_39",
@@ -611,7 +691,9 @@
           "entity_id": "entity_22",
           "confidence": 0.96
         }
-      ]
+      ],
+      "start_index": 275,
+      "end_index": 298
     },
     {
       "id": "mention_40",
@@ -623,7 +705,9 @@
           "entity_id": "entity_22",
           "confidence": 0.9
         }
-      ]
+      ],
+      "start_index": 104,
+      "end_index": 122
     },
     {
       "id": "mention_41",
@@ -635,7 +719,9 @@
           "entity_id": "entity_23",
           "confidence": 0.95
         }
-      ]
+      ],
+      "start_index": 131,
+      "end_index": 152
     },
     {
       "id": "mention_42",
@@ -647,7 +733,9 @@
           "entity_id": "entity_23",
           "confidence": 0.87
         }
-      ]
+      ],
+      "start_index": 176,
+      "end_index": 190
     },
     {
       "id": "mention_43",
@@ -659,7 +747,9 @@
           "entity_id": "entity_24",
           "confidence": 0.96
         }
-      ]
+      ],
+      "start_index": 267,
+      "end_index": 276
     },
     {
       "id": "mention_44",
@@ -671,7 +761,9 @@
           "entity_id": "entity_24",
           "confidence": 0.85
         }
-      ]
+      ],
+      "start_index": 236,
+      "end_index": 245
     },
     {
       "id": "mention_45",
@@ -683,7 +775,9 @@
           "entity_id": "entity_25",
           "confidence": 0.95
         }
-      ]
+      ],
+      "start_index": 285,
+      "end_index": 297
     },
     {
       "id": "mention_46",
@@ -703,7 +797,9 @@
           "entity_id": "entity_9",
           "confidence": 0.5
         }
-      ]
+      ],
+      "start_index": 217,
+      "end_index": 219
     },
     {
       "id": "mention_47",
@@ -719,14 +815,18 @@
           "entity_id": "entity_7",
           "confidence": 0.3
         }
-      ]
+      ],
+      "start_index": 105,
+      "end_index": 110
     },
     {
       "id": "mention_48",
       "name": "Johnson",
       "type": "PER",
       "document_id": "doc_2",
-      "links": []
+      "links": [],
+      "start_index": 341,
+      "end_index": 348
     },
     {
       "id": "mention_49",
@@ -750,14 +850,18 @@
           "entity_id": "entity_12",
           "confidence": 0.3
         }
-      ]
+      ],
+      "start_index": 325,
+      "end_index": 335
     },
     {
       "id": "mention_50",
       "name": "White",
       "type": "PER",
       "document_id": "doc_1",
-      "links": []
+      "links": [],
+      "start_index": 405,
+      "end_index": 410
     }
   ],
   "collocations": [

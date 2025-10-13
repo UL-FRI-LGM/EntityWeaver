@@ -4,11 +4,14 @@ import type { Dataset } from "@/stores/dataset.ts";
 import { updateMentionNode } from "@/utils/graphHelpers.ts";
 import { Document } from "@/stores/document.ts";
 import { Entity } from "@/stores/entity.ts";
+import { DEFINES } from "@/defines.ts";
 
 export interface MentionDB {
   id: string;
   name: string;
   type: string;
+  start_index: number;
+  end_index: number;
   document_id: string;
   links: {
     entity_id: string;
@@ -22,6 +25,9 @@ export class Mention extends GraphEntity {
 
   name: string;
   type: string;
+  start_index: number;
+  end_index: number;
+
   entities: Map<string, Entity> = new Map<string, Entity>();
 
   document: Document;
@@ -30,6 +36,8 @@ export class Mention extends GraphEntity {
     internal_id: string,
     name: string,
     type: string,
+    start_index: number,
+    end_index: number,
     document: Document,
     dataset: Dataset,
     entities: Entity[] = [],
@@ -39,6 +47,8 @@ export class Mention extends GraphEntity {
     super(internal_id, Mention.prefix, dataset, x, y);
     this.name = name;
     this.type = type;
+    this.start_index = start_index;
+    this.end_index = end_index;
     this.document = document;
 
     entities.forEach((entity) => {
@@ -50,6 +60,8 @@ export class Mention extends GraphEntity {
     makeObservable<Mention>(this, {
       name: true,
       type: true,
+      start_index: true,
+      end_index: true,
       entities: true,
       document: true,
 
@@ -60,6 +72,8 @@ export class Mention extends GraphEntity {
 
       removeEntityLink: true,
       setEntityLink: true,
+
+      contextSnippet: computed,
     });
   }
 
@@ -87,6 +101,8 @@ export class Mention extends GraphEntity {
       data.id,
       data.name,
       data.type,
+      data.start_index,
+      data.end_index,
       document,
       dataset,
       entities,
@@ -100,6 +116,8 @@ export class Mention extends GraphEntity {
       id: this.internal_id,
       name: this.name,
       type: this.type,
+      start_index: this.start_index,
+      end_index: this.end_index,
       document_id: this.document.internal_id,
       links: this.entityLinkList.map((entity) => ({
         entity_id: entity.internal_id,
@@ -187,5 +205,32 @@ export class Mention extends GraphEntity {
         clearEntityLinks: !keepExisting,
       });
     }
+  }
+
+  get contextSnippet() {
+    const docText = this.document.text;
+
+    let start = Math.max(0, this.start_index - DEFINES.contextWindow);
+    let end = Math.min(docText.length, this.end_index + DEFINES.contextWindow);
+
+    while (start > 0 && !/\s/.test(docText[start])) {
+      start--;
+    }
+
+    while (end < docText.length - 1 && !/\w/.test(docText[end])) {
+      end++;
+    }
+
+    const prefix = start > 0 ? "..." : "";
+    const suffix = end < docText.length ? "..." : "";
+
+    return {
+      before: prefix + docText.slice(start, this.start_index),
+      mention: docText.slice(this.start_index, this.end_index),
+      after: docText.slice(this.end_index, end) + suffix,
+      // context: prefix + docText.slice(start, end) + suffix,
+      // start: newStart,
+      // end: newEnd,
+    };
   }
 }

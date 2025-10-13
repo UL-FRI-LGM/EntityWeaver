@@ -4,16 +4,16 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import { appState, AppStateProvider } from "./stores/appState.ts";
 import "@mantine/core/styles.css";
-import { createTheme, MantineProvider, virtualColor } from "@mantine/core";
+import { createTheme, MantineProvider } from "@mantine/core";
 
 const theme = createTheme({
   cursorType: "pointer",
   colors: {
-    primary: virtualColor({
-      name: "primary",
-      dark: "green",
-      light: "green",
-    }),
+    // primary: virtualColor({
+    //   name: "primary",
+    //   dark: "green",
+    //   light: "green",
+    // }),
   },
 });
 

@@ -21,6 +21,7 @@ export class UiState {
   highlightOnHover = true;
   entityView = false;
   colorByType = false;
+  mentionContextOpen = false;
   filters: Filters = {
     entities: true,
     documents: true,
@@ -61,5 +62,9 @@ export class UiState {
   setColorByType(state: boolean) {
     this.colorByType = state;
     setColorByType(appState.sigma, state);
+  }
+
+  setMentionContextOpen(state: boolean) {
+    this.mentionContextOpen = state;
   }
 }
