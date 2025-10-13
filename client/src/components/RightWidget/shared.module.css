@@ -1,5 +1,7 @@
 .editorFieldset {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: auto;
+  overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 25px;
