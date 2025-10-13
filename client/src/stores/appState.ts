@@ -132,7 +132,7 @@ export class AppState {
   }
   setSelectedNode(nodeId: string | null) {
     if (nodeId === this.selectedNode) return;
-    if (this.selectedNode) {
+    if (this.selectedNode && this.selectedNode !== this.uiHoveredNode) {
       updateNodeProperties(this.sigma, this.selectedNode, {
         borderColor: undefined,
       });
@@ -166,13 +166,17 @@ export class AppState {
     this.hoveredEdge = edgeId;
   }
   setUiHoveredNode(nodeId: string | null) {
-    if (this.uiHoveredNode && nodeId === null) {
+    if (
+      this.uiHoveredNode &&
+      nodeId === null &&
+      this.uiHoveredNode !== this.selectedNode
+    ) {
       updateNodeProperties(this.sigma, this.uiHoveredNode, {
         borderColor: undefined,
       });
     }
     this.uiHoveredNode = nodeId;
-    if (nodeId) {
+    if (nodeId && this.uiHoveredNode !== this.selectedNode) {
       updateNodeProperties(this.sigma, nodeId, {
         borderColor: DEFINES.uiHover.borderColor,
       });
