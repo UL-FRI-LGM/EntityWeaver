@@ -49,9 +49,8 @@ const DocumentSelector = observer(
     label: string;
   }) => {
     const appState = useAppState();
-    const { dataset, setSelectedNode } = useAppState();
 
-    const selectedDocument = dataset.documents.get(documentId);
+    const selectedDocument = appState.dataset.documents.get(documentId);
 
     const [searchValue, setSearchValue] = useState(
       selectedDocument?.title ?? "",
@@ -60,10 +59,10 @@ const DocumentSelector = observer(
     const shouldFilterOptions = selectedDocument?.title !== searchValue;
 
     const filteredOptions = shouldFilterOptions
-      ? dataset.documentList.filter((doc) =>
+      ? appState.dataset.documentList.filter((doc) =>
           doc.title.toLowerCase().includes(searchValue.toLowerCase().trim()),
         )
-      : dataset.documentList;
+      : appState.dataset.documentList;
 
     const options: SearchableComboboxOption[] = filteredOptions.map((doc) => ({
       val: doc.id,
@@ -94,7 +93,7 @@ const DocumentSelector = observer(
           <ActionIcon
             size={36}
             variant="default"
-            onClick={() => setSelectedNode(documentId)}
+            onClick={() => appState.setSelectedNode(documentId)}
           >
             <IconEdit />
           </ActionIcon>
