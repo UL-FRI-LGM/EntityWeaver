@@ -7,11 +7,14 @@ import {
   IconBorderSides,
   IconCaretDownFilled,
   IconCaretUpFilled,
+  IconColorFilter,
   IconDotsCircleHorizontal,
   IconDownload,
   IconFile,
   IconFileCode2,
+  IconHandFinger,
   IconMapPin,
+  IconPointer,
   IconRefresh,
   IconSitemap,
   IconTextScan2,
@@ -21,6 +24,67 @@ import {
 import { useState } from "react";
 import { useFileDialog } from "@mantine/hooks";
 import { downloadTextFile } from "@/utils/helpers.ts";
+
+const DisplayMenu = observer(() => {
+  const appState = useAppState();
+
+  const [showMenu, setShowMenu] = useState(false);
+
+  return (
+    <Menu opened={showMenu} shadow="md" width={250}>
+      <Menu.Target>
+        <Button
+          className={classes.filterButton}
+          classNames={{ label: classes.filterLabel }}
+          variant="subtle"
+          color="gray"
+          rightSection={
+            showMenu ? (
+              <IconCaretUpFilled size={14} />
+            ) : (
+              <IconCaretDownFilled size={14} />
+            )
+          }
+          onClick={() => setShowMenu(!showMenu)}
+        >
+          Display Options
+        </Button>
+      </Menu.Target>
+      <Menu.Dropdown>
+        <Menu.Item
+          leftSection={<IconColorFilter size={14} />}
+          rightSection={<Switch checked={appState.uiState.colorByType} />}
+          onClick={(event) => {
+            event.preventDefault();
+            appState.uiState.setColorByType(!appState.uiState.colorByType);
+          }}
+        >
+          Color By Entity Type
+        </Menu.Item>
+        <Menu.Item
+          leftSection={<IconPointer size={14} />}
+          rightSection={<Switch checked={appState.uiState.highlightOnHover} />}
+          onClick={(event) => {
+            event.preventDefault();
+            appState.setHighlightOnHover(!appState.uiState.highlightOnHover);
+          }}
+        >
+          Highlight On Hover
+        </Menu.Item>
+        <Menu.Item
+          leftSection={<IconHandFinger size={14} />}
+          rightSection={<Switch checked={appState.uiState.highlightOnSelect} />}
+          onClick={(event) => {
+            event.preventDefault();
+            appState.setHighlightOnSelect(!appState.uiState.highlightOnSelect);
+          }}
+        >
+          Highlight On Selection
+        </Menu.Item>
+      </Menu.Dropdown>
+    </Menu>
+  );
+});
 
 const FiltersMenu = observer(() => {
   const appState = useAppState();
@@ -269,36 +333,7 @@ const TopBar = observer(() => {
           Reset Layout
         </Button>
       </Group>
-
-      <Group gap={40}>
-        <Switch
-          label={"Color By Entity Type"}
-          disabled={appState.graphLoading}
-          checked={appState.uiState.colorByType}
-          classNames={{ label: classes.switchLabel }}
-          onChange={(event) =>
-            appState.uiState.setColorByType(event.currentTarget.checked)
-          }
-        />
-        <Switch
-          label={"Highlight On Hover"}
-          disabled={appState.graphLoading}
-          checked={appState.uiState.highlightOnHover}
-          classNames={{ label: classes.switchLabel }}
-          onChange={(event) =>
-            appState.setHighlightOnHover(event.currentTarget.checked)
-          }
-        />
-        <Switch
-          label={"Highlight On Selection"}
-          disabled={appState.graphLoading}
-          checked={appState.uiState.highlightOnSelect}
-          classNames={{ label: classes.switchLabel }}
-          onChange={(event) =>
-            appState.setHighlightOnSelect(event.currentTarget.checked)
-          }
-        />
-      </Group>
+      <DisplayMenu />
     </Group>
   );
 });
