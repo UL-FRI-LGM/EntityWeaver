@@ -18,7 +18,7 @@
     {
       "id": "doc_4",
       "title": "Cultural Events Around the World",
-      "text": "O'Neil and M. Green attended the Spring Festival in New York City and Paris, accompanied by Laura White. Green delivered a keynote address on global economic trends during the Economic Forum, highlighting the role of the United Nations. Later, the group attended the World Cup and the Art Biennale, celebrating cultural exchange and international cooperation."
+      "text": "O'Neil and M. Green attended the Spring Festival in New York City and Paris, accompanied by Laura White. Green delivered a keynote address on global economic trends during the Economic Forum, highlighting the role of the UN. Later, the group attended the World Cup and the Art Biennale, celebrating cultural exchange and international cooperation."
     }
   ],
   "entities": [
@@ -748,8 +748,8 @@
           "confidence": 0.96
         }
       ],
-      "start_index": 267,
-      "end_index": 276
+      "start_index": 255,
+      "end_index": 264
     },
     {
       "id": "mention_44",
@@ -776,8 +776,8 @@
           "confidence": 0.95
         }
       ],
-      "start_index": 285,
-      "end_index": 297
+      "start_index": 273,
+      "end_index": 285
     },
     {
       "id": "mention_46",

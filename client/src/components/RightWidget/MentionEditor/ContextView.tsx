@@ -5,6 +5,7 @@ import classes from "./ContextView.module.css";
 import { typeToColor } from "@/utils/helpers.ts";
 import { IconFileBroken } from "@tabler/icons-react";
 import { useAppState } from "@/stores/appState.ts";
+import globalClasses from "@/styles/global.module.css";
 
 const ContextView = observer(({ mention }: { mention: Mention }) => {
   const appState = useAppState();
@@ -27,7 +28,7 @@ const ContextView = observer(({ mention }: { mention: Mention }) => {
         <Accordion.Panel>
           <Text>
             {contextSnippet.before}
-            <Mark className={classes.mark} color={color}>
+            <Mark className={globalClasses.mark} color={color}>
               {contextSnippet.mention}
             </Mark>
             {contextSnippet.after}

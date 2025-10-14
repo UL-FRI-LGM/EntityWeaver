@@ -1,0 +1,18 @@
+.textView {
+  width: min(500px, 100%);
+  display: flex;
+  flex: 0 1 auto;
+  min-height: 0;
+  padding: 10px;
+  overflow: auto;
+  border-left: 1px solid var(--mantine-color-dark-light-color);
+  flex-direction: column;
+  gap: 10px;
+  transition: width 0.25s ease;
+}
+
+.content {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: auto;
+}

@@ -85,6 +85,7 @@ const sigmaSettings: Partial<Settings<NodeType, EdgeType>> = {
   zIndex: true,
   doubleClickZoomingRatio: 1,
   enableEdgeEvents: true,
+  allowInvalidContainer: true,
   // defaultDrawNodeHover: () => {
   //   return;
   // },

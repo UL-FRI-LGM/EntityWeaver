@@ -9,6 +9,7 @@ import { Group, Text } from "@mantine/core";
 import RightClickIcon from "./assets/mouse-right-button.svg?react";
 import LeftClickIcon from "./assets/mouse-left-button.svg?react";
 import { type MouseEvent } from "react";
+import DocumentTextView from "@/components/DocumentTextView/DocumentTextView.tsx";
 
 const App = observer(() => {
   const appState = useAppState();
@@ -54,6 +55,7 @@ const App = observer(() => {
           </Group>
         </div>
         <RightWidget />
+        <DocumentTextView />
       </div>
     </div>
   );

@@ -37,6 +37,7 @@ export class Document extends GraphEntity {
       text: observable,
       mentions: observable,
       mentionList: computed({ keepAlive: true }),
+      textWithEntities: true,
       canDelete: override,
     });
   }
@@ -70,7 +71,33 @@ export class Document extends GraphEntity {
   }
 
   get mentionList() {
-    return Array.from(this.mentions.values());
+    return Array.from(this.mentions.values()).sort(
+      (a, b) => a.start_index - b.start_index,
+    );
+  }
+
+  get textWithEntities() {
+    const mentionList = this.mentionList;
+    if (mentionList.length === 0) return [{ text: this.text }];
+    const spans: { text: string; mention?: Mention }[] = [];
+    let currentIndex = 0;
+    for (const mention of mentionList) {
+      if (mention.start_index > currentIndex) {
+        spans.push({
+          text: this.text.slice(currentIndex, mention.start_index),
+        });
+      }
+      spans.push({
+        text: this.text.slice(mention.start_index, mention.end_index),
+        mention,
+      });
+      currentIndex = mention.end_index;
+    }
+    if (currentIndex < this.text.length) {
+      spans.push({ text: this.text.slice(currentIndex) });
+    }
+
+    return spans;
   }
 
   get canDelete(): boolean {
