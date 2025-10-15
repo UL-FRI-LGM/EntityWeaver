@@ -83,6 +83,7 @@ export class AppState {
   noOverlapLayout: any = null;
   atlasLayoutInProgress = false;
   noverlapLayoutInProgress = false;
+  viewedDocument: Document | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -141,6 +142,13 @@ export class AppState {
       });
     }
     this.setUiHoveredNode(null);
+
+    if (
+      this.viewedDocument !== null &&
+      this.selectedNodeInstance instanceof Document
+    ) {
+      this.setViewedDocument(this.selectedNodeInstance);
+    }
   }
   setSelectedEdge(edgeId: string | null) {
     if (edgeId === this.selectedEdge) return;
@@ -300,6 +308,9 @@ export class AppState {
       const mention = this.dataset.mentions.get(mentionId);
       mention?.removeEntityLink(entityId);
     }
+  }
+  setViewedDocument(doc: Document | null) {
+    this.viewedDocument = doc;
   }
 }
 

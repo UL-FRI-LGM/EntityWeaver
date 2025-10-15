@@ -11,8 +11,26 @@
   transition: width 0.25s ease;
 }
 
-.content {
-  flex: 0 1 auto;
-  min-height: 0;
-  overflow: auto;
+.editor {
+  border: 0 !important;
+}
+
+.content :global(.tiptap) {
+  padding: 0 !important;
+}
+
+.textEntity {
+  outline-style: solid;
+  outline-offset: -1px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+/* Fix for mark coloring */
+:where([data-mantine-color-scheme="dark"]) .textEntity {
+  background-color: var(--mark-bg-dark) !important;
+}
+
+:where([data-mantine-color-scheme="light"]) .textEntity {
+  background-color: var(--mark-bg-light) !important;
 }

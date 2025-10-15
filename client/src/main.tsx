@@ -1,9 +1,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-// import "./index.css";
+import "./global.css";
 import App from "./App.tsx";
 import { appState, AppStateProvider } from "./stores/appState.ts";
 import "@mantine/core/styles.css";
+import "@mantine/tiptap/styles.css";
+import "prosemirror-view/style/prosemirror.css";
 import { createTheme, MantineProvider } from "@mantine/core";
 
 const theme = createTheme({
