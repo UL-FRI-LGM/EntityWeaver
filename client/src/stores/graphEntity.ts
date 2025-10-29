@@ -39,7 +39,7 @@ export abstract class GraphEntity {
   setPosition(position: { x?: number | null; y?: number | null }) {
     this.x = position.x ?? undefined;
     this.y = position.y ?? undefined;
-    if (this.x !== null || this.y !== null) {
+    if (this.x !== undefined || this.y !== undefined) {
       updateNodeProperties(this.dataset.appState.sigma, this.id, {
         x: this.x,
         y: this.y,

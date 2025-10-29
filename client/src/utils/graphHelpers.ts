@@ -77,10 +77,8 @@ function areVisibleNeighbors(
   nodeId: string,
   otherNodeId: string,
 ) {
-  const edges =
-    graph.edges(nodeId, otherNodeId) ?? graph.edges(otherNodeId, nodeId);
-  if (edges.length === 0) return false;
-  const edgeId = edges[0];
+  const edgeId = graph.edge(nodeId, otherNodeId);
+  if (edgeId === undefined) return false;
   return !isEdgeHidden(uiState, graph.getEdgeAttributes(edgeId));
 }
 
@@ -93,7 +91,7 @@ export function nodeAdjacentToHighlighted(
 ) {
   if (highlightedNodes.size > 0) {
     for (const edge of graph.edges(node)) {
-      const neighbor = graph.opposite(node, edge)!;
+      const neighbor = graph.opposite(node, edge);
       if (highlightedNodes.has(neighbor)) {
         if (!isEdgeHidden(uiState, graph.getEdgeAttributes(edge))) {
           return true;
@@ -228,7 +226,7 @@ export async function zoomInOnNodeNeighbors(
   );
   nodes.push(nodeId);
   const cameraState = getCameraStateToFitViewportToNodes(
-    // @ts-ignore: TS2345
+    // @ts-expect-error: function expects base sigma type
     sigma,
     nodes,
   );
@@ -249,18 +247,14 @@ export function updateMentionNode(
 ) {
   const graph = sigma.getGraph();
   const node = graph.getNodeAttributes(nodeId);
-  if (!node) {
-    console.warn(`Node with id ${nodeId} not found in the graph.`);
-    return;
-  }
 
   if (update.label !== undefined && update.label !== node.label) {
-    graph.updateNodeAttribute(nodeId, "label", () => update.label!);
+    graph.setNodeAttribute(nodeId, "label", update.label);
   }
 
   if (update.type !== undefined && update.type !== node.type) {
     const entityImage = typeToImage(update.type);
-    graph.updateNodeAttribute(nodeId, "image", () => entityImage);
+    graph.setNodeAttribute(nodeId, "image", entityImage);
   }
 
   if (update.documentId !== undefined) {
@@ -271,7 +265,7 @@ export function updateMentionNode(
         graph.dropEdge(edgeId);
       }
     });
-    graph.addEdge(nodeId, update.documentId, {
+    graph.addUndirectedEdge(nodeId, update.documentId, {
       size: DEFINES.edges.MentionToDocument.width,
       color: DEFINES.edges.MentionToDocument.color,
       connectionType: "MentionToDocument",
@@ -299,7 +293,7 @@ export function updateMentionNode(
       if (graph.hasEdge(nodeId, entityId)) {
         continue;
       }
-      graph.addEdge(nodeId, entityId, {
+      graph.addUndirectedEdge(nodeId, entityId, {
         size: DEFINES.edges.MentionToEntity.width,
         color: DEFINES.edges.MentionToEntity.color,
         connectionType: "MentionToEntity",
@@ -353,12 +347,10 @@ export function updateEntityViewEdges(
     const mentions = entity.mentionList;
     const connectedDocuments = new Set<string>();
     for (const mention of mentions) {
-      if (mention.document) {
-        connectedDocuments.add(mention.document.id);
-      }
+      connectedDocuments.add(mention.document.id);
     }
     for (const documentId of connectedDocuments) {
-      graph.addEdge(entity.id, documentId, {
+      graph.addUndirectedEdge(entity.id, documentId, {
         size: DEFINES.edges.EntityToDocument.width,
         color: DEFINES.edges.EntityToDocument.color,
         connectionType: "EntityToDocument",
@@ -384,7 +376,7 @@ export function updateEntityViewEdges(
         if (graph.hasEdge(entity.id, entityLink.id)) {
           continue;
         }
-        graph.addEdge(entity.id, entityLink.id, {
+        graph.addUndirectedEdge(entity.id, entityLink.id, {
           size: DEFINES.edges.MentionCollocation.width,
           color: DEFINES.edges.MentionCollocation.color,
           connectionType: "EntityCollocation",
@@ -467,7 +459,7 @@ export function updateGraph(
     });
 
     const document = mention.document;
-    graph.addEdge(mention.id, document.id, {
+    graph.addUndirectedEdge(mention.id, document.id, {
       size: DEFINES.edges.MentionToDocument.width,
       color: DEFINES.edges.MentionToDocument.color,
       connectionType: "MentionToDocument",
@@ -475,7 +467,7 @@ export function updateGraph(
     });
 
     mention.entities.forEach((link) => {
-      graph.addEdge(mention.id, link.id, {
+      graph.addUndirectedEdge(mention.id, link.id, {
         size: DEFINES.edges.MentionToEntity.width,
         color: DEFINES.edges.MentionToEntity.color,
         connectionType: "MentionToEntity",
@@ -492,7 +484,7 @@ export function updateGraph(
         if (graph.hasEdge(mentionA.id, mentionB.id)) {
           continue;
         }
-        graph.addEdge(mentionA.id, mentionB.id, {
+        graph.addUndirectedEdge(mentionA.id, mentionB.id, {
           size: DEFINES.edges.MentionCollocation.width,
           color: DEFINES.edges.MentionCollocation.color,
           connectionType: "MentionCollocation",

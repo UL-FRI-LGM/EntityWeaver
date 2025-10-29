@@ -48,7 +48,9 @@ const DocumentEditor = observer(({ document }: { document: Document }) => {
         <TextInput
           label="Title"
           value={title}
-          onChange={(event) => setTitle(event.currentTarget.value)}
+          onChange={(event) => {
+            setTitle(event.currentTarget.value);
+          }}
         />
         <Button
           disabled={!canApplyChanges}

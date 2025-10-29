@@ -54,13 +54,13 @@ export class Dataset {
             },
           },
           {
-            // @ts-ignore
+            // @ts-expect-error: bad TS inference
             key: "entities",
-            // @ts-ignore
+            // @ts-expect-error: bad TS inference
             serialize: (value) => {
               return Array.from(value.values()).map((value) => value.toJson());
             },
-            // @ts-ignore
+            // @ts-expect-error: bad TS inference
             deserialize: (value) => {
               if (!Array.isArray(value)) return new Map<string, Entity>();
               return new Map(
@@ -72,13 +72,13 @@ export class Dataset {
             },
           },
           {
-            // @ts-ignore
+            // @ts-expect-error: bad TS inference
             key: "mentions",
-            // @ts-ignore
+            // @ts-expect-error: bad TS inference
             serialize: (value) => {
               return Array.from(value.values()).map((value) => value.toJson());
             },
-            // @ts-ignore
+            // @ts-expect-error: bad TS inference
             deserialize: (value) => {
               if (!Array.isArray(value)) return new Map<string, Mention>();
               return new Map(
@@ -95,14 +95,12 @@ export class Dataset {
           if (this.hasData) {
             appState.runGraphUpdate(false);
           } else if (import.meta.env.VITE_AUTO_LOAD_DEMO === "true") {
-            this.loadDemo().catch((error) => console.error(error));
+            this.loadDemo().catch(console.error);
           }
         })
-        .catch((error) => {
-          console.error(error);
-        });
+        .catch(console.error);
     } else if (import.meta.env.VITE_AUTO_LOAD_DEMO === "true") {
-      this.loadDemo().catch((error) => console.error(error));
+      this.loadDemo().catch(console.error);
     }
   }
 

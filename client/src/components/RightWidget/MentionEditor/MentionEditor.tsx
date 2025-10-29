@@ -69,8 +69,12 @@ const DocumentSelector = observer(
       val: doc.id,
       display: doc.title,
       props: {
-        onMouseEnter: () => appState.setUiHoveredNode(doc.id),
-        onMouseLeave: () => appState.setUiHoveredNode(null),
+        onMouseEnter: () => {
+          appState.setUiHoveredNode(doc.id);
+        },
+        onMouseLeave: () => {
+          appState.setUiHoveredNode(null);
+        },
       },
     }));
 
@@ -86,15 +90,21 @@ const DocumentSelector = observer(
           options={options}
           textInputProps={{
             style: { flex: 1 },
-            onMouseEnter: () => appState.setUiHoveredNode(documentId),
-            onMouseLeave: () => appState.setUiHoveredNode(null),
+            onMouseEnter: () => {
+              appState.setUiHoveredNode(documentId);
+            },
+            onMouseLeave: () => {
+              appState.setUiHoveredNode(null);
+            },
           }}
         />
         <Tooltip label={"Open Document Editor"}>
           <ActionIcon
             size={36}
             variant="default"
-            onClick={() => appState.setSelectedNode(documentId)}
+            onClick={() => {
+              appState.setSelectedNode(documentId);
+            }}
           >
             <IconEdit />
           </ActionIcon>
@@ -138,8 +148,12 @@ const EntitySelector = observer(
       val: item.id,
       display: item.searchString,
       props: {
-        onMouseEnter: () => appState.setUiHoveredNode(item.id),
-        onMouseLeave: () => appState.setUiHoveredNode(null),
+        onMouseEnter: () => {
+          appState.setUiHoveredNode(item.id);
+        },
+        onMouseLeave: () => {
+          appState.setUiHoveredNode(null);
+        },
       },
     }));
 
@@ -157,8 +171,12 @@ const EntitySelector = observer(
         options={options}
         textInputProps={{
           style: { flex: 1 },
-          onMouseEnter: () => appState.setUiHoveredNode(entityId),
-          onMouseLeave: () => appState.setUiHoveredNode(null),
+          onMouseEnter: () => {
+            appState.setUiHoveredNode(entityId);
+          },
+          onMouseLeave: () => {
+            appState.setUiHoveredNode(null);
+          },
         }}
       />
     );
@@ -174,21 +192,33 @@ const LinkEditor = observer(
         className={classes.linkEntry}
         shadow="xl"
         withBorder
-        onMouseEnter={() => appState.setUiHoveredNode(link.id)}
-        onMouseLeave={() => appState.setUiHoveredNode(null)}
+        onMouseEnter={() => {
+          appState.setUiHoveredNode(link.id);
+        }}
+        onMouseLeave={() => {
+          appState.setUiHoveredNode(null);
+        }}
       >
         <Group
           wrap={"nowrap"}
           justify="space-between"
           gap={0}
-          onMouseEnter={() => appState.setUiHoveredNode(link.id)}
-          onMouseLeave={() => appState.setUiHoveredNode(null)}
+          onMouseEnter={() => {
+            appState.setUiHoveredNode(link.id);
+          }}
+          onMouseLeave={() => {
+            appState.setUiHoveredNode(null);
+          }}
         >
           <Text truncate="end" component="span" className={classes.linkText}>
             {link.name}
           </Text>
           <ActionIcon variant="default">
-            <IconX onClick={() => mention.removeEntityLink(link.id)} />
+            <IconX
+              onClick={() => {
+                mention.removeEntityLink(link.id);
+              }}
+            />
           </ActionIcon>
         </Group>
       </Paper>
@@ -265,7 +295,9 @@ const MentionEditor = observer(({ mention }: { mention: Mention }) => {
         <TextInput
           label="Name"
           value={name}
-          onChange={(event) => setName(event.currentTarget.value)}
+          onChange={(event) => {
+            setName(event.currentTarget.value);
+          }}
         />
         <Combobox
           store={entityTypeCombobox}
@@ -282,7 +314,9 @@ const MentionEditor = observer(({ mention }: { mention: Mention }) => {
               pointer
               rightSection={<Combobox.Chevron />}
               rightSectionPointerEvents="none"
-              onClick={() => entityTypeCombobox.toggleDropdown()}
+              onClick={() => {
+                entityTypeCombobox.toggleDropdown();
+              }}
             >
               {typeToString(entityType) || (
                 <Input.Placeholder>Select Entity Type</Input.Placeholder>

@@ -12,8 +12,12 @@ const MentionLinkEditor = observer(({ mention }: { mention: Mention }) => {
       className={classes.mentionLinkEntry}
       shadow="xl"
       withBorder
-      onMouseEnter={() => appState.setUiHoveredNode(mention.id)}
-      onMouseLeave={() => appState.setUiHoveredNode(null)}
+      onMouseEnter={() => {
+        appState.setUiHoveredNode(mention.id);
+      }}
+      onMouseLeave={() => {
+        appState.setUiHoveredNode(null);
+      }}
     >
       <Group wrap={"nowrap"} justify="space-between" gap={0}>
         <Text
@@ -26,7 +30,9 @@ const MentionLinkEditor = observer(({ mention }: { mention: Mention }) => {
         <Tooltip label={"Open Mention Editor"}>
           <ActionIcon
             variant="default"
-            onClick={() => appState.setSelectedNode(mention.id)}
+            onClick={() => {
+              appState.setSelectedNode(mention.id);
+            }}
           >
             <IconEdit />
           </ActionIcon>

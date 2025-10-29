@@ -53,6 +53,7 @@ const SearchableCombobox = ({
       store={combobox}
       // classNames={comboboxClassNames}
       onOptionSubmit={(val, optionProps) => {
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         setSearchValue(optionProps.children?.toString() ?? "");
         onChange(val);
         changed.current = true;
@@ -70,9 +71,15 @@ const SearchableCombobox = ({
             combobox.openDropdown();
             combobox.updateSelectedOptionIndex();
           }}
-          onClick={() => combobox.openDropdown()}
-          onFocus={() => combobox.openDropdown()}
-          onBlur={() => combobox.closeDropdown()}
+          onClick={() => {
+            combobox.openDropdown();
+          }}
+          onFocus={() => {
+            combobox.openDropdown();
+          }}
+          onBlur={() => {
+            combobox.closeDropdown();
+          }}
           rightSection={<Combobox.Chevron />}
           rightSectionPointerEvents="none"
           {...textInputProps}

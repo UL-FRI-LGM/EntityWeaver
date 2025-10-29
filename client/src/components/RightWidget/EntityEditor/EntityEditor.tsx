@@ -69,7 +69,9 @@ const EntityEditor = observer(({ entity }: { entity: Entity }) => {
         <TextInput
           label="Name"
           value={name}
-          onChange={(event) => setName(event.currentTarget.value)}
+          onChange={(event) => {
+            setName(event.currentTarget.value);
+          }}
         />
         <Combobox
           store={entityTypeCombobox}
@@ -86,7 +88,9 @@ const EntityEditor = observer(({ entity }: { entity: Entity }) => {
               pointer
               rightSection={<Combobox.Chevron />}
               rightSectionPointerEvents="none"
-              onClick={() => entityTypeCombobox.toggleDropdown()}
+              onClick={() => {
+                entityTypeCombobox.toggleDropdown();
+              }}
             >
               {typeToString(entityType) || (
                 <Input.Placeholder>Select Entity Type</Input.Placeholder>

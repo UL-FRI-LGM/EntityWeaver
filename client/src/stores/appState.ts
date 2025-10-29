@@ -79,8 +79,8 @@ export class AppState {
   holdingShift = false;
   loadingData = false;
   initialLayout = false;
-  forceAtlasLayout: any = null;
-  noOverlapLayout: any = null;
+  forceAtlasLayout: FA2Layout<NodeType, EdgeType> | null = null;
+  // noOverlapLayout: null = null;
   atlasLayoutInProgress = false;
   noverlapLayoutInProgress = false;
   viewedDocument: Document | null = null;
@@ -90,8 +90,10 @@ export class AppState {
   }
 
   get selectedNodeInstance() {
-    if (!this.selectedNode) return undefined;
-    return this.sigma?.getGraph().getNodeAttributes(this.selectedNode).source;
+    if (!this.selectedNode) return null;
+    return (
+      this.sigma?.getGraph().getNodeAttributes(this.selectedNode).source ?? null
+    );
   }
 
   get graphLoading() {
@@ -103,10 +105,15 @@ export class AppState {
     return this.atlasLayoutInProgress || this.noverlapLayoutInProgress;
   }
 
-  setSigma(sigma: SigmaGraph) {
+  setSigma(sigma: SigmaGraph | null) {
+    if (sigma === this.sigma) return;
+
     this.sigma = sigma;
+
+    if (this.sigma === null) return;
+
     this.forceAtlasLayout = new FA2Layout<NodeType, EdgeType>(
-      sigma.getGraph(),
+      this.sigma.getGraph(),
       {
         settings: { slowDown: 10, gravity: 0, scalingRatio: 0.001 },
         getEdgeWeight: (_edge, attributes) => {
@@ -247,26 +254,26 @@ export class AppState {
       attr.source.setPosition(attr);
     });
 
-    if (this.noOverlapLayout) {
-      this.noverlapLayoutInProgress = true;
-      this.noOverlapLayout?.start();
-      setTimeout(() => {
-        this.stopNoverlapLayout();
-      }, DEFINES.layoutRuntimeInMs);
-    }
+    // if (this.noOverlapLayout) {
+    //   this.noverlapLayoutInProgress = true;
+    //   this.noOverlapLayout?.start();
+    //   setTimeout(() => {
+    //     this.stopNoverlapLayout();
+    //   }, DEFINES.layoutRuntimeInMs);
+    // }
   }
-  stopNoverlapLayout() {
-    if (!this.noOverlapLayout?.isRunning()) {
-      this.noverlapLayoutInProgress = false;
-      return;
-    }
-    this.noOverlapLayout.stop();
-    this.sigma?.getGraph().forEachNode((_node, attributes) => {
-      attributes.source.setPosition(attributes);
-    });
-    this.noverlapLayoutInProgress = false;
-    this.initialLayout = false;
-  }
+  // stopNoverlapLayout() {
+  //   if (!this.noOverlapLayout?.isRunning()) {
+  //     this.noverlapLayoutInProgress = false;
+  //     return;
+  //   }
+  //   this.noOverlapLayout.stop();
+  //   this.sigma?.getGraph().forEachNode((_node, attributes) => {
+  //     attributes.source.setPosition(attributes);
+  //   });
+  //   this.noverlapLayoutInProgress = false;
+  //   this.initialLayout = false;
+  // }
   setHoldingShift(state: boolean) {
     this.holdingShift = state;
   }

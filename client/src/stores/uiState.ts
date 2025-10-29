@@ -48,12 +48,10 @@ export class UiState {
         "filters",
         "documentEditMode",
       ],
-    }).catch((error) => {
-      console.error(error);
-    });
+    }).catch(console.error);
   }
 
-  toggleFilter<Key extends keyof Filters>(key: Key) {
+  toggleFilter(key: keyof Filters) {
     this.filters[key] = !this.filters[key];
   }
 

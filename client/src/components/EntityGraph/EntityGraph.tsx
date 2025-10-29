@@ -4,6 +4,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type KeyboardEvent,
 } from "react";
 import {
   ControlsContainer,
@@ -28,7 +29,6 @@ import {
 } from "sigma/rendering";
 import { createNodeBorderProgram } from "@sigma/node-border";
 import classes from "./EntityGraph.module.css";
-import type Sigma from "sigma";
 import type { Settings } from "sigma/settings";
 import { isLeftClick } from "@/utils/helpers.ts";
 import { LoadingOverlay } from "@mantine/core";
@@ -173,14 +173,11 @@ export const GraphEffects = observer(() => {
   }, [draggedNode, registerEvents, appState, appState.dataset, sigma]);
 
   useEffect(() => {
-    if (sigma !== null) {
-      appState.setSigma(sigma);
-    }
+    appState.setSigma(sigma);
   }, [appState, sigma]);
 
   // TODO Replace node and edge reducers if focused node for performance
   useEffect(() => {
-    if (!sigma) return;
     const highlightedNodes = new Set<string>();
     const highlightedEdges = new Set<string>();
 
@@ -287,13 +284,6 @@ export const GraphEffects = observer(() => {
 
 const EntityGraph = observer(() => {
   const appState = useAppState();
-  const [sigma, setSigma] = useState<Sigma<NodeType, EdgeType> | null>(null);
-
-  useEffect(() => {
-    if (sigma !== null) {
-      appState.setSigma(sigma);
-    }
-  }, [appState, sigma]);
 
   const onFocus = useCallback(
     (value: GraphSearchOption | null) => {
@@ -315,7 +305,9 @@ const EntityGraph = observer(() => {
     (options: GraphSearchOption[]): GraphSearchOption[] => {
       options = options.filter((option) => {
         if (option.type === "message") return true;
-        const attributes = sigma?.getGraph().getNodeAttributes(option.id);
+        const attributes = appState.sigma
+          ?.getGraph()
+          .getNodeAttributes(option.id);
         return attributes
           ? !isNodeHidden(appState, option.id, attributes)
           : false;
@@ -334,7 +326,7 @@ const EntityGraph = observer(() => {
             },
           ];
     },
-    [appState, sigma],
+    [appState],
   );
 
   function onEscapeClick() {
@@ -352,9 +344,6 @@ const EntityGraph = observer(() => {
     }
   }
 
-  // function odDeleteClick() {}
-
-  // @ts-ignore TS2315
   function canvasOnKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     switch (event.key) {
       case "Escape":
@@ -378,9 +367,10 @@ const EntityGraph = observer(() => {
         style={{ opacity: appState.graphLoading ? 0 : 1 }}
       >
         <SigmaContainer
-          ref={(instance) =>
-            setSigma(instance as Sigma<NodeType, EdgeType> | null)
-          }
+          ref={(instance) => {
+            if (instance === null) return;
+            appState.setSigma(instance);
+          }}
           settings={sigmaSettings}
           style={sigmaStyle}
         >

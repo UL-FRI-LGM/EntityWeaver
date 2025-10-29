@@ -53,7 +53,9 @@ const NodeActions = observer(({ node }: { node: GraphEntity }) => {
           <ActionIcon
             variant={"filled"}
             color={"var(--mantine-color-red-9)"}
-            onClick={() => appState.setDeleteNodeModalOpen(true)}
+            onClick={() => {
+              appState.setDeleteNodeModalOpen(true);
+            }}
           >
             <IconTrash size={20} />
           </ActionIcon>

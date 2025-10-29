@@ -45,7 +45,9 @@ const DisplayMenu = observer(() => {
               <IconCaretDownFilled size={14} />
             )
           }
-          onClick={() => setShowMenu(!showMenu)}
+          onClick={() => {
+            setShowMenu(!showMenu);
+          }}
         >
           Display Options
         </Button>
@@ -106,7 +108,9 @@ const FiltersMenu = observer(() => {
               <IconCaretDownFilled size={14} />
             )
           }
-          onClick={() => setShowFilters(!showFilters)}
+          onClick={() => {
+            setShowFilters(!showFilters);
+          }}
         >
           Filters
         </Button>
@@ -221,17 +225,15 @@ const FileMenu = observer(() => {
   const uploadJSONDialog = useFileDialog({
     accept: ".json",
     resetOnOpen: true,
-    onChange: onImportGraphFromJson,
+    onChange: (files: FileList | null) => {
+      onImportGraphFromJson(files).catch(console.error);
+    },
   });
 
   async function onImportGraphFromJson(files: FileList | null) {
-    try {
-      if (!files || files.length === 0) return;
-      const graphFile = files[0];
-      await appState.dataset.loadFromFile(graphFile);
-    } catch (error) {
-      console.error(error);
-    }
+    if (!files || files.length === 0) return;
+    const graphFile = files[0];
+    await appState.dataset.loadFromFile(graphFile);
   }
 
   function onExportGraphToJson() {
@@ -243,17 +245,12 @@ const FileMenu = observer(() => {
     }
   }
 
-  async function loadDemo() {
-    try {
-      await appState.dataset.loadDemo();
-    } catch (error) {
-      console.error(error);
-    }
-  }
   return (
     <Menu
       opened={showFileMenu}
-      onChange={(value) => setShowFileMenu(value)}
+      onChange={(value) => {
+        setShowFileMenu(value);
+      }}
       position="bottom-start"
       shadow="md"
     >
@@ -287,7 +284,12 @@ const FileMenu = observer(() => {
         >
           Export Graph to JSON
         </Menu.Item>
-        <Menu.Item leftSection={<IconFileCode2 size={14} />} onClick={loadDemo}>
+        <Menu.Item
+          leftSection={<IconFileCode2 size={14} />}
+          onClick={() => {
+            appState.dataset.loadDemo().catch(console.error);
+          }}
+        >
           Load Demo data
         </Menu.Item>
       </Menu.Dropdown>
@@ -308,9 +310,9 @@ const TopBar = observer(() => {
           disabled={appState.graphLoading}
           checked={appState.uiState.entityView}
           classNames={{ label: classes.switchLabel }}
-          onChange={(event) =>
-            appState.setEntityView(event.currentTarget.checked)
-          }
+          onChange={(event) => {
+            appState.setEntityView(event.currentTarget.checked);
+          }}
         />
 
         <FiltersMenu />
@@ -318,7 +320,9 @@ const TopBar = observer(() => {
         <Button
           variant={"default"}
           disabled={appState.graphLoading || appState.isLayoutInProgress}
-          onClick={() => appState.runLayout()}
+          onClick={() => {
+            appState.runLayout();
+          }}
           leftSection={
             <IconRefresh
               className={

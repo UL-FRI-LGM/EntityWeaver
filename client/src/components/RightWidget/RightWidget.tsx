@@ -16,13 +16,13 @@ const RightWidget = observer(() => {
     if (!node) return null;
 
     if (node instanceof Mention) {
-      return <MentionEditor mention={node as Mention} />;
+      return <MentionEditor mention={node} />;
     }
     if (node instanceof Document) {
-      return <DocumentEditor document={node as Document} />;
+      return <DocumentEditor document={node} />;
     }
     if (node instanceof Entity) {
-      return <EntityEditor entity={node as Entity} />;
+      return <EntityEditor entity={node} />;
     }
   }
 

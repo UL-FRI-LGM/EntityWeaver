@@ -1,7 +1,6 @@
 import { observer } from "mobx-react";
 import { Button, Group, Modal, Text, Tooltip } from "@mantine/core";
 import { useAppState } from "@/stores/appState.ts";
-import { Document } from "@/stores/document.ts";
 
 const DeleteNodeModal = observer(() => {
   const appState = useAppState();
@@ -17,17 +16,15 @@ const DeleteNodeModal = observer(() => {
     }
   }
 
-  const canDeleteNode =
-    appState.selectedNodeInstance !== null &&
-    appState.selectedNodeInstance &&
-    (!(appState.selectedNodeInstance instanceof Document) ||
-      (appState.selectedNodeInstance as Document).canDelete);
+  const canDeleteNode = !!appState.selectedNodeInstance?.canDelete;
 
   return (
     <Modal
       size="auto"
       opened={appState.deleteNodeModalOpen}
-      onClose={() => appState.setDeleteNodeModalOpen(false)}
+      onClose={() => {
+        appState.setDeleteNodeModalOpen(false);
+      }}
       title={
         <>
           <Text>
@@ -43,7 +40,9 @@ const DeleteNodeModal = observer(() => {
       <Group justify="end" mt={"10px"}>
         <Button
           variant="default"
-          onClick={() => appState.setDeleteNodeModalOpen(false)}
+          onClick={() => {
+            appState.setDeleteNodeModalOpen(false);
+          }}
         >
           Cancel
         </Button>

@@ -19,7 +19,9 @@ const ContextView = observer(({ mention }: { mention: Mention }) => {
       variant="contained"
       classNames={{ label: classes.label }}
       value={appState.uiState.mentionContextOpen ? "open" : "closed"}
-      onChange={(value) => appState.uiState.setMentionContextOpen(!!value)}
+      onChange={(value) => {
+        appState.uiState.setMentionContextOpen(!!value);
+      }}
     >
       <Accordion.Item key={mention.id} value={"open"}>
         <Accordion.Control icon={<IconFileBroken />}>

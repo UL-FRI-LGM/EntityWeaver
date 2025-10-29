@@ -2,6 +2,10 @@ import { DEFINES } from "../defines.ts";
 import type { DatasetDB } from "@/stores/dataset.ts";
 import demoJsonUrl from "/demo.json?url";
 
+interface ErrorResponse {
+  message: string;
+}
+
 export async function sendApiRequest(
   url: string,
   request: RequestInit,
@@ -13,7 +17,8 @@ export async function sendApiRequest(
   const defaultOptions: RequestInit = {};
 
   if (options?.query !== undefined) {
-    url += "?" + new URLSearchParams(options.query);
+    const urlSearchParams = new URLSearchParams(options.query);
+    url += "?" + urlSearchParams.toString();
   }
 
   const fetchOptions = { ...defaultOptions, ...request };
@@ -27,13 +32,16 @@ export async function sendApiRequest(
 
   if (!response.ok) {
     const contentType = response.headers.get("Content-Type");
-    const isJson = contentType?.includes("application/json");
-    const content = isJson ? await response.json() : await response.text();
-
-    errorMsg = isJson ? content.message : content;
+    const isJson = !!contentType?.includes("application/json");
+    if (isJson) {
+      const content = (await response.json()) as ErrorResponse;
+      errorMsg = content.message;
+    } else {
+      errorMsg = await response.text();
+    }
 
     console.error(
-      `Error when calling ${url}: (${response.status}) ${errorMsg}`,
+      `Error when calling ${url}: (${response.status.toString()}) ${errorMsg}`,
     );
     throw new Error(errorMsg);
   }
@@ -42,8 +50,7 @@ export async function sendApiRequest(
 
 export async function loadDemo() {
   const response = await fetch(demoJsonUrl);
-  const data: DatasetDB = await response.json();
-  return data;
+  return (await response.json()) as DatasetDB;
 }
 
 export function typeToString(type: string) {
@@ -84,13 +91,12 @@ export function edgeTypeToProperties(type: keyof typeof DEFINES.edges) {
 
 export function isLeftClick(event: MouseEvent | TouchEvent) {
   if (event instanceof MouseEvent) {
-    const mouseEvent = event as MouseEvent;
-    if (mouseEvent.button === 0) return true;
+    if (event.button === 0) return true;
   }
   return false;
 }
 
-export function storeInLocalStorage(key: string, value: any) {
+export function storeInLocalStorage(key: string, value: unknown) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (error) {
@@ -151,7 +157,14 @@ export function readFile(
       }
     };
 
-    reader.onerror = () => reject(reader.error);
+    reader.onerror = () => {
+      const error =
+        reader.error instanceof DOMException
+          ? reader.error
+          : new Error("File reading failed");
+
+      reject(error);
+    };
 
     switch (as) {
       case "dataURL":

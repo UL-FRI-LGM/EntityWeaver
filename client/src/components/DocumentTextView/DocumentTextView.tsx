@@ -22,22 +22,23 @@ import { DEFINES } from "@/defines.ts";
 import { IconPencil } from "@tabler/icons-react";
 import type { Mention } from "@/stores/mention.ts";
 import { useDebouncedCallback } from "@mantine/hooks";
+import { getMarkType } from "@tiptap/core";
 
 const ClickableMarkComponent = observer((props: MarkViewRendererProps) => {
   const appState = useAppState();
   const markRef = useRef<HTMLElement | null>(null);
 
+  const mention = props.mark.attrs.mention as Mention;
   const color =
-    typeToColor(props.mark.attrs.mention.type) ??
-    "var(--mantine-primary-color-filled)";
+    typeToColor(mention.type) ?? "var(--mantine-primary-color-filled)";
 
   const outline = useMemo(() => {
-    if (appState.selectedNode === props.mark.attrs.mention.id) {
+    if (appState.selectedNode === mention.id) {
       return `${DEFINES.selection.borderColor} 2px solid`;
     }
     if (
-      appState.hoveredNode === props.mark.attrs.mention.id ||
-      appState.uiHoveredNode === props.mark.attrs.mention.id
+      appState.hoveredNode === mention.id ||
+      appState.uiHoveredNode === mention.id
     ) {
       return `${DEFINES.uiHover.borderColor} 2px solid`;
     }
@@ -53,10 +54,10 @@ const ClickableMarkComponent = observer((props: MarkViewRendererProps) => {
       }}
       color={color}
       onClick={() => {
-        appState.setSelectedNode(props.mark.attrs.mention.id);
+        appState.setSelectedNode(mention.id);
       }}
       onMouseEnter={() => {
-        appState.setUiHoveredNode(props.mark.attrs.mention.id);
+        appState.setUiHoveredNode(mention.id);
       }}
       onMouseLeave={() => {
         appState.setUiHoveredNode(null);
@@ -67,6 +68,7 @@ const ClickableMarkComponent = observer((props: MarkViewRendererProps) => {
   );
 });
 
+// const clickableMarkTypeName = "clickableHighlight";
 const ClickableMark = TiptapMark.create({
   name: "clickableHighlight",
 
@@ -120,28 +122,6 @@ const TextViewContents = observer(({ document }: { document: Document }) => {
   const appState = useAppState();
   const initialUpdate = useRef<boolean>(false);
 
-  const updateMentions = useDebouncedCallback((editor: Editor) => {
-    if (appState.viewedDocument === null) return;
-    appState.viewedDocument.setText(editor.getText());
-    editor.state.doc.descendants((node, pos) => {
-      node.marks.forEach((mark) => {
-        if (mark.type.name !== ClickableMark.name || node.text === undefined) {
-          return;
-        }
-        const mention = mark.attrs.mention as Mention;
-        const startIndex = pos - 1;
-        const endIndex = startIndex + node.text.length;
-        if (
-          mention.start_index === startIndex &&
-          mention.end_index === endIndex
-        ) {
-          return;
-        }
-        mention.setIndices(startIndex, endIndex);
-      });
-    });
-  }, 500);
-
   const editor = useEditor({
     extensions: [
       DocumentExtension,
@@ -159,8 +139,31 @@ const TextViewContents = observer(({ document }: { document: Document }) => {
     },
   });
 
+  const updateMentions = useDebouncedCallback((editor: Editor) => {
+    if (appState.viewedDocument === null) return;
+    const markType = getMarkType(ClickableMark.name, editor.schema);
+
+    appState.viewedDocument.setText(editor.getText());
+    editor.state.doc.descendants((node, pos) => {
+      node.marks.forEach((mark) => {
+        if (mark.type !== markType || node.text === undefined) {
+          return;
+        }
+        const mention = mark.attrs.mention as Mention;
+        const startIndex = pos - 1;
+        const endIndex = startIndex + node.text.length;
+        if (
+          mention.start_index === startIndex &&
+          mention.end_index === endIndex
+        ) {
+          return;
+        }
+        mention.setIndices(startIndex, endIndex);
+      });
+    });
+  }, 500);
+
   useEffect(() => {
-    if (!editor) return;
     initialUpdate.current = true;
     // console.log("Setting content");
     editor.commands.setContent(`<text>${document.text}</text>`);
@@ -170,10 +173,9 @@ const TextViewContents = observer(({ document }: { document: Document }) => {
       const { state, view } = editor;
       const tr = state.tr;
 
-      document.mentionList.forEach((m) => {
-        const markType = state.schema.marks.clickableHighlight;
-        if (!markType) return;
+      const markType = getMarkType(ClickableMark.name, editor.schema);
 
+      document.mentionList.forEach((m) => {
         tr.addMark(
           m.start_index + 1,
           m.end_index + 1,
