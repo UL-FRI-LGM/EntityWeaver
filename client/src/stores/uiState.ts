@@ -22,6 +22,7 @@ export class UiState {
   entityView = false;
   colorByType = false;
   mentionContextOpen = false;
+  documentEditMode = false;
   filters: Filters = {
     entities: true,
     documents: true,
@@ -45,6 +46,7 @@ export class UiState {
         "entityView",
         "colorByType",
         "filters",
+        "documentEditMode",
       ],
     }).catch((error) => {
       console.error(error);
@@ -66,5 +68,9 @@ export class UiState {
 
   setMentionContextOpen(state: boolean) {
     this.mentionContextOpen = state;
+  }
+
+  setDocumentEditMode(state: boolean) {
+    this.documentEditMode = state;
   }
 }

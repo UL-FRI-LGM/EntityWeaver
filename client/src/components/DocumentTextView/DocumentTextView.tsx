@@ -3,12 +3,13 @@ import classes from "./DocumentTextView.module.css";
 import { Box, Mark, Title } from "@mantine/core";
 import { useAppState } from "@/stores/appState.ts";
 import { Document } from "@/stores/document.ts";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { RichTextEditor } from "@mantine/tiptap";
+import { useEffect, useMemo, useRef } from "react";
+import { RichTextEditor, useRichTextEditorContext } from "@mantine/tiptap";
 import {
   useEditor,
   Mark as TiptapMark,
   ReactMarkViewRenderer,
+  type Editor,
 } from "@tiptap/react";
 import DocumentExtension from "@tiptap/extension-document";
 import TextExtension from "@tiptap/extension-text";
@@ -18,6 +19,9 @@ import { MarkViewContent, type MarkViewRendererProps } from "@tiptap/react";
 import globalClasses from "@/styles/global.module.css";
 import { typeToColor } from "@/utils/helpers.ts";
 import { DEFINES } from "@/defines.ts";
+import { IconPencil } from "@tabler/icons-react";
+import type { Mention } from "@/stores/mention.ts";
+import { useDebouncedCallback } from "@mantine/hooks";
 
 const ClickableMarkComponent = observer((props: MarkViewRendererProps) => {
   const appState = useAppState();
@@ -85,7 +89,59 @@ const ClickableMark = TiptapMark.create({
   },
 });
 
+const InsertStarControl = () => {
+  const appState = useAppState();
+  const { editor } = useRichTextEditorContext();
+  return (
+    <RichTextEditor.Control
+      onClick={() => {
+        appState.uiState.setDocumentEditMode(
+          !appState.uiState.documentEditMode,
+        );
+        editor?.setEditable(appState.uiState.documentEditMode);
+      }}
+      aria-label="Edit Document"
+      title="Edit Document"
+    >
+      <IconPencil
+        stroke={1.5}
+        size={16}
+        color={
+          appState.uiState.documentEditMode
+            ? "var(--mantine-primary-color-filled)"
+            : undefined
+        }
+      />
+    </RichTextEditor.Control>
+  );
+};
+
 const TextViewContents = observer(({ document }: { document: Document }) => {
+  const appState = useAppState();
+  const initialUpdate = useRef<boolean>(false);
+
+  const updateMentions = useDebouncedCallback((editor: Editor) => {
+    if (appState.viewedDocument === null) return;
+    appState.viewedDocument.setText(editor.getText());
+    editor.state.doc.descendants((node, pos) => {
+      node.marks.forEach((mark) => {
+        if (mark.type.name !== ClickableMark.name || node.text === undefined) {
+          return;
+        }
+        const mention = mark.attrs.mention as Mention;
+        const startIndex = pos - 1;
+        const endIndex = startIndex + node.text.length;
+        if (
+          mention.start_index === startIndex &&
+          mention.end_index === endIndex
+        ) {
+          return;
+        }
+        mention.setIndices(startIndex, endIndex);
+      });
+    });
+  }, 500);
+
   const editor = useEditor({
     extensions: [
       DocumentExtension,
@@ -93,20 +149,40 @@ const TextViewContents = observer(({ document }: { document: Document }) => {
       ParagraphExtension,
       ClickableMark,
     ],
-    editable: false,
+    editable: appState.uiState.documentEditMode,
+    onUpdate({ editor }) {
+      if (initialUpdate.current) {
+        initialUpdate.current = false;
+        return;
+      }
+      updateMentions(editor);
+    },
   });
 
   useEffect(() => {
     if (!editor) return;
-    editor.commands.setContent(document.text);
+    initialUpdate.current = true;
+    // console.log("Setting content");
+    editor.commands.setContent(`<text>${document.text}</text>`);
     queueMicrotask(() => {
+      editor.chain().focus();
+
+      const { state, view } = editor;
+      const tr = state.tr;
+
       document.mentionList.forEach((m) => {
-        editor
-          .chain()
-          .setTextSelection({ from: m.start_index + 1, to: m.end_index + 1 })
-          .setMark("clickableHighlight", { mention: m })
-          .run();
+        const markType = state.schema.marks.clickableHighlight;
+        if (!markType) return;
+
+        tr.addMark(
+          m.start_index + 1,
+          m.end_index + 1,
+          markType.create({ mention: m }),
+        );
       });
+      // console.log("Calling dispatch");
+
+      view.dispatch(tr);
     });
   }, [document, editor]);
 
@@ -118,9 +194,16 @@ const TextViewContents = observer(({ document }: { document: Document }) => {
       <RichTextEditor
         variant="subtle"
         className={classes.editor}
-        classNames={{ content: classes.content }}
+        classNames={{
+          content: classes.content,
+          root: classes.editorRoot,
+          Typography: classes.editorTypography,
+        }}
         editor={editor}
       >
+        <RichTextEditor.Toolbar sticky stickyOffset={0}>
+          <InsertStarControl />
+        </RichTextEditor.Toolbar>
         <RichTextEditor.Content />
       </RichTextEditor>
     </>
@@ -129,16 +212,16 @@ const TextViewContents = observer(({ document }: { document: Document }) => {
 
 const DocumentTextView = observer(() => {
   const appState = useAppState();
-  const [isTransitionActive, setIsTransitionActive] = useState<boolean>(false);
-
-  function onTransitionStart() {
-    setIsTransitionActive(true);
-  }
-
-  function onTransitionEnd() {
-    setIsTransitionActive(false);
-    appState.sigma?.refresh();
-  }
+  // const [isTransitionActive, setIsTransitionActive] = useState<boolean>(false);
+  //
+  // function onTransitionStart() {
+  //   setIsTransitionActive(true);
+  // }
+  //
+  // function onTransitionEnd() {
+  //   setIsTransitionActive(false);
+  //   appState.sigma?.refresh();
+  // }
 
   return (
     <Box
@@ -147,10 +230,14 @@ const DocumentTextView = observer(() => {
         width: appState.viewedDocument !== null ? 300 : 0,
         padding: appState.viewedDocument !== null ? 20 : 0,
       }}
-      onTransitionStart={onTransitionStart}
-      onTransitionEnd={onTransitionEnd}
+      // onTransitionStart={onTransitionStart}
+      // onTransitionEnd={onTransitionEnd}
+      // style={{
+      //   width: 300,
+      //   padding: 20,
+      // }}
     >
-      {!isTransitionActive && appState.viewedDocument !== null && (
+      {appState.viewedDocument !== null && (
         <TextViewContents document={appState.viewedDocument} />
       )}
     </Box>

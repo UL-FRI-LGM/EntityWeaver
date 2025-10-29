@@ -69,6 +69,7 @@ export class Mention extends GraphEntity {
       setName: true,
       setType: true,
       setDocument: true,
+      setIndices: true,
 
       removeEntityLink: true,
       setEntityLink: true,
@@ -150,6 +151,11 @@ export class Mention extends GraphEntity {
         documentId: document.id,
       });
     }
+  }
+
+  setIndices(startIndex: number, endIndex: number) {
+    this.start_index = startIndex;
+    this.end_index = endIndex;
   }
 
   removeEntityLink(entityId: string) {

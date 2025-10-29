@@ -35,6 +35,7 @@ export class Document extends GraphEntity {
       title: observable,
       setTitle: true,
       text: observable,
+      setText: true,
       mentions: observable,
       mentionList: computed({ keepAlive: true }),
       textWithEntities: true,
@@ -68,6 +69,10 @@ export class Document extends GraphEntity {
     updateNodeProperties(this.dataset.appState.sigma, this.id, {
       label: this.title,
     });
+  }
+
+  setText(text: string) {
+    this.text = text;
   }
 
   get mentionList() {

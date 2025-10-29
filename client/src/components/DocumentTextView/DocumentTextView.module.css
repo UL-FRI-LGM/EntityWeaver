@@ -8,15 +8,31 @@
   border-left: 1px solid var(--mantine-color-dark-light-color);
   flex-direction: column;
   gap: 10px;
-  transition: width 0.25s ease;
+  /*transition: width 0.25s ease;*/
 }
 
 .editor {
   border: 0 !important;
 }
 
+.editorRoot {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: hidden;
+}
+
 .content :global(.tiptap) {
-  padding: 0 !important;
+  padding-bottom: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.editorTypography {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .textEntity {
