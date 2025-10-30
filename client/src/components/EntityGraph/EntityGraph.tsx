@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type MouseEvent,
 } from "react";
 import {
   ControlsContainer,
@@ -31,7 +32,7 @@ import { createNodeBorderProgram } from "@sigma/node-border";
 import classes from "./EntityGraph.module.css";
 import type { Settings } from "sigma/settings";
 import { isLeftClick } from "@/utils/helpers.ts";
-import { LoadingOverlay } from "@mantine/core";
+import { Group, LoadingOverlay, Text } from "@mantine/core";
 import { DEFINES } from "@/defines.ts";
 import { GraphSearch, type GraphSearchOption } from "@react-sigma/graph-search";
 import "./EntityGraph.css";
@@ -42,6 +43,8 @@ import {
 } from "@/utils/graphHelpers.ts";
 import { MiniMap } from "@react-sigma/minimap";
 import DeleteNodeModal from "@/components/DeleteNodeModal/DeleteNodeModal.tsx";
+import RightClickIcon from "@/assets/mouse-right-button.svg?react";
+import LeftClickIcon from "@/assets/mouse-left-button.svg?react";
 
 const sigmaStyle: CSSProperties = {
   display: "flex",
@@ -426,4 +429,35 @@ const EntityGraph = observer(() => {
   );
 });
 
-export default EntityGraph;
+const EntityGraphWidget = observer(() => {
+  const appState = useAppState();
+
+  function onContextMenu(event: MouseEvent) {
+    event.preventDefault();
+    appState.setSelectedNode(null);
+    appState.setSelectedEdge(null);
+  }
+
+  return (
+    <div onContextMenu={onContextMenu} className={classes.graphContainer}>
+      <EntityGraph />
+      <Group className={classes.graphTooltipContainer}>
+        <Group className={classes.mouseClickTooltip}>
+          <LeftClickIcon fill="white" width={25} height={25} />
+          <Text>Select Node</Text>
+        </Group>
+        {/*<Group className={classes.mouseClickTooltip}>*/}
+        {/*  <LeftClickIcon fill="white" width={25} height={25} />*/}
+        {/*  <Text>Zoom to Node</Text>*/}
+        {/*  <Text className={classes.doubleClockTooltip}>2x</Text>*/}
+        {/*</Group>*/}
+        <Group className={classes.mouseClickTooltip}>
+          <RightClickIcon fill="white" width={25} height={25} />
+          <Text>Reset Selection</Text>
+        </Group>
+      </Group>
+    </div>
+  );
+});
+
+export default EntityGraphWidget;

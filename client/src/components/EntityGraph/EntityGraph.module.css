@@ -35,3 +35,34 @@
 .searchBox {
   flex: 1 1 auto;
 }
+
+.graphContainer {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.graphTooltipContainer {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  opacity: 0.8;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background-color: black;
+  z-index: 2000;
+}
+
+.mouseClickTooltip {
+  position: relative;
+  gap: 2px !important;
+}
+
+.doubleClockTooltip {
+  font-size: 8px !important;
+  position: absolute;
+  left: 8px;
+  top: 11px;
+  pointer-events: none;
+}
