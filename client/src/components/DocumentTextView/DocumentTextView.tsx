@@ -228,10 +228,10 @@ const DocumentTextView = observer(() => {
   return (
     <Box
       className={classes.textView}
-      style={{
-        width: appState.viewedDocument !== null ? 300 : 0,
-        padding: appState.viewedDocument !== null ? 20 : 0,
-      }}
+      // style={{
+      //   width: appState.viewedDocument !== null ? 300 : 0,
+      //   padding: appState.viewedDocument !== null ? 20 : 0,
+      // }}
       // onTransitionStart={onTransitionStart}
       // onTransitionEnd={onTransitionEnd}
       // style={{

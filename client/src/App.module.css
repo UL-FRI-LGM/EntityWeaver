@@ -8,5 +8,40 @@
 .main {
   display: flex;
   flex: 1 1 auto;
+  flex-direction: column;
   min-height: 0;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.maxHeight {
+  /*height: 100%;*/
+}
+
+.upperGrid {
+  height: 66%;
+}
+
+.lowerGrid {
+  height: 34%;
+}
+
+.gridContainer {
+  padding: 0;
+}
+
+.main :global(.mantine-Grid-root):not(.upperGrid, .lowerGrid) {
+  height: 100%;
+  width: 100%;
+}
+
+.main :global(.mantine-Grid-inner) {
+  height: 100%;
+}
+
+.main :global(.mantine-Grid-col) {
+  height: 100%;
+  border: white 1px solid;
+  display: flex;
+  flex: 1 1 auto;
 }
