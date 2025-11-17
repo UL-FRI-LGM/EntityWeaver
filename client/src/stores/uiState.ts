@@ -14,6 +14,8 @@ interface Filters {
   collocations: boolean;
 }
 
+export type tableContents = "documents" | "entities" | "mentions";
+
 export class UiState {
   appState: AppState;
 
@@ -24,6 +26,8 @@ export class UiState {
   mentionContextOpen = false;
   documentEditMode = false;
   tableView = false;
+  tableContents: tableContents = "documents";
+
   filters: Filters = {
     entities: true,
     documents: true,
@@ -49,6 +53,7 @@ export class UiState {
         "filters",
         "documentEditMode",
         "tableView",
+        "tableContents",
       ],
     }).catch(console.error);
   }
@@ -76,5 +81,9 @@ export class UiState {
 
   setTableView(state: boolean) {
     this.tableView = state;
+  }
+
+  setTableContents(contents: tableContents) {
+    this.tableContents = contents;
   }
 }
