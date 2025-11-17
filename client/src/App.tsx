@@ -5,10 +5,9 @@ import { useWindowEvent } from "@mantine/hooks";
 import { observer } from "mobx-react";
 import { useAppState } from "./stores/appState.ts";
 import DocumentTextView from "@/components/DocumentTextView/DocumentTextView.tsx";
-import EntityGraphWidget from "./components/EntityGraph/EntityGraph.tsx";
 import { Grid, GridCol } from "@mantine/core";
-import TableWidget from "@/components/TableWidget/TableWidget.tsx";
 import FlowWidget from "@/components/FlowWidget/FlowWidget.tsx";
+import TableGraphWindow from "@/components/TableGraphWindow/TableGraphWindow.tsx";
 
 const App = observer(() => {
   const appState = useAppState();
@@ -30,15 +29,8 @@ const App = observer(() => {
       <TopBar />
       <div className={classes.main}>
         <Grid className={classes.upperGrid}>
-          <Grid.Col span={8}>
-            <Grid className={classes.gridContainer}>
-              <Grid.Col span={6}>
-                <TableWidget />
-              </Grid.Col>
-              <Grid.Col span={6}>
-                <EntityGraphWidget />
-              </Grid.Col>
-            </Grid>
+          <Grid.Col span={8} className={classes.gridContainer}>
+            <TableGraphWindow />
           </Grid.Col>
           <GridCol span={4}>
             <FlowWidget />

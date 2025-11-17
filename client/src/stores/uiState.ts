@@ -23,6 +23,7 @@ export class UiState {
   colorByType = false;
   mentionContextOpen = false;
   documentEditMode = false;
+  tableView = false;
   filters: Filters = {
     entities: true,
     documents: true,
@@ -47,6 +48,7 @@ export class UiState {
         "colorByType",
         "filters",
         "documentEditMode",
+        "tableView",
       ],
     }).catch(console.error);
   }
@@ -70,5 +72,9 @@ export class UiState {
 
   setDocumentEditMode(state: boolean) {
     this.documentEditMode = state;
+  }
+
+  setTableView(state: boolean) {
+    this.tableView = state;
   }
 }

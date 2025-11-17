@@ -19,15 +19,15 @@
 }
 
 .upperGrid {
-  height: 66%;
+  height: 65%;
 }
 
 .lowerGrid {
-  height: 34%;
+  height: 35%;
 }
 
 .gridContainer {
-  padding: 0;
+  /*padding: 0 !important;*/
 }
 
 .main :global(.mantine-Grid-root):not(.upperGrid, .lowerGrid) {

@@ -74,7 +74,6 @@ const nodePictogramProgram = createNodeCompoundProgram<NodeType, EdgeType>([
 ]);
 
 const sigmaSettings: Partial<Settings<NodeType, EdgeType>> = {
-  // allowInvalidContainer: true,
   nodeProgramClasses: {
     pictogram: nodePictogramProgram,
     bordered: nodeBorderProgram,
