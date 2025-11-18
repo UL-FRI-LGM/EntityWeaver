@@ -44,6 +44,7 @@ export default defineConfig([
           caughtErrors: "all",
         },
       ],
+      "@typescript-eslint/prefer-nullish-coalescing": "off",
     },
   },
 ]);
