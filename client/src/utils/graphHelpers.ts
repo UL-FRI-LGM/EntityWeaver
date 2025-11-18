@@ -12,12 +12,13 @@ import {
   typeIconToColor,
   typeToColor,
   typeToImage,
+  uncertaintyToEdgeColor,
 } from "./helpers.ts";
 import { Dataset, type GraphNodeType } from "@/stores/dataset.ts";
 import type Graph from "graphology";
 import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
 import type { UiState } from "@/stores/uiState.ts";
-import type { Mention } from "@/stores/mention.ts";
+import { EntityLink, type Mention } from "@/stores/mention.ts";
 
 function getRandomPosition(generator?: PRNG) {
   return generator ? generator() : Math.random() * 10000;
@@ -241,7 +242,7 @@ export function updateMentionNode(
     type?: string;
     documentId?: string;
     clearEntityLinks?: boolean;
-    addedEntityLinks?: string[]; // array of entity IDs
+    addedEntityLinks?: EntityLink[]; // array of entity IDs
     removedEntityLinks?: string[]; // array of entity IDs
   },
 ) {
@@ -277,7 +278,9 @@ export function updateMentionNode(
     for (const edgeId of edges) {
       if (update.addedEntityLinks) {
         const entityId = graph.opposite(nodeId, edgeId);
-        if (update.addedEntityLinks.includes(entityId)) {
+        if (
+          update.addedEntityLinks.some((link) => link.entity.id === entityId)
+        ) {
           continue;
         }
       }
@@ -289,15 +292,11 @@ export function updateMentionNode(
   }
 
   if (update.addedEntityLinks) {
-    for (const entityId of update.addedEntityLinks) {
-      if (graph.hasEdge(nodeId, entityId)) {
+    for (const link of update.addedEntityLinks) {
+      if (graph.hasEdge(nodeId, link.entity.id)) {
         continue;
       }
-      graph.addUndirectedEdge(nodeId, entityId, {
-        size: DEFINES.edges.MentionToEntity.width,
-        color: DEFINES.edges.MentionToEntity.color,
-        connectionType: "MentionToEntity",
-      });
+      addMentionToEntityEdge(graph, link);
     }
   }
 
@@ -370,13 +369,13 @@ export function updateEntityViewEdges(
 
     collocatedMentions.forEach((mention) => {
       for (const entityLink of mention.entityLinkList) {
-        if (entityLink.id === entity.id) {
+        if (entityLink.entity.id === entity.id) {
           continue;
         }
-        if (graph.hasEdge(entity.id, entityLink.id)) {
+        if (graph.hasEdge(entity.id, entityLink.entity.id)) {
           continue;
         }
-        graph.addUndirectedEdge(entity.id, entityLink.id, {
+        graph.addUndirectedEdge(entity.id, entityLink.entity.id, {
           size: DEFINES.edges.MentionCollocation.width,
           color: DEFINES.edges.MentionCollocation.color,
           connectionType: "EntityCollocation",
@@ -466,13 +465,8 @@ export function updateGraph(
       zIndex: 1,
     });
 
-    mention.entities.forEach((link) => {
-      graph.addUndirectedEdge(mention.id, link.id, {
-        size: DEFINES.edges.MentionToEntity.width,
-        color: DEFINES.edges.MentionToEntity.color,
-        connectionType: "MentionToEntity",
-        zIndex: 2,
-      });
+    mention.entityLinks.forEach((link) => {
+      addMentionToEntityEdge(graph, link);
     });
   });
 
@@ -503,4 +497,17 @@ export function updateGraph(
   // });
 
   sigma.refresh();
+}
+
+export function addMentionToEntityEdge(
+  graph: Graph<NodeType, EdgeType>,
+  link: EntityLink,
+) {
+  const edgeColor = uncertaintyToEdgeColor(link.confidence);
+  graph.addUndirectedEdge(link.mention.id, link.entity.id, {
+    size: DEFINES.edges.MentionToEntity.width,
+    color: edgeColor.hex(),
+    connectionType: "MentionToEntity",
+    zIndex: 2,
+  });
 }

@@ -4,6 +4,7 @@ import miscImg from "/miscellaneous.svg?url";
 import organizationImg from "/organization.svg?url";
 import personImg from "/person.svg?url";
 import unknownImg from "/unknown.svg?url";
+import Color from "color";
 
 const edgeWidth = 2;
 
@@ -41,6 +42,18 @@ export const DEFINES = {
     size: 10,
     borderSize: 0.2,
   },
+  edgeConfidence: [
+    {
+      threshold: 0.5,
+      minCertainColor: new Color("hsl(360, 100%, 68%)"),
+      maxCertainColor: new Color("hsl(360, 0%, 68%)"),
+    },
+    {
+      threshold: 1,
+      minCertainColor: new Color("hsl(210, 0%, 68%)"),
+      maxCertainColor: new Color("hsl(210, 100%, 68%)"),
+    },
+  ],
   edges: {
     MentionToDocument: {
       color: "#282828",

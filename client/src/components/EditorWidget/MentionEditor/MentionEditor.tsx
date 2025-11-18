@@ -28,8 +28,7 @@ import SearchableCombobox, {
 } from "../../SearchableCombobox/SearchableCombobox.tsx";
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
 import sharedClasses from "../shared.module.css";
-import type { Mention } from "@/stores/mention.ts";
-import type { Entity } from "@/stores/entity.ts";
+import { EntityLink, type Mention } from "@/stores/mention.ts";
 import TypeSelectorCombobox from "@/components/EditorWidget/TypeSelectorCombobox.tsx";
 
 const EntitySelector = observer(
@@ -101,48 +100,46 @@ const EntitySelector = observer(
   },
 );
 
-const LinkEditor = observer(
-  ({ mention, link }: { mention: Mention; link: Entity }) => {
-    const appState = useAppState();
+const LinkEditor = observer(({ link }: { link: EntityLink }) => {
+  const appState = useAppState();
 
-    return (
-      <Paper
-        className={classes.linkEntry}
-        shadow="xl"
-        withBorder
+  return (
+    <Paper
+      className={classes.linkEntry}
+      shadow="xl"
+      withBorder
+      onMouseEnter={() => {
+        appState.setUiHoveredNode(link.entity.id);
+      }}
+      onMouseLeave={() => {
+        appState.setUiHoveredNode(null);
+      }}
+    >
+      <Group
+        wrap={"nowrap"}
+        justify="space-between"
+        gap={0}
         onMouseEnter={() => {
-          appState.setUiHoveredNode(link.id);
+          appState.setUiHoveredNode(link.entity.id);
         }}
         onMouseLeave={() => {
           appState.setUiHoveredNode(null);
         }}
       >
-        <Group
-          wrap={"nowrap"}
-          justify="space-between"
-          gap={0}
-          onMouseEnter={() => {
-            appState.setUiHoveredNode(link.id);
-          }}
-          onMouseLeave={() => {
-            appState.setUiHoveredNode(null);
-          }}
-        >
-          <Text truncate="end" component="span" className={classes.linkText}>
-            {link.name}
-          </Text>
-          <ActionIcon variant="default">
-            <IconX
-              onClick={() => {
-                mention.removeEntityLink(link.id);
-              }}
-            />
-          </ActionIcon>
-        </Group>
-      </Paper>
-    );
-  },
-);
+        <Text truncate="end" component="span" className={classes.linkText}>
+          {link.entity.name}
+        </Text>
+        <ActionIcon variant="default">
+          <IconX
+            onClick={() => {
+              link.delete();
+            }}
+          />
+        </ActionIcon>
+      </Group>
+    </Paper>
+  );
+});
 
 const MentionToEntityLinkEditor = observer(
   ({ mention }: { mention: Mention }) => {
@@ -153,7 +150,7 @@ const MentionToEntityLinkEditor = observer(
       >
         <Stack className={classes.linkList}>
           {mention.entityLinkList.map((link) => (
-            <LinkEditor key={link.id} mention={mention} link={link} />
+            <LinkEditor key={link.entity.id} link={link} />
           ))}
         </Stack>
       </Fieldset>
@@ -183,7 +180,7 @@ const MentionEditor = observer(({ mention }: { mention: Mention }) => {
 
   const canAddEntity =
     entityId !== null &&
-    (!mention.entities.has(entityId) || appState.holdingShift);
+    (!mention.entityLinks.has(entityId) || appState.holdingShift);
 
   return (
     <Fieldset

@@ -1,6 +1,7 @@
 import { DEFINES } from "../defines.ts";
 import type { DatasetDB } from "@/stores/dataset.ts";
 import demoJsonUrl from "/demo.json?url";
+import Color, { type ColorInstance } from "color";
 
 interface ErrorResponse {
   message: string;
@@ -87,6 +88,23 @@ export function typeToImage(type: string) {
 
 export function edgeTypeToProperties(type: keyof typeof DEFINES.edges) {
   return DEFINES.edges[type];
+}
+
+export function uncertaintyToEdgeColor(certainty: number): ColorInstance {
+  let prevThreshold = 0;
+  for (const uncertaintyLevel of DEFINES.edgeConfidence) {
+    const threshold: number = uncertaintyLevel.threshold;
+    if (certainty <= threshold) {
+      const localCertainty =
+        (certainty - prevThreshold) / (threshold - prevThreshold);
+      return uncertaintyLevel.minCertainColor.mix(
+        uncertaintyLevel.maxCertainColor,
+        localCertainty,
+      );
+    }
+    prevThreshold = threshold;
+  }
+  return new Color("black");
 }
 
 export function isLeftClick(event: MouseEvent | TouchEvent) {

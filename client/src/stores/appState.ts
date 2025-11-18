@@ -312,7 +312,7 @@ export class AppState {
       const mentionId = graph.source(edgeId);
       const entityId = graph.target(edgeId);
       const mention = this.dataset.mentions.get(mentionId);
-      mention?.removeEntityLink(entityId);
+      mention?.onEntityUnlinked(entityId);
     }
   }
   setViewedDocument(doc: Document | null) {

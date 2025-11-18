@@ -1,5 +1,5 @@
 import { GraphEntity } from "@/stores/graphEntity.ts";
-import { computed, makeObservable } from "mobx";
+import { computed, makeAutoObservable, makeObservable } from "mobx";
 import type { Dataset } from "@/stores/dataset.ts";
 import { updateMentionNode } from "@/utils/graphHelpers.ts";
 import { Document } from "@/stores/document.ts";
@@ -14,9 +14,42 @@ export interface MentionDB {
   document_id: string;
   links: {
     entity_id: string;
+    confidence: number;
   }[];
   x?: number;
   y?: number;
+}
+
+export interface UncertainEntity {
+  entity: Entity;
+  confidence: number;
+}
+
+export class EntityLink {
+  entity: Entity;
+  mention: Mention;
+  confidence: number;
+
+  constructor(
+    entity: Entity,
+    mention: Mention,
+    confidence: number,
+    updateGraph = true,
+  ) {
+    this.entity = entity;
+    this.mention = mention;
+    this.confidence = confidence;
+
+    mention.onEntityLinked(this, updateGraph);
+    entity.onMentionLinked(this.mention);
+
+    makeAutoObservable(this);
+  }
+
+  delete(updateGraph = true) {
+    this.mention.onEntityUnlinked(this.entity.id, updateGraph);
+    this.entity.onMentionUnlinked(this.mention);
+  }
 }
 
 export class Mention extends GraphEntity {
@@ -26,7 +59,7 @@ export class Mention extends GraphEntity {
   start_index: number;
   end_index: number;
 
-  entities: Map<string, Entity> = new Map<string, Entity>();
+  entityLinks: Map<string, EntityLink> = new Map<string, EntityLink>();
 
   document: Document;
 
@@ -37,7 +70,7 @@ export class Mention extends GraphEntity {
     end_index: number,
     document: Document,
     dataset: Dataset,
-    entities: Entity[] = [],
+    entities: (Entity | UncertainEntity)[] = [],
     x?: number,
     y?: number,
   ) {
@@ -58,7 +91,7 @@ export class Mention extends GraphEntity {
       type: true,
       start_index: true,
       end_index: true,
-      entities: true,
+      entityLinks: true,
       document: true,
 
       entityLinkList: computed({ keepAlive: true }),
@@ -67,7 +100,7 @@ export class Mention extends GraphEntity {
       setDocument: true,
       setIndices: true,
 
-      removeEntityLink: true,
+      onEntityUnlinked: true,
       setEntityLink: true,
 
       contextSnippet: computed,
@@ -82,12 +115,12 @@ export class Mention extends GraphEntity {
         `Document with id ${data.document_id} not found for Mention ${data.id}`,
       );
     }
-    const entities: Entity[] = [];
+    const entities: UncertainEntity[] = [];
     data.links.forEach((link) => {
       const entityId = Entity.prefix + link.entity_id;
       const entity = dataset.entities.get(entityId);
       if (entity) {
-        entities.push(entity);
+        entities.push({ entity, confidence: link.confidence });
       } else {
         console.warn(
           `Entity with id ${link.entity_id} not found for Mention ${data.id}`,
@@ -114,8 +147,9 @@ export class Mention extends GraphEntity {
       start_index: this.start_index,
       end_index: this.end_index,
       document_id: this.document.internal_id,
-      links: this.entityLinkList.map((entity) => ({
-        entity_id: entity.internal_id,
+      links: this.entityLinkList.map((entityLink) => ({
+        entity_id: entityLink.entity.internal_id,
+        confidence: entityLink.confidence,
       })),
       x: this.x,
       y: this.y,
@@ -123,7 +157,7 @@ export class Mention extends GraphEntity {
   }
 
   get entityLinkList() {
-    return Array.from(this.entities.values());
+    return Array.from(this.entityLinks.values());
   }
 
   get name() {
@@ -159,56 +193,63 @@ export class Mention extends GraphEntity {
     }
   }
 
-  removeEntityLink(entityId: string) {
-    this.entities.delete(entityId);
-    const entity = this.dataset.entities.get(entityId);
-    if (entity) {
-      entity.onMentionUnlinked(this);
+  onEntityLinked(entityLink: EntityLink, updateGraph = true) {
+    this.entityLinks.set(entityLink.entity.id, entityLink);
+    if (updateGraph && this.dataset.appState.sigma) {
+      updateMentionNode(this.dataset.appState.sigma, this.id, {
+        addedEntityLinks: [entityLink],
+      });
     }
-    if (this.dataset.appState.sigma) {
+  }
+
+  onEntityUnlinked(entityId: string, updateGraph = true) {
+    this.entityLinks.delete(entityId);
+    if (updateGraph && this.dataset.appState.sigma) {
       updateMentionNode(this.dataset.appState.sigma, this.id, {
         removedEntityLinks: [entityId],
       });
     }
   }
+
   setEntityLink(
-    entity: Entity | string,
+    entity: Entity | UncertainEntity | string,
     keepExisting = true,
     updateGraph = true,
   ) {
-    let linkedEntity: Entity;
+    let newEntityLink: UncertainEntity;
     if (typeof entity === "string") {
       const foundEntity = this.dataset.entities.get(entity);
       if (!foundEntity) {
         console.warn(`Entity with id ${entity} not found`);
         return;
       }
-      linkedEntity = foundEntity;
+      newEntityLink = { entity: foundEntity, confidence: 1 };
     } else {
-      linkedEntity = entity;
+      newEntityLink =
+        entity instanceof Entity ? { entity, confidence: 1 } : entity;
     }
-    const alreadyHasLink = this.entities.has(linkedEntity.id);
-    if (keepExisting && alreadyHasLink) {
+    let entityLink = this.entityLinks.get(newEntityLink.entity.id);
+    if (keepExisting && entityLink) {
       return;
     }
     if (!keepExisting) {
-      if (!alreadyHasLink) {
-        this.entities.clear();
-      } else {
-        this.entities.forEach((link) => {
-          if (link.id !== linkedEntity.id) {
-            this.entities.delete(link.id);
-          }
-        });
-      }
+      this.entityLinks.forEach((link) => {
+        if (!entityLink || link.entity.id !== newEntityLink.entity.id) {
+          link.delete(false);
+        }
+      });
     }
-    if (!alreadyHasLink) {
-      this.entities.set(linkedEntity.id, linkedEntity);
-      linkedEntity.onMentionLinked(this);
+    if (!entityLink) {
+      entityLink = new EntityLink(
+        newEntityLink.entity,
+        this,
+        newEntityLink.confidence,
+        false,
+      );
     }
     if (updateGraph && this.dataset.appState.sigma) {
       updateMentionNode(this.dataset.appState.sigma, this.id, {
-        addedEntityLinks: [linkedEntity.id],
+        addedEntityLinks: [entityLink],
         clearEntityLinks: !keepExisting,
       });
     }
