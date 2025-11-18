@@ -1,5 +1,43 @@
 .container {
-  display: flex;
-  flex-direction: column;
+  /*display: flex;*/
+  /*flex-direction: column;*/
+  width: 300px;
   padding: 10px;
+  z-index: 100;
+}
+
+.gradientContainer {
+  position: relative;
+  height: 20px;
+  width: calc(100% - 20px);
+  border-radius: 4px;
+  user-select: none;
+  background: repeating-conic-gradient(#808080 0 25%, #ffffffff 0 50%) 50% /
+    20px 20px;
+}
+
+.gradientBox {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.gradientStop {
+  position: absolute;
+  top: 120%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid white;
+  cursor: pointer;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+.colorInput {
+  flex-grow: 1;
 }

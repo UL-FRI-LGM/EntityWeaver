@@ -419,7 +419,7 @@ const EntityGraph = observer(() => {
       </div>
       <LoadingOverlay
         visible={appState.graphLoading}
-        zIndex={1000}
+        zIndex={100}
         overlayProps={{
           radius: "sm",
           blur: 2,

@@ -2,6 +2,7 @@ import { DEFINES } from "../defines.ts";
 import type { DatasetDB } from "@/stores/dataset.ts";
 import demoJsonUrl from "/demo.json?url";
 import Color, { type ColorInstance } from "color";
+import type { AppState } from "@/stores/appState.ts";
 
 interface ErrorResponse {
   message: string;
@@ -90,21 +91,28 @@ export function edgeTypeToProperties(type: keyof typeof DEFINES.edges) {
   return DEFINES.edges[type];
 }
 
-export function uncertaintyToEdgeColor(certainty: number): ColorInstance {
+export function uncertaintyToEdgeColor(
+  appState: AppState,
+  certainty: number,
+): ColorInstance {
+  if (appState.tfStops.stops.length === 0) {
+    return new Color("black");
+  }
   let prevThreshold = 0;
-  for (const uncertaintyLevel of DEFINES.edgeConfidence) {
-    const threshold: number = uncertaintyLevel.threshold;
+  let prevColor = new Color(appState.tfStops.sortedTFStops[0].color);
+  for (const tfStop of appState.tfStops.sortedTFStops) {
+    const threshold: number = tfStop.position;
+    const color = new Color(tfStop.color);
     if (certainty <= threshold) {
       const localCertainty =
         (certainty - prevThreshold) / (threshold - prevThreshold);
-      return uncertaintyLevel.minCertainColor.mix(
-        uncertaintyLevel.maxCertainColor,
-        localCertainty,
-      );
+      return prevColor.mix(color, localCertainty);
     }
     prevThreshold = threshold;
+    prevColor = color;
   }
-  return new Color("black");
+
+  return prevColor;
 }
 
 export function isLeftClick(event: MouseEvent | TouchEvent) {

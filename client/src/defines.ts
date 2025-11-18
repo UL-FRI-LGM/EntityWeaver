@@ -42,16 +42,19 @@ export const DEFINES = {
     size: 10,
     borderSize: 0.2,
   },
-  edgeConfidence: [
+  gradientEditorDebounceMs: 100,
+  defaultTFStops: [
+    {
+      threshold: 0,
+      color: new Color("hsl(360, 100%, 68%)"),
+    },
     {
       threshold: 0.5,
-      minCertainColor: new Color("hsl(360, 100%, 68%)"),
-      maxCertainColor: new Color("hsl(360, 0%, 68%)"),
+      color: new Color("hsl(360, 0%, 68%)"),
     },
     {
       threshold: 1,
-      minCertainColor: new Color("hsl(210, 0%, 68%)"),
-      maxCertainColor: new Color("hsl(210, 100%, 68%)"),
+      color: new Color("hsl(210, 100%, 68%)"),
     },
   ],
   edges: {

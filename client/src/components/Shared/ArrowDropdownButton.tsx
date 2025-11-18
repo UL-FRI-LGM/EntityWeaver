@@ -1,23 +1,22 @@
 import classes from "./ArrowDropdownButton.module.css";
 import { IconCaretDownFilled, IconCaretUpFilled } from "@tabler/icons-react";
-import { Button } from "@mantine/core";
-import { type PropsWithChildren, type Ref } from "react";
+import { Button, type ButtonProps, type ElementProps } from "@mantine/core";
+import { type PropsWithChildren } from "react";
 
-interface Props {
+type Props = {
   shownMenu: boolean;
   onClick?: () => void;
-  ref?: Ref<HTMLButtonElement>;
-}
+} & ButtonProps &
+  ElementProps<"button">;
 
 const ArrowDropdownButton = ({
   shownMenu,
-  onClick,
-  ref,
   children,
+  ...props
 }: PropsWithChildren<Props>) => {
   return (
     <Button
-      ref={ref}
+      {...props}
       className={classes.filterButton}
       classNames={{ label: classes.filterLabel }}
       variant="subtle"
@@ -31,7 +30,6 @@ const ArrowDropdownButton = ({
           <IconCaretDownFilled size={14} />
         )
       }
-      onClick={onClick}
     >
       {children}
     </Button>

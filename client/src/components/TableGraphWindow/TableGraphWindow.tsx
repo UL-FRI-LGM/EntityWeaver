@@ -3,9 +3,10 @@ import classes from "./TableGraphWindow.module.css";
 import { useAppState } from "@/stores/appState.ts";
 import TableWidget from "@/components/TableWidget/TableWidget.tsx";
 import EntityGraphWidget from "@/components/EntityGraph/EntityGraph.tsx";
-import { Button, Menu, SegmentedControl } from "@mantine/core";
+import { Popover, SegmentedControl } from "@mantine/core";
 import UncertaintyTFWidget from "@/components/TableGraphWindow/UncertaintyTFWidget.tsx";
 import { useState } from "react";
+import ArrowDropdownButton from "@/components/Shared/ArrowDropdownButton.tsx";
 
 const TableGraphWindow = observer(() => {
   const appState = useAppState();
@@ -24,16 +25,22 @@ const TableGraphWindow = observer(() => {
             { label: "Graph View", value: "graph" },
           ]}
         />
-        <Menu opened={tfMenuOpen} onChange={setTfMenuOpen}>
-          <Menu.Target>
-            <Button>Transfer Functions</Button>
-          </Menu.Target>
-          <Menu.Dropdown>
-            <Menu.Item>
-              <UncertaintyTFWidget />
-            </Menu.Item>
-          </Menu.Dropdown>
-        </Menu>
+        <Popover opened={tfMenuOpen} position="bottom-start">
+          <Popover.Target>
+            <ArrowDropdownButton
+              shownMenu={tfMenuOpen}
+              onClick={() => {
+                setTfMenuOpen(!tfMenuOpen);
+              }}
+              style={{ height: 30 }}
+            >
+              Transfer Function
+            </ArrowDropdownButton>
+          </Popover.Target>
+          <Popover.Dropdown>
+            <UncertaintyTFWidget />
+          </Popover.Dropdown>
+        </Popover>
       </div>
       <div className={classes.container}>
         <div

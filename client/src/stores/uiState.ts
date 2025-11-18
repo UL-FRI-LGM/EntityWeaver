@@ -41,7 +41,8 @@ export class UiState {
 
   constructor(appState: AppState) {
     this.appState = appState;
-    makeAutoObservable(this);
+
+    makeAutoObservable(this, { appState: false });
 
     makePersistable(this, {
       name: "NERVIS-UIState",

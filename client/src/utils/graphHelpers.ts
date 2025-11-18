@@ -503,11 +503,29 @@ export function addMentionToEntityEdge(
   graph: Graph<NodeType, EdgeType>,
   link: EntityLink,
 ) {
-  const edgeColor = uncertaintyToEdgeColor(link.confidence);
+  const appState = link.mention.dataset.appState;
+  const edgeColor = uncertaintyToEdgeColor(appState, link.confidence);
   graph.addUndirectedEdge(link.mention.id, link.entity.id, {
     size: DEFINES.edges.MentionToEntity.width,
     color: edgeColor.hex(),
     connectionType: "MentionToEntity",
     zIndex: 2,
+    confidence: link.confidence,
+  });
+}
+
+export function refreshEdgeColorsBasedOnUncertainty(appState: AppState) {
+  if (!appState.sigma) {
+    return;
+  }
+  const graph = appState.sigma.getGraph();
+  graph.forEachEdge((edgeId, attributes) => {
+    if (attributes.connectionType === "MentionToEntity") {
+      const edgeColor = uncertaintyToEdgeColor(
+        appState,
+        attributes.confidence ?? 1,
+      );
+      graph.setEdgeAttribute(edgeId, "color", edgeColor.hex());
+    }
   });
 }

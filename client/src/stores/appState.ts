@@ -19,6 +19,7 @@ import {
 import { DEFINES } from "@/defines.ts";
 import type { AnimateOptions } from "sigma/utils";
 import { configurePersistable } from "mobx-persist-store";
+import { GradientStopsHandler } from "@/stores/gradientStopsHandler.ts";
 
 configurePersistable(
   {
@@ -60,6 +61,7 @@ export interface EdgeType {
   hidden?: boolean;
   zIndex?: number;
   layoutWeight?: number;
+  confidence?: number;
 }
 
 export type SigmaGraph = Sigma<NodeType, EdgeType>;
@@ -85,7 +87,11 @@ export class AppState {
   noverlapLayoutInProgress = false;
   viewedDocument: Document | null = null;
 
+  tfStops: GradientStopsHandler;
+
   constructor() {
+    this.tfStops = new GradientStopsHandler(this);
+
     makeAutoObservable(this);
   }
 
