@@ -41,7 +41,7 @@
 
 .main :global(.mantine-Grid-col) {
   height: 100%;
-  border: white 1px solid;
+  border: var(--mantine-color-dark-light-color) 1px solid;
   display: flex;
   flex: 1 1 auto;
 }

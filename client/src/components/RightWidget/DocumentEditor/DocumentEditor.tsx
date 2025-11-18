@@ -2,14 +2,13 @@ import { observer } from "mobx-react";
 import classes from "./DocumentEditor.module.css";
 import { Button, Fieldset, TextInput, Divider, Stack } from "@mantine/core";
 import { useState } from "react";
-import { IconEdit, IconFileDescription } from "@tabler/icons-react";
+import { IconEdit } from "@tabler/icons-react";
 import { DEFINES } from "@/defines.ts";
 import sharedClasses from "../shared.module.css";
 import MentionLinkEditor from "@/components/RightWidget/MentionLinkEditor.tsx";
 import NodeActions from "@/components/RightWidget/NodeActions.tsx";
 import type { Mention } from "@/stores/mention.ts";
 import { Document } from "@/stores/document.ts";
-import { appState } from "@/stores/appState.ts";
 
 const MentionList = observer(({ mentions }: { mentions: Mention[] }) => {
   return (
@@ -62,20 +61,6 @@ const DocumentEditor = observer(({ document }: { document: Document }) => {
           Apply Changes
         </Button>
       </Stack>
-      <Button
-        style={{ flexShrink: 0 }}
-        variant="filled"
-        leftSection={<IconFileDescription size={14} />}
-        onClick={() => {
-          appState.setViewedDocument(
-            appState.viewedDocument === null ? document : null,
-          );
-        }}
-      >
-        {appState.viewedDocument === null
-          ? "Open Document Editor"
-          : "Close Document Editor"}
-      </Button>
       <Stack className={classes.mentionsContainer} gap={6}>
         <Divider label="Mentions" labelPosition={"center"} />
         <MentionList mentions={document.mentionList} />

@@ -212,6 +212,10 @@ export class Dataset {
       (document) => document.x === undefined || document.y === undefined,
     );
 
+    if (this.documentList.length > 0) {
+      appState.setViewedDocument(this.documentList[0]);
+    }
+
     appState.runGraphUpdate(recomputeLayout);
   }
 }

@@ -150,11 +150,10 @@ export class AppState {
     }
     this.setUiHoveredNode(null);
 
-    if (
-      this.viewedDocument !== null &&
-      this.selectedNodeInstance instanceof Document
-    ) {
+    if (this.selectedNodeInstance instanceof Document) {
       this.setViewedDocument(this.selectedNodeInstance);
+    } else if (this.selectedNodeInstance instanceof Mention) {
+      this.setViewedDocument(this.selectedNodeInstance.document);
     }
   }
   setSelectedEdge(edgeId: string | null) {
