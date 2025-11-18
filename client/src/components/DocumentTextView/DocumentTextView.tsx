@@ -186,7 +186,7 @@ const TextViewContents = observer(({ document }: { document: Document }) => {
 
       view.dispatch(tr);
     });
-  }, [document, editor]);
+  }, [document, editor, document.text]);
 
   return (
     <>

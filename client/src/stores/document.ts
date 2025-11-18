@@ -1,7 +1,7 @@
 import { GraphEntity } from "@/stores/graphEntity.ts";
 import type { Mention } from "@/stores/mention.ts";
 import type { Dataset } from "@/stores/dataset.ts";
-import { computed, makeObservable, observable, override } from "mobx";
+import { computed, makeObservable, override } from "mobx";
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
 
 export interface DocumentDB {
@@ -32,11 +32,12 @@ export class Document extends GraphEntity {
     this.text = text;
 
     makeObservable(this, {
-      title: observable,
+      title: true,
       setTitle: true,
-      text: observable,
+      text: true,
       setText: true,
-      mentions: observable,
+      editText: true,
+      mentions: true,
       mentionList: computed({ keepAlive: true }),
       textWithEntities: true,
       canDelete: override,
@@ -69,6 +70,27 @@ export class Document extends GraphEntity {
     updateNodeProperties(this.dataset.appState.sigma, this.id, {
       label: this.title,
     });
+  }
+
+  editText(startIndex: number, endIndex: number, newText: string) {
+    const before = this.text.slice(0, startIndex);
+    const after = this.text.slice(endIndex);
+    this.setText(before + newText + after);
+
+    const lengthDiff = newText.length - (endIndex - startIndex);
+    for (const mention of this.mentions.values()) {
+      if (mention.start_index >= endIndex) {
+        mention.setIndices(
+          mention.start_index + lengthDiff,
+          mention.end_index + lengthDiff,
+        );
+      } else if (
+        mention.start_index <= startIndex &&
+        mention.end_index >= endIndex
+      ) {
+        mention.setIndices(mention.start_index, mention.end_index + lengthDiff);
+      }
+    }
   }
 
   setText(text: string) {

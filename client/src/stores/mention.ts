@@ -8,7 +8,6 @@ import { DEFINES } from "@/defines.ts";
 
 export interface MentionDB {
   id: string;
-  name: string;
   type: string;
   start_index: number;
   end_index: number;
@@ -23,7 +22,6 @@ export interface MentionDB {
 export class Mention extends GraphEntity {
   static prefix = "Mention-";
 
-  name: string;
   type: string;
   start_index: number;
   end_index: number;
@@ -34,7 +32,6 @@ export class Mention extends GraphEntity {
 
   constructor(
     internal_id: string,
-    name: string,
     type: string,
     start_index: number,
     end_index: number,
@@ -45,7 +42,6 @@ export class Mention extends GraphEntity {
     y?: number,
   ) {
     super(internal_id, Mention.prefix, dataset, x, y);
-    this.name = name;
     this.type = type;
     this.start_index = start_index;
     this.end_index = end_index;
@@ -58,7 +54,7 @@ export class Mention extends GraphEntity {
     this.document.mentions.set(this.id, this);
 
     makeObservable<Mention>(this, {
-      name: true,
+      name: computed({ keepAlive: true }),
       type: true,
       start_index: true,
       end_index: true,
@@ -100,7 +96,6 @@ export class Mention extends GraphEntity {
     });
     return new Mention(
       data.id,
-      data.name,
       data.type,
       data.start_index,
       data.end_index,
@@ -115,7 +110,6 @@ export class Mention extends GraphEntity {
   toJson(): MentionDB {
     return {
       id: this.internal_id,
-      name: this.name,
       type: this.type,
       start_index: this.start_index,
       end_index: this.end_index,
@@ -132,12 +126,14 @@ export class Mention extends GraphEntity {
     return Array.from(this.entities.values());
   }
 
-  setName(name: string) {
-    this.name = name;
-    if (this.dataset.appState.sigma) {
-      updateMentionNode(this.dataset.appState.sigma, this.id, { label: name });
-    }
+  get name() {
+    return this.document.text.slice(this.start_index, this.end_index);
   }
+
+  setName(name: string) {
+    this.document.editText(this.start_index, this.end_index, name);
+  }
+
   setType(type: string) {
     this.type = type;
     if (this.dataset.appState.sigma) {
@@ -156,6 +152,11 @@ export class Mention extends GraphEntity {
   setIndices(startIndex: number, endIndex: number) {
     this.start_index = startIndex;
     this.end_index = endIndex;
+    if (this.dataset.appState.sigma) {
+      updateMentionNode(this.dataset.appState.sigma, this.id, {
+        label: this.name,
+      });
+    }
   }
 
   removeEntityLink(entityId: string) {
