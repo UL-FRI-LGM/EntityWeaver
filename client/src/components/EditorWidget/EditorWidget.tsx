@@ -1,14 +1,14 @@
 import { observer } from "mobx-react";
 import { useAppState } from "@/stores/appState.ts";
-import classes from "./RightWidget.module.css";
+import classes from "./EditorWidget.module.css";
 import MentionEditor from "./MentionEditor/MentionEditor.tsx";
 import DocumentEditor from "./DocumentEditor/DocumentEditor.tsx";
-import EntityEditor from "@/components/RightWidget/EntityEditor/EntityEditor.tsx";
+import EntityEditor from "@/components/EditorWidget/EntityEditor/EntityEditor.tsx";
 import { Mention } from "@/stores/mention.ts";
 import { Entity } from "@/stores/entity.ts";
 import { Document } from "@/stores/document.ts";
 
-const RightWidget = observer(() => {
+const EditorWidget = observer(() => {
   const appState = useAppState();
 
   function NodeEditor() {
@@ -34,4 +34,4 @@ const RightWidget = observer(() => {
   );
 });
 
-export default RightWidget;
+export default EditorWidget;

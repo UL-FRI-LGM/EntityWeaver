@@ -5,8 +5,8 @@ import { useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
 import { DEFINES } from "@/defines.ts";
 import sharedClasses from "../shared.module.css";
-import MentionLinkEditor from "@/components/RightWidget/MentionLinkEditor.tsx";
-import NodeActions from "@/components/RightWidget/NodeActions.tsx";
+import MentionLinkEditor from "@/components/EditorWidget/MentionLinkEditor.tsx";
+import NodeActions from "@/components/EditorWidget/NodeActions.tsx";
 import type { Mention } from "@/stores/mention.ts";
 import { Document } from "@/stores/document.ts";
 

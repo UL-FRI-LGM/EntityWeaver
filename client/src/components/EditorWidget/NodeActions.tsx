@@ -5,7 +5,7 @@ import {
   IconTrash,
   IconZoomScan,
 } from "@tabler/icons-react";
-import sharedClasses from "@/components/RightWidget/shared.module.css";
+import sharedClasses from "@/components/EditorWidget/shared.module.css";
 import { useAppState } from "@/stores/appState.ts";
 import { zoomInOnNodeNeighbors } from "@/utils/graphHelpers.ts";
 import type { GraphEntity } from "@/stores/graphEntity.ts";

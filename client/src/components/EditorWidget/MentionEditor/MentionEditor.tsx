@@ -26,10 +26,10 @@ import SearchableCombobox, {
 } from "../../SearchableCombobox/SearchableCombobox.tsx";
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
 import sharedClasses from "../shared.module.css";
-import NodeActions from "@/components/RightWidget/NodeActions.tsx";
+import NodeActions from "@/components/EditorWidget/NodeActions.tsx";
 import type { Mention } from "@/stores/mention.ts";
 import type { Entity } from "@/stores/entity.ts";
-import ContextView from "@/components/RightWidget/MentionEditor/ContextView.tsx";
+import ContextView from "@/components/EditorWidget/MentionEditor/ContextView.tsx";
 
 const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
   ([tag, name]) => (

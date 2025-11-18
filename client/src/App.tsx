@@ -1,5 +1,5 @@
 import classes from "./App.module.css";
-import RightWidget from "./components/RightWidget/RightWidget.tsx";
+import EditorWidget from "./components/EditorWidget/EditorWidget.tsx";
 import TopBar from "./components/TopBar/TopBar.tsx";
 import { useWindowEvent } from "@mantine/hooks";
 import { observer } from "mobx-react";
@@ -41,7 +41,7 @@ const App = observer(() => {
             <DocumentTextView />
           </Grid.Col>
           <Grid.Col span={4}>
-            <RightWidget />
+            <EditorWidget />
           </Grid.Col>
         </Grid>
       </div>
