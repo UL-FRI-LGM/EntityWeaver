@@ -1,0 +1,8 @@
+.filterLabel {
+  font-weight: 400;
+  color: var(--mantine-color-text);
+}
+
+.filterButton:active {
+  transform: none !important;
+}

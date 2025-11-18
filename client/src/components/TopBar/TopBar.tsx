@@ -5,8 +5,6 @@ import { useAppState } from "@/stores/appState.ts";
 import {
   IconAt,
   IconBorderSides,
-  IconCaretDownFilled,
-  IconCaretUpFilled,
   IconColorFilter,
   IconDotsCircleHorizontal,
   IconDownload,
@@ -24,6 +22,7 @@ import {
 import { useState } from "react";
 import { useFileDialog } from "@mantine/hooks";
 import { downloadTextFile } from "@/utils/helpers.ts";
+import ArrowDropdownButton from "@/components/Shared/ArrowDropdownButton.tsx";
 
 const DisplayMenu = observer(() => {
   const appState = useAppState();
@@ -33,24 +32,14 @@ const DisplayMenu = observer(() => {
   return (
     <Menu opened={showMenu} shadow="md" width={250}>
       <Menu.Target>
-        <Button
-          className={classes.filterButton}
-          classNames={{ label: classes.filterLabel }}
-          variant="subtle"
-          color="gray"
-          rightSection={
-            showMenu ? (
-              <IconCaretUpFilled size={14} />
-            ) : (
-              <IconCaretDownFilled size={14} />
-            )
-          }
+        <ArrowDropdownButton
+          shownMenu={showMenu}
           onClick={() => {
             setShowMenu(!showMenu);
           }}
         >
           Display Options
-        </Button>
+        </ArrowDropdownButton>
       </Menu.Target>
       <Menu.Dropdown>
         <Menu.Item
@@ -96,24 +85,14 @@ const FiltersMenu = observer(() => {
   return (
     <Menu opened={showFilters} shadow="md" width={200}>
       <Menu.Target>
-        <Button
-          className={classes.filterButton}
-          classNames={{ label: classes.filterLabel }}
-          variant="subtle"
-          color="gray"
-          rightSection={
-            showFilters ? (
-              <IconCaretUpFilled size={14} />
-            ) : (
-              <IconCaretDownFilled size={14} />
-            )
-          }
+        <ArrowDropdownButton
+          shownMenu={showFilters}
           onClick={() => {
             setShowFilters(!showFilters);
           }}
         >
-          Filters
-        </Button>
+          Display Options
+        </ArrowDropdownButton>
       </Menu.Target>
       <Menu.Dropdown>
         <Menu.Label>Nodes</Menu.Label>
@@ -255,21 +234,7 @@ const FileMenu = observer(() => {
       shadow="md"
     >
       <Menu.Target>
-        <Button
-          className={classes.filterButton}
-          classNames={{ label: classes.filterLabel }}
-          variant="subtle"
-          color="gray"
-          rightSection={
-            showFileMenu ? (
-              <IconCaretUpFilled size={14} />
-            ) : (
-              <IconCaretDownFilled size={14} />
-            )
-          }
-        >
-          File
-        </Button>
+        <ArrowDropdownButton shownMenu={showFileMenu}>File</ArrowDropdownButton>
       </Menu.Target>
       <Menu.Dropdown>
         <Menu.Item
