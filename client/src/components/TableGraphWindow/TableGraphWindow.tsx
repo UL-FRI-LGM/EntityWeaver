@@ -3,10 +3,13 @@ import classes from "./TableGraphWindow.module.css";
 import { useAppState } from "@/stores/appState.ts";
 import TableWidget from "@/components/TableWidget/TableWidget.tsx";
 import EntityGraphWidget from "@/components/EntityGraph/EntityGraph.tsx";
-import { SegmentedControl } from "@mantine/core";
+import { Button, Menu, SegmentedControl } from "@mantine/core";
+import UncertaintyTFWidget from "@/components/TableGraphWindow/UncertaintyTFWidget.tsx";
+import { useState } from "react";
 
 const TableGraphWindow = observer(() => {
   const appState = useAppState();
+  const [tfMenuOpen, setTfMenuOpen] = useState(false);
 
   return (
     <div className={classes.main}>
@@ -21,6 +24,16 @@ const TableGraphWindow = observer(() => {
             { label: "Graph View", value: "graph" },
           ]}
         />
+        <Menu opened={tfMenuOpen} onChange={setTfMenuOpen}>
+          <Menu.Target>
+            <Button>Transfer Functions</Button>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Item>
+              <UncertaintyTFWidget />
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
       </div>
       <div className={classes.container}>
         <div
