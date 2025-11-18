@@ -2,10 +2,7 @@ import { observer } from "mobx-react";
 import classes from "./MentionEditor.module.css";
 import {
   Button,
-  Combobox,
   Fieldset,
-  Input,
-  InputBase,
   Stack,
   TextInput,
   useCombobox,
@@ -18,101 +15,22 @@ import {
   Code,
 } from "@mantine/core";
 import { useState } from "react";
-import { IconEdit, IconLink, IconLinkPlus, IconX } from "@tabler/icons-react";
-import { DEFINES } from "@/defines.ts";
+import {
+  IconEdit,
+  IconFileExport,
+  IconLink,
+  IconLinkPlus,
+  IconX,
+} from "@tabler/icons-react";
 import { useAppState } from "@/stores/appState.ts";
 import SearchableCombobox, {
   type SearchableComboboxOption,
 } from "../../SearchableCombobox/SearchableCombobox.tsx";
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
 import sharedClasses from "../shared.module.css";
-import NodeActions from "@/components/EditorWidget/NodeActions.tsx";
 import type { Mention } from "@/stores/mention.ts";
 import type { Entity } from "@/stores/entity.ts";
-import ContextView from "@/components/EditorWidget/MentionEditor/ContextView.tsx";
-
-const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
-  ([tag, name]) => (
-    <Combobox.Option value={tag} key={tag}>
-      {name}
-    </Combobox.Option>
-  ),
-);
-
-const DocumentSelector = observer(
-  ({
-    documentId,
-    onDocumentChange,
-    label,
-  }: {
-    documentId: string;
-    onDocumentChange: (_id: string) => void;
-    label: string;
-  }) => {
-    const appState = useAppState();
-
-    const selectedDocument = appState.dataset.documents.get(documentId);
-
-    const [searchValue, setSearchValue] = useState(
-      selectedDocument?.title ?? "",
-    );
-
-    const shouldFilterOptions = selectedDocument?.title !== searchValue;
-
-    const filteredOptions = shouldFilterOptions
-      ? appState.dataset.documentList.filter((doc) =>
-          doc.title.toLowerCase().includes(searchValue.toLowerCase().trim()),
-        )
-      : appState.dataset.documentList;
-
-    const options: SearchableComboboxOption[] = filteredOptions.map((doc) => ({
-      val: doc.id,
-      display: doc.title,
-      props: {
-        onMouseEnter: () => {
-          appState.setUiHoveredNode(doc.id);
-        },
-        onMouseLeave: () => {
-          appState.setUiHoveredNode(null);
-        },
-      },
-    }));
-
-    return (
-      <Group align="end" justify="space-between" gap={10}>
-        <SearchableCombobox
-          label={label}
-          placeholder={"Select Document"}
-          selectedValue={selectedDocument?.title}
-          onChange={onDocumentChange}
-          searchValue={searchValue}
-          setSearchValue={setSearchValue}
-          options={options}
-          textInputProps={{
-            style: { flex: 1 },
-            onMouseEnter: () => {
-              appState.setUiHoveredNode(documentId);
-            },
-            onMouseLeave: () => {
-              appState.setUiHoveredNode(null);
-            },
-          }}
-        />
-        <Tooltip label={"Open Document Editor"}>
-          <ActionIcon
-            size={36}
-            variant="default"
-            onClick={() => {
-              appState.setSelectedNode(documentId);
-            }}
-          >
-            <IconEdit />
-          </ActionIcon>
-        </Tooltip>
-      </Group>
-    );
-  },
-);
+import TypeSelectorCombobox from "@/components/EditorWidget/TypeSelectorCombobox.tsx";
 
 const EntitySelector = observer(
   ({
@@ -249,18 +167,11 @@ const MentionEditor = observer(({ mention }: { mention: Mention }) => {
 
   const [name, setName] = useState(mention.name);
   const [entityType, setEntityType] = useState(mention.type);
-  const [documentId, setDocumentId] = useState<string>(mention.document.id);
   const [entityId, setEntityId] = useState<string | null>(null);
 
   function applyChanges() {
     mention.setName(name);
     mention.setType(entityType);
-    const document = documentId
-      ? appState.dataset.documents.get(documentId)
-      : null;
-    if (document) {
-      mention.setDocument(document);
-    }
   }
 
   function setLinkedEntity() {
@@ -268,10 +179,7 @@ const MentionEditor = observer(({ mention }: { mention: Mention }) => {
     mention.setEntityLink(entityId, !appState.holdingShift);
   }
 
-  const canApplyChanges =
-    mention.name !== name ||
-    mention.type !== entityType ||
-    mention.document.id !== documentId;
+  const canApplyChanges = mention.name !== name || mention.type !== entityType;
 
   const canAddEntity =
     entityId !== null &&
@@ -290,60 +198,45 @@ const MentionEditor = observer(({ mention }: { mention: Mention }) => {
         },
       }}
     >
-      <NodeActions node={mention} />
+      {/*<NodeActions node={mention} />*/}
       <Stack gap={10}>
-        <TextInput
-          label="Name"
-          value={name}
-          onChange={(event) => {
-            setName(event.currentTarget.value);
-          }}
-        />
-        <Combobox
-          store={entityTypeCombobox}
-          onOptionSubmit={(val) => {
-            setEntityType(val);
-            entityTypeCombobox.closeDropdown();
-          }}
-        >
-          <Combobox.Target>
-            <InputBase
-              component="button"
-              type="button"
-              label="Entity Type"
-              pointer
-              rightSection={<Combobox.Chevron />}
-              rightSectionPointerEvents="none"
+        <Group>
+          <TextInput
+            label="Name"
+            value={name}
+            onChange={(event) => {
+              setName(event.currentTarget.value);
+            }}
+            style={{ flexGrow: 1 }}
+          />
+          <TypeSelectorCombobox
+            combobox={entityTypeCombobox}
+            entityType={entityType}
+            setEntityType={setEntityType}
+          />
+        </Group>
+        <Group>
+          <Button
+            disabled={!canApplyChanges}
+            variant="filled"
+            leftSection={<IconEdit size={14} />}
+            onClick={applyChanges}
+            className={sharedClasses.applyChangesButton}
+          >
+            Apply Changes
+          </Button>
+          <Tooltip label={"Open Document Editor"}>
+            <ActionIcon
+              size={36}
+              variant="default"
               onClick={() => {
-                entityTypeCombobox.toggleDropdown();
+                appState.setSelectedNode(mention.document.id);
               }}
             >
-              {typeToString(entityType) || (
-                <Input.Placeholder>Select Entity Type</Input.Placeholder>
-              )}
-            </InputBase>
-          </Combobox.Target>
-
-          <Combobox.Dropdown>
-            <Combobox.Options>{entityTypeDropdownOptions}</Combobox.Options>
-          </Combobox.Dropdown>
-        </Combobox>
-        <DocumentSelector
-          label={"Source Document"}
-          documentId={documentId}
-          onDocumentChange={(id) => {
-            setDocumentId(id);
-          }}
-        />
-        <Button
-          disabled={!canApplyChanges}
-          variant="filled"
-          leftSection={<IconEdit size={14} />}
-          onClick={applyChanges}
-          className={sharedClasses.applyChangesButton}
-        >
-          Apply Changes
-        </Button>
+              <IconFileExport />
+            </ActionIcon>
+          </Tooltip>
+        </Group>
         {/* TODO disable tooltip if you just clicked apply changes until you move mouse */}
         {/*<Tooltip*/}
         {/*  position="bottom"*/}
@@ -362,7 +255,7 @@ const MentionEditor = observer(({ mention }: { mention: Mention }) => {
         {/*  </Button>*/}
         {/*</Tooltip>*/}
       </Stack>
-      <ContextView mention={mention} />
+      {/*<ContextView mention={mention} />*/}
       <div>
         <Divider label="Linked Entities" />
         <Stack gap="10px">

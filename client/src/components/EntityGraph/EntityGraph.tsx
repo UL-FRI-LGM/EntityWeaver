@@ -45,6 +45,7 @@ import { MiniMap } from "@react-sigma/minimap";
 import DeleteNodeModal from "@/components/DeleteNodeModal/DeleteNodeModal.tsx";
 import RightClickIcon from "@/assets/mouse-right-button.svg?react";
 import LeftClickIcon from "@/assets/mouse-left-button.svg?react";
+import NodeActions from "@/components/EditorWidget/NodeActions.tsx";
 
 const sigmaStyle: CSSProperties = {
   display: "flex",
@@ -364,6 +365,10 @@ const EntityGraph = observer(() => {
       onKeyDown={canvasOnKeyDown}
       style={{ backgroundColor: DEFINES.backgroundColor }}
     >
+      {appState.selectedNodeInstance && (
+        <NodeActions node={appState.selectedNodeInstance} />
+      )}
+
       <div
         className={classes.innerContainer}
         style={{ opacity: appState.graphLoading ? 0 : 1 }}

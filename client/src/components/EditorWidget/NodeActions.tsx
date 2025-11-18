@@ -5,7 +5,7 @@ import {
   IconTrash,
   IconZoomScan,
 } from "@tabler/icons-react";
-import sharedClasses from "@/components/EditorWidget/shared.module.css";
+import classes from "./NodeActions.module.css";
 import { useAppState } from "@/stores/appState.ts";
 import { zoomInOnNodeNeighbors } from "@/utils/graphHelpers.ts";
 import type { GraphEntity } from "@/stores/graphEntity.ts";
@@ -29,10 +29,17 @@ const NodeActions = observer(({ node }: { node: GraphEntity }) => {
   }
 
   return (
-    <div className={sharedClasses.actionsContainer}>
+    <div
+      // className={clsx(classes.actionsContainer, "react-sigma-controls")}
+      className={classes.actionsContainer}
+    >
       <Stack gap={5}>
         <Tooltip label={"Zoom to Node"} position="left">
-          <ActionIcon variant={"default"} onClick={onZoomToNode}>
+          <ActionIcon
+            variant={"default"}
+            onClick={onZoomToNode}
+            // className={"react-sigma-controls"}
+          >
             <IconZoomScan />
           </ActionIcon>
         </Tooltip>
@@ -44,6 +51,7 @@ const NodeActions = observer(({ node }: { node: GraphEntity }) => {
         >
           <ActionIcon
             variant={appState.focusedNode === node.id ? "filled" : "default"}
+            // className={"react-sigma-controls"}
             onClick={onFocusNode}
           >
             <IconFocusCentered />
@@ -53,6 +61,7 @@ const NodeActions = observer(({ node }: { node: GraphEntity }) => {
           <ActionIcon
             variant={"filled"}
             color={"var(--mantine-color-red-9)"}
+            // className={"react-sigma-controls"}
             onClick={() => {
               appState.setDeleteNodeModalOpen(true);
             }}

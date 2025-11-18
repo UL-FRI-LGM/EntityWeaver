@@ -7,9 +7,6 @@
   min-height: 0;
 }
 
-.outerContainer {
-}
-
 .controls > button > svg {
   color: black !important;
 }

@@ -3,30 +3,19 @@ import classes from "./EntityEditor.module.css";
 import sharedClasses from "../shared.module.css";
 import {
   Button,
-  Combobox,
   Fieldset,
-  Input,
-  InputBase,
   Stack,
   TextInput,
   useCombobox,
   Divider,
+  Group,
 } from "@mantine/core";
 import { useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
-import { DEFINES } from "@/defines.ts";
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
 import MentionLinkEditor from "@/components/EditorWidget/MentionLinkEditor.tsx";
-import NodeActions from "@/components/EditorWidget/NodeActions.tsx";
 import type { Entity } from "@/stores/entity.ts";
-
-const entityTypeDropdownOptions = Object.entries(DEFINES.entityTypes.names).map(
-  ([tag, name]) => (
-    <Combobox.Option value={tag} key={tag}>
-      {name}
-    </Combobox.Option>
-  ),
-);
+import TypeSelectorCombobox from "@/components/EditorWidget/TypeSelectorCombobox.tsx";
 
 const MentionList = observer(({ entity }: { entity: Entity }) => {
   return (
@@ -64,44 +53,23 @@ const EntityEditor = observer(({ entity }: { entity: Entity }) => {
         },
       }}
     >
-      <NodeActions node={entity} />
       <Stack gap={10}>
-        <TextInput
-          label="Name"
-          value={name}
-          onChange={(event) => {
-            setName(event.currentTarget.value);
-          }}
-        />
-        <Combobox
-          store={entityTypeCombobox}
-          onOptionSubmit={(val) => {
-            setEntityType(val);
-            entityTypeCombobox.closeDropdown();
-          }}
-        >
-          <Combobox.Target>
-            <InputBase
-              component="button"
-              type="button"
-              label="Entity Type"
-              pointer
-              rightSection={<Combobox.Chevron />}
-              rightSectionPointerEvents="none"
-              onClick={() => {
-                entityTypeCombobox.toggleDropdown();
-              }}
-            >
-              {typeToString(entityType) || (
-                <Input.Placeholder>Select Entity Type</Input.Placeholder>
-              )}
-            </InputBase>
-          </Combobox.Target>
+        <Group>
+          <TextInput
+            label="Name"
+            value={name}
+            onChange={(event) => {
+              setName(event.currentTarget.value);
+            }}
+            style={{ flexGrow: 1 }}
+          />
+          <TypeSelectorCombobox
+            combobox={entityTypeCombobox}
+            entityType={entityType}
+            setEntityType={setEntityType}
+          />
+        </Group>
 
-          <Combobox.Dropdown>
-            <Combobox.Options>{entityTypeDropdownOptions}</Combobox.Options>
-          </Combobox.Dropdown>
-        </Combobox>
         <Button
           disabled={!canApplyChanges}
           variant="filled"
