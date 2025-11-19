@@ -6,6 +6,7 @@ import { computed, makeAutoObservable, runInAction } from "mobx";
 import { appState, type AppState } from "@/stores/appState.ts";
 import { loadDemo, readFile } from "@/utils/helpers.ts";
 import { makePersistable } from "mobx-persist-store";
+import { DEFINES } from "@/defines.ts";
 
 export type GraphNodeType = "Document" | "Entity" | "Mention";
 
@@ -23,10 +24,14 @@ export class Dataset {
   documents: Map<string, Document> = new Map<string, Document>();
   entities: Map<string, Entity> = new Map<string, Entity>();
   collocations: Map<string, Collocation> = new Map<string, Collocation>();
+  confidenceBins: number[];
+
   fetchingData = false;
 
   constructor(appState: AppState) {
     this.appState = appState;
+    this.confidenceBins = Array<number>(DEFINES.confidenceBins).fill(0);
+
     makeAutoObservable(this, {
       mentionList: computed({ keepAlive: true }),
       documentList: computed({ keepAlive: true }),
@@ -216,6 +221,31 @@ export class Dataset {
       appState.setViewedDocument(this.documentList[0]);
     }
 
+    this.resetConfidenceBins();
+
     appState.runGraphUpdate(recomputeLayout);
+  }
+
+  get normalizedConfidenceBins() {
+    const maxBin = Math.max(...this.confidenceBins);
+    if (maxBin === 0) {
+      return this.confidenceBins.map(() => 0);
+    }
+    return this.confidenceBins.map((bin) => Math.min(1, bin / maxBin));
+  }
+
+  resetConfidenceBins() {
+    this.confidenceBins.fill(0);
+    const binCount = this.confidenceBins.length;
+
+    this.mentionList.forEach((mention) => {
+      mention.entityLinkList.forEach((entity) => {
+        const binIndex = Math.min(
+          Math.floor(entity.confidence * binCount),
+          binCount - 1,
+        );
+        this.confidenceBins[binIndex]++;
+      });
+    });
   }
 }

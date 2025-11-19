@@ -7,11 +7,31 @@ import {
   useCallback,
   type MouseEvent as ReactMouseEvent,
 } from "react";
-import { ActionIcon, ColorInput, Group, Stack } from "@mantine/core";
+import {
+  ActionIcon,
+  ColorInput,
+  Group,
+  RangeSlider,
+  Space,
+  Stack,
+} from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
 import { observer } from "mobx-react";
 import { useAppState } from "@/stores/appState.ts";
 import type { GradientStopsHandler } from "@/stores/gradientStopsHandler.ts";
+import {
+  Area,
+  XAxis,
+  YAxis,
+  AreaChart,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  type TooltipContentProps,
+} from "recharts";
+import type {
+  HorizontalCoordinatesGenerator,
+  VerticalCoordinatesGenerator,
+} from "recharts/types/cartesian/CartesianGrid";
 
 interface ColorStop {
   color: string;
@@ -20,10 +40,37 @@ interface ColorStop {
 
 interface GradientEditorProps {
   gradientStopsHandler: GradientStopsHandler;
+  binData: number[];
 }
 
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: TooltipContentProps<number, string>) => {
+  const isVisible = active && payload.length > 0 && "value" in payload[0];
+  const payloadObject = payload[0] as { value: number };
+  return (
+    <div
+      style={{
+        border: "1px solid",
+        borderRadius: "8px",
+        height: "fit-content",
+        margin: "0",
+        padding: "2px 4px",
+        backgroundColor: "black",
+        visibility: isVisible ? "visible" : "hidden",
+      }}
+    >
+      {isVisible && (
+        <>{`${label?.toString() ?? ""}% : ${payloadObject.value.toString()}`}</>
+      )}
+    </div>
+  );
+};
+
 const GradientEditor = observer(
-  ({ gradientStopsHandler }: GradientEditorProps) => {
+  ({ gradientStopsHandler, binData }: GradientEditorProps) => {
     const gradientBoxRef = useRef<HTMLDivElement>(null);
     const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
     const [newStop, setNewStop] = useState<ColorStop | null>(null);
@@ -81,8 +128,76 @@ const GradientEditor = observer(
       .map((stop) => `${stop.color} ${(stop.position * 100).toString()}%`)
       .join(", ");
 
+    const test: VerticalCoordinatesGenerator = (props) => {
+      const pixelsPerTick = 20;
+      const ticks = Math.ceil((props.width - 10) / pixelsPerTick) + 1;
+      return Array.from({ length: ticks + 1 }, (_, i) => i * pixelsPerTick + 5);
+    };
+
+    const test2: HorizontalCoordinatesGenerator = (props) => {
+      const pixelsPerTick = 30;
+      const ticks = Math.ceil((props.height - 10) / pixelsPerTick) + 1;
+      return Array.from({ length: ticks }, (_, i) => i * pixelsPerTick + 5);
+    };
+
     return (
-      <Stack align={"center"} gap={"30px"}>
+      <Stack align={"center"} gap={"5px"}>
+        <AreaChart
+          className={classes.histogram}
+          responsive={true}
+          data={binData.map((value, index) => ({ bin: index, value }))}
+        >
+          <defs>
+            <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#8884d8" stopOpacity={1} />
+              <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid
+            stroke={"#aaaaaaaa"}
+            style={{
+              backgroundColor: "rgb(255, 255, 255, 0.05)",
+            }}
+            strokeDasharray="3 3"
+            verticalCoordinatesGenerator={test}
+            horizontalCoordinatesGenerator={test2}
+          />
+          <XAxis
+            dataKey="bin"
+            allowDecimals={false}
+            padding={"no-gap"}
+            scale="point"
+            hide={true}
+            style={{ padding: 0, margin: 0 }}
+          />
+          <YAxis width="auto" hide={true} />
+          <RechartsTooltip isAnimationActive={false} content={CustomTooltip} />
+          <Area
+            type="monotone"
+            dataKey="value"
+            stroke="#8884d8"
+            fillOpacity={1}
+            fill="url(#colorUv)"
+            isAnimationActive={false}
+          />
+        </AreaChart>
+        <RangeSlider
+          className={classes.slider}
+          // size="sm"
+          defaultValue={[0, 1]}
+          value={[
+            gradientStopsHandler.minShownValue,
+            gradientStopsHandler.maxShownValue,
+          ]}
+          onChange={([min, max]) => {
+            gradientStopsHandler.setMinMaxShownValues(min, max);
+          }}
+          min={0}
+          max={1}
+          minRange={0}
+          step={0.01}
+          label={(value) => `${(value * 100).toString()}%`}
+        ></RangeSlider>
         <div
           ref={gradientBoxRef}
           className={classes.gradientContainer}
@@ -131,6 +246,7 @@ const GradientEditor = observer(
             />
           )}
         </div>
+        <Space h={30} />
         <Group>
           <ColorInput
             format={"hsla"}
@@ -181,7 +297,10 @@ const UncertaintyTFWidget = observer(() => {
 
   return (
     <div className={classes.container}>
-      <GradientEditor gradientStopsHandler={appState.tfStops} />
+      <GradientEditor
+        gradientStopsHandler={appState.tfStops}
+        binData={appState.dataset.confidenceBins}
+      />
     </div>
   );
 });

@@ -95,8 +95,14 @@ export function uncertaintyToEdgeColor(
   appState: AppState,
   certainty: number,
 ): ColorInstance {
+  if (
+    certainty <= appState.tfStops.minShownValue ||
+    certainty >= appState.tfStops.maxShownValue
+  ) {
+    return new Color("transparent");
+  }
   if (appState.tfStops.stops.length === 0) {
-    return new Color("black");
+    return new Color("#00000000");
   }
   let prevThreshold = 0;
   let prevColor = new Color(appState.tfStops.sortedTFStops[0].color);

@@ -31,3 +31,8 @@
   border-bottom: 1px solid var(--mantine-color-dark-light-color);
   margin-bottom: 2px;
 }
+
+.gradientWidgetPopover {
+  border: 1px solid red;
+  box-shadow: 0 0 3px 3px black;
+}

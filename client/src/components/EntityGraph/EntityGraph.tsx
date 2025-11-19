@@ -235,6 +235,11 @@ export const GraphEffects = observer(() => {
         const newData = { ...data, hidden: false };
         const graph = sigma.getGraph();
 
+        if (newData.forceHidden) {
+          newData.hidden = true;
+          return newData;
+        }
+
         if (!highlightedEdges.has(edge)) {
           if (isEdgeHidden(appState.uiState, newData)) {
             newData.hidden = true;

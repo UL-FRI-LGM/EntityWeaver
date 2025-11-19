@@ -34,10 +34,16 @@ const TableGraphWindow = observer(() => {
               }}
               style={{ height: 30 }}
             >
-              Transfer Function
+              Confidence Transfer Function
             </ArrowDropdownButton>
           </Popover.Target>
-          <Popover.Dropdown>
+          <Popover.Dropdown
+            style={{
+              border: "1px solid var(--mantine-color-gray-5)",
+              boxShadow: "0 0 3px 3px black",
+              backgroundColor: "var(--mantine-color-dark-outline)",
+            }}
+          >
             <UncertaintyTFWidget />
           </Popover.Dropdown>
         </Popover>

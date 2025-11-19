@@ -42,6 +42,7 @@ export const DEFINES = {
     size: 10,
     borderSize: 0.2,
   },
+  confidenceBins: 100,
   gradientEditorDebounceMs: 100,
   defaultTFStops: [
     {

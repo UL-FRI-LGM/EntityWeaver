@@ -62,6 +62,7 @@ export interface EdgeType {
   zIndex?: number;
   layoutWeight?: number;
   confidence?: number;
+  forceHidden?: boolean;
 }
 
 export type SigmaGraph = Sigma<NodeType, EdgeType>;

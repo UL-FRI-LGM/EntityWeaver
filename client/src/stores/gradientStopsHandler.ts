@@ -39,6 +39,9 @@ export class GradientStopsHandler {
   stops: GradientStop[] = [];
   selectedStopIndex: number | null = null;
 
+  minShownValue = 0;
+  maxShownValue = 1;
+
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(appState: AppState) {
@@ -68,6 +71,13 @@ export class GradientStopsHandler {
 
   setSelectedStopIndex(index: number | null) {
     this.selectedStopIndex = index;
+  }
+
+  setMinMaxShownValues(min: number, max: number) {
+    this.minShownValue = min;
+    this.maxShownValue = max;
+
+    this.onTFStopsChanged();
   }
 
   addTFStop(position: number, color: string) {

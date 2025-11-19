@@ -511,6 +511,7 @@ export function addMentionToEntityEdge(
     connectionType: "MentionToEntity",
     zIndex: 2,
     confidence: link.confidence,
+    forceHidden: edgeColor.alpha() === 0,
   });
 }
 
@@ -526,6 +527,7 @@ export function refreshEdgeColorsBasedOnUncertainty(appState: AppState) {
         attributes.confidence ?? 1,
       );
       graph.setEdgeAttribute(edgeId, "color", edgeColor.hex());
+      graph.setEdgeAttribute(edgeId, "forceHidden", edgeColor.alpha() === 0);
     }
   });
 }
