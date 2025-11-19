@@ -25,10 +25,11 @@ const TableGraphWindow = observer(() => {
             { label: "Graph View", value: "graph" },
           ]}
         />
-        <Popover opened={tfMenuOpen} position="bottom-start">
+        <Popover opened={tfMenuOpen} position="right-start">
           <Popover.Target>
             <ArrowDropdownButton
               shownMenu={tfMenuOpen}
+              direction={"right"}
               onClick={() => {
                 setTfMenuOpen(!tfMenuOpen);
               }}
