@@ -120,7 +120,7 @@ export class Mention extends GraphEntity {
       const entityId = Entity.prefix + link.entity_id;
       const entity = dataset.entities.get(entityId);
       if (entity) {
-        entities.push({ entity, confidence: link.confidence });
+        entities.push({ entity: entity, confidence: link.confidence });
       } else {
         console.warn(
           `Entity with id ${link.entity_id} not found for Mention ${data.id}`,
@@ -226,7 +226,7 @@ export class Mention extends GraphEntity {
       newEntityLink = { entity: foundEntity, confidence: 1 };
     } else {
       newEntityLink =
-        entity instanceof Entity ? { entity, confidence: 1 } : entity;
+        entity instanceof Entity ? { entity: entity, confidence: 1 } : entity;
     }
     let entityLink = this.entityLinks.get(newEntityLink.entity.id);
     if (keepExisting && entityLink) {

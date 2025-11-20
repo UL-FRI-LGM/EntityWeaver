@@ -23,24 +23,29 @@ export const DEFINES = {
   uiHover: {
     borderColor: "#048385",
   },
-  document: {
-    color: "#f5d96e",
-    iconColor: "black",
-    size: 30,
-    borderSize: 0.1,
-    image: documentImg,
-  },
-  entity: {
-    color: "#61b5d4",
-    iconColor: "black",
-    size: 15,
-    borderSize: 0.15,
-  },
-  mention: {
-    color: "#f56563",
-    iconColor: "black",
-    size: 10,
-    borderSize: 0.2,
+  nodes: {
+    Document: {
+      color: "#f5d96e",
+      iconColor: "black",
+      size: 30,
+      borderSize: 0.1,
+      borderColor: "black",
+      image: documentImg,
+    },
+    Entity: {
+      color: "#61b5d4",
+      iconColor: "black",
+      size: 15,
+      borderSize: 0.15,
+      borderColor: "black",
+    },
+    Mention: {
+      color: "#f56563",
+      iconColor: "black",
+      size: 10,
+      borderSize: 0.2,
+      borderColor: "#696969",
+    },
   },
   confidenceBins: 100,
   gradientEditorDebounceMs: 100,

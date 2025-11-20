@@ -155,15 +155,10 @@ function getNodeColors(
         typeIconToColor(entityType) ?? DEFINES.entityTypes.iconColor.MISC,
     };
   } else {
-    return nodeType === "Entity"
-      ? {
-          color: DEFINES.entity.color,
-          pictogramColor: DEFINES.entity.iconColor,
-        }
-      : {
-          color: DEFINES.mention.color,
-          pictogramColor: DEFINES.mention.iconColor,
-        };
+    return {
+      color: DEFINES.nodes[nodeType].color,
+      pictogramColor: DEFINES.nodes[nodeType].iconColor,
+    };
   }
 }
 
@@ -399,13 +394,13 @@ export function updateGraph(
     graph.addNode(document.id, {
       x: document.x ?? getRandomPosition(rng),
       y: document.y ?? getRandomPosition(rng),
-      size: DEFINES.document.size,
+      size: DEFINES.nodes.Document.size,
       label: document.title,
-      color: DEFINES.document.color,
-      image: DEFINES.document.image,
-      pictogramColor: DEFINES.document.iconColor,
+      color: DEFINES.nodes.Document.color,
+      image: DEFINES.nodes.Document.image,
+      pictogramColor: DEFINES.nodes.Document.iconColor,
       type: "pictogram",
-      borderSize: DEFINES.document.borderSize,
+      borderSize: DEFINES.nodes.Document.borderSize,
       nodeType: "Document",
       zIndex: 0,
       source: document,
@@ -421,13 +416,14 @@ export function updateGraph(
     graph.addNode(entity.id, {
       x: entity.x ?? getRandomPosition(rng),
       y: entity.y ?? getRandomPosition(rng),
-      size: DEFINES.entity.size,
+      size: DEFINES.nodes.Entity.size,
       label: entity.name,
       color: color,
       image: entityImage,
       pictogramColor: pictogramColor,
       type: "pictogram",
-      borderSize: DEFINES.entity.borderSize,
+      borderSize: DEFINES.nodes.Entity.borderSize,
+      borderColor: DEFINES.nodes.Entity.borderColor,
       nodeType: "Entity",
       entityType: entity.type,
       zIndex: 10,
@@ -444,13 +440,14 @@ export function updateGraph(
     graph.addNode(mention.id, {
       x: mention.x ?? getRandomPosition(rng),
       y: mention.y ?? getRandomPosition(rng),
-      size: DEFINES.mention.size,
+      size: DEFINES.nodes.Mention.size,
       label: mention.name,
       color: color,
       image: entityImage,
       pictogramColor: pictogramColor,
       type: "pictogram",
-      borderSize: DEFINES.mention.borderSize,
+      borderSize: DEFINES.nodes.Mention.borderSize,
+      borderColor: DEFINES.nodes.Mention.borderColor,
       nodeType: "Mention",
       entityType: mention.type,
       zIndex: 20,

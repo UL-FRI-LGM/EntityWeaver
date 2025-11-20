@@ -14,7 +14,6 @@ import {
   updateEdgeProperties,
   updateEntityViewEdges,
   updateGraph,
-  updateNodeProperties,
 } from "@/utils/graphHelpers.ts";
 import { DEFINES } from "@/defines.ts";
 import type { AnimateOptions } from "sigma/utils";
@@ -143,19 +142,8 @@ export class AppState {
   }
   setSelectedNode(nodeId: string | null) {
     if (nodeId === this.selectedNode) return;
-    if (this.selectedNode && this.selectedNode !== this.uiHoveredNode) {
-      updateNodeProperties(this.sigma, this.selectedNode, {
-        borderColor: undefined,
-      });
-    }
     this.setSelectedEdge(null);
     this.selectedNode = nodeId;
-    if (nodeId) {
-      updateNodeProperties(this.sigma, nodeId, {
-        borderColor: DEFINES.selection.borderColor,
-      });
-    }
-    this.setUiHoveredNode(null);
 
     if (this.selectedNodeInstance instanceof Document) {
       this.setViewedDocument(this.selectedNodeInstance);
@@ -183,21 +171,7 @@ export class AppState {
     this.hoveredEdge = edgeId;
   }
   setUiHoveredNode(nodeId: string | null) {
-    if (
-      this.uiHoveredNode &&
-      nodeId === null &&
-      this.uiHoveredNode !== this.selectedNode
-    ) {
-      updateNodeProperties(this.sigma, this.uiHoveredNode, {
-        borderColor: undefined,
-      });
-    }
     this.uiHoveredNode = nodeId;
-    if (nodeId && this.uiHoveredNode !== this.selectedNode) {
-      updateNodeProperties(this.sigma, nodeId, {
-        borderColor: DEFINES.uiHover.borderColor,
-      });
-    }
   }
   setFocusedNode(nodeId: string | null) {
     if (nodeId !== null && this.focusedNode !== this.selectedNode) {

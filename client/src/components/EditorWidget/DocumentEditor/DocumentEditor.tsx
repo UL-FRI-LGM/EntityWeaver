@@ -34,10 +34,10 @@ const DocumentEditor = observer(({ document }: { document: Document }) => {
       legend={"Document"}
       styles={{
         root: {
-          borderColor: DEFINES.document.color,
+          borderColor: DEFINES.nodes.Document.color,
         },
         legend: {
-          color: DEFINES.document.color,
+          color: DEFINES.nodes.Document.color,
         },
       }}
     >

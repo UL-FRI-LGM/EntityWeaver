@@ -213,6 +213,12 @@ export const GraphEffects = observer(() => {
           highlighted: data.highlighted ?? false,
         };
 
+        if (appState.selectedNode === node) {
+          newData.borderColor = DEFINES.selection.borderColor;
+        } else if (appState.uiHoveredNode === node) {
+          newData.borderColor = DEFINES.uiHover.borderColor;
+        }
+
         if (isNodeHidden(appState, node, data)) {
           newData.hidden = true;
         } else if (

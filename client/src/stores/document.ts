@@ -116,7 +116,7 @@ export class Document extends GraphEntity {
       }
       spans.push({
         text: this.text.slice(mention.start_index, mention.end_index),
-        mention,
+        mention: mention,
       });
       currentIndex = mention.end_index;
     }
