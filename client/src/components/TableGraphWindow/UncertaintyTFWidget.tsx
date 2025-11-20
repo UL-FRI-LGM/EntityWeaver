@@ -34,6 +34,7 @@ import type {
 } from "recharts/types/cartesian/CartesianGrid";
 import Color from "color";
 import ColorPicker from "react-best-gradient-color-picker";
+import type { BinInfo } from "@/stores/dataset.ts";
 
 interface ColorStop {
   color: string;
@@ -42,16 +43,22 @@ interface ColorStop {
 
 interface GradientEditorProps {
   gradientStopsHandler: GradientStopsHandler;
-  binData: number[];
+  binData: BinInfo[];
 }
 
-const CustomTooltip = ({
+const HistogramTooltip = ({
   active,
   payload,
-  label,
 }: TooltipContentProps<number, string>) => {
-  const isVisible = active && payload.length > 0 && "value" in payload[0];
-  const payloadObject = payload[0] as { value: number };
+  const isVisible =
+    active &&
+    payload.length > 0 &&
+    "value" in payload[0] &&
+    "payload" in payload[0];
+  const payloadObject = payload[0] as {
+    payload: BinInfo & { bin: number };
+    value: number;
+  };
   return (
     <div
       style={{
@@ -65,7 +72,7 @@ const CustomTooltip = ({
       }}
     >
       {isVisible && (
-        <>{`${label?.toString() ?? ""}% : ${payloadObject.value.toString()}`}</>
+        <>{`${payloadObject.payload.bin.toString()}-${(payloadObject.payload.bin + 1).toString()}% : ${payloadObject.payload.count.toString()} (${(payloadObject.payload.relative * 100).toFixed(2)}%)`}</>
       )}
     </div>
   );
@@ -130,13 +137,17 @@ const GradientEditor = observer(
       .map((stop) => `${stop.color} ${(stop.position * 100).toString()}%`)
       .join(", ");
 
-    const test: VerticalCoordinatesGenerator = (props) => {
+    const verticalCoordinatesGenerator: VerticalCoordinatesGenerator = (
+      props,
+    ) => {
       const pixelsPerTick = 20;
       const ticks = Math.ceil((props.width - 10) / pixelsPerTick) + 1;
       return Array.from({ length: ticks + 1 }, (_, i) => i * pixelsPerTick + 5);
     };
 
-    const test2: HorizontalCoordinatesGenerator = (props) => {
+    const horizontalCoordinatesGenerator: HorizontalCoordinatesGenerator = (
+      props,
+    ) => {
       const pixelsPerTick = 30;
       const ticks = Math.ceil((props.height - 10) / pixelsPerTick) + 1;
       return Array.from({ length: ticks }, (_, i) => i * pixelsPerTick + 5);
@@ -147,7 +158,12 @@ const GradientEditor = observer(
         <AreaChart
           className={classes.histogram}
           responsive={true}
-          data={binData.map((value, index) => ({ bin: index, value }))}
+          data={binData.map(({ value, count, relative }, index) => ({
+            bin: index,
+            value,
+            count,
+            relative,
+          }))}
         >
           <defs>
             <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
@@ -161,8 +177,8 @@ const GradientEditor = observer(
               backgroundColor: "rgb(255, 255, 255, 0.05)",
             }}
             strokeDasharray="3 3"
-            verticalCoordinatesGenerator={test}
-            horizontalCoordinatesGenerator={test2}
+            verticalCoordinatesGenerator={verticalCoordinatesGenerator}
+            horizontalCoordinatesGenerator={horizontalCoordinatesGenerator}
           />
           <XAxis
             dataKey="bin"
@@ -173,7 +189,10 @@ const GradientEditor = observer(
             style={{ padding: 0, margin: 0 }}
           />
           <YAxis width="auto" hide={true} />
-          <RechartsTooltip isAnimationActive={false} content={CustomTooltip} />
+          <RechartsTooltip
+            isAnimationActive={false}
+            content={HistogramTooltip}
+          />
           <Area
             type="monotone"
             dataKey="value"
@@ -331,7 +350,7 @@ const UncertaintyTFWidget = observer(() => {
     <div className={classes.container}>
       <GradientEditor
         gradientStopsHandler={appState.tfStops}
-        binData={appState.dataset.confidenceBins}
+        binData={appState.dataset.normalizedConfidenceBins}
       />
     </div>
   );

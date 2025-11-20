@@ -215,3 +215,13 @@ export function readFile(
 export function nextFrame(): Promise<number> {
   return new Promise((resolve) => requestAnimationFrame(resolve));
 }
+
+export function sumAndMax(arr: number[]): { sum: number; max: number | null } {
+  return arr.reduce(
+    (acc, v) => ({
+      sum: acc.sum + v,
+      max: acc.max === null || v > acc.max ? v : acc.max,
+    }),
+    { sum: 0, max: arr.length ? arr[0] : null },
+  );
+}

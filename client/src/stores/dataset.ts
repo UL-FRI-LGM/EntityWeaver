@@ -4,7 +4,7 @@ import { Document, type DocumentDB } from "@/stores/document.ts";
 import { Collocation, type CollocationDB } from "@/stores/collocation.ts";
 import { computed, makeAutoObservable, runInAction } from "mobx";
 import { appState, type AppState } from "@/stores/appState.ts";
-import { loadDemo, readFile } from "@/utils/helpers.ts";
+import { loadDemo, readFile, sumAndMax } from "@/utils/helpers.ts";
 import { makePersistable } from "mobx-persist-store";
 import { DEFINES } from "@/defines.ts";
 
@@ -17,6 +17,12 @@ export interface DatasetDB {
   collocations: CollocationDB[];
 }
 
+export interface BinInfo {
+  value: number;
+  count: number;
+  relative: number;
+}
+
 export class Dataset {
   appState: AppState;
 
@@ -24,19 +30,18 @@ export class Dataset {
   documents: Map<string, Document> = new Map<string, Document>();
   entities: Map<string, Entity> = new Map<string, Entity>();
   collocations: Map<string, Collocation> = new Map<string, Collocation>();
-  confidenceBins: number[];
 
   fetchingData = false;
 
   constructor(appState: AppState) {
     this.appState = appState;
-    this.confidenceBins = Array<number>(DEFINES.confidenceBins).fill(0);
 
     makeAutoObservable(this, {
       mentionList: computed({ keepAlive: true }),
       documentList: computed({ keepAlive: true }),
       entityList: computed({ keepAlive: true }),
       collocationsList: computed({ keepAlive: true }),
+      normalizedConfidenceBins: computed({ keepAlive: true }),
     });
 
     if (import.meta.env.VITE_STORE_GRAPH === "true") {
@@ -221,22 +226,12 @@ export class Dataset {
       appState.setViewedDocument(this.documentList[0]);
     }
 
-    this.resetConfidenceBins();
-
     appState.runGraphUpdate(recomputeLayout);
   }
 
-  get normalizedConfidenceBins() {
-    const maxBin = Math.max(...this.confidenceBins);
-    if (maxBin === 0) {
-      return this.confidenceBins.map(() => 0);
-    }
-    return this.confidenceBins.map((bin) => Math.min(1, bin / maxBin));
-  }
-
-  resetConfidenceBins() {
-    this.confidenceBins.fill(0);
-    const binCount = this.confidenceBins.length;
+  get normalizedConfidenceBins(): BinInfo[] {
+    const confidenceBins = Array<number>(DEFINES.confidenceBins).fill(0);
+    const binCount = confidenceBins.length;
 
     this.mentionList.forEach((mention) => {
       mention.entityLinkList.forEach((entity) => {
@@ -244,8 +239,18 @@ export class Dataset {
           Math.floor(entity.confidence * binCount),
           binCount - 1,
         );
-        this.confidenceBins[binIndex]++;
+        confidenceBins[binIndex]++;
       });
+    });
+
+    const { sum, max } = sumAndMax(confidenceBins);
+    if (max === 0 || max === null) {
+      return confidenceBins.map(() => {
+        return { value: 0, count: 0, relative: 0 };
+      });
+    }
+    return confidenceBins.map((bin) => {
+      return { value: Math.min(1, bin / max), count: bin, relative: bin / sum };
     });
   }
 }
