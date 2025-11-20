@@ -41,6 +41,7 @@
     "mobx-persist-store": "^1.1.8",
     "mobx-react": "^9.2.1",
     "react": "^19.2.0",
+    "react-best-gradient-color-picker": "^3.0.14",
     "react-dom": "^19.2.0",
     "recharts": "^3.4.1",
     "seedrandom": "^3.0.5",

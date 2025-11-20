@@ -1,5 +1,4 @@
 import classes from "./UncertaintyTFWidget.module.css";
-import Color from "color";
 import {
   useState,
   useRef,
@@ -11,6 +10,7 @@ import {
   ActionIcon,
   ColorInput,
   Group,
+  Popover,
   RangeSlider,
   Space,
   Stack,
@@ -32,6 +32,8 @@ import type {
   HorizontalCoordinatesGenerator,
   VerticalCoordinatesGenerator,
 } from "recharts/types/cartesian/CartesianGrid";
+import Color from "color";
+import ColorPicker from "react-best-gradient-color-picker";
 
 interface ColorStop {
   color: string;
@@ -247,25 +249,55 @@ const GradientEditor = observer(
           )}
         </div>
         <Space h={30} />
-        <Group>
-          <ColorInput
-            format={"hsla"}
-            className={classes.colorInput}
-            withEyeDropper={false}
-            disabled={gradientStopsHandler.selectedTFStop === null}
-            value={
-              gradientStopsHandler.selectedTFStop === null
-                ? undefined
-                : new Color(gradientStopsHandler.selectedTFStop.color)
-                    .hsl()
-                    .string()
-            }
-            onChangeEnd={(color) => {
-              if (gradientStopsHandler.selectedTFStop !== null) {
-                gradientStopsHandler.selectedTFStop.setColor(color);
-              }
-            }}
-          />
+        <Group w={"100%"}>
+          <Popover>
+            <Popover.Target>
+              <ColorInput
+                format={"hex"}
+                className={classes.colorInput}
+                styles={{ dropdown: { overflow: "hidden" } }}
+                withEyeDropper={false}
+                fixOnBlur={true}
+                withPicker={false}
+                disabled={gradientStopsHandler.selectedTFStop === null}
+                value={
+                  gradientStopsHandler.selectedTFStop === null
+                    ? undefined
+                    : new Color(gradientStopsHandler.selectedTFStop.color).hex()
+                }
+                onChange={(color) => {
+                  if (gradientStopsHandler.selectedTFStop !== null) {
+                    const hex = new Color(color).hex();
+                    gradientStopsHandler.selectedTFStop.setColor(hex);
+                  }
+                }}
+              />
+            </Popover.Target>
+            <Popover.Dropdown>
+              <ColorPicker
+                className={classes.colorPicker}
+                hideOpacity
+                hideColorGuide
+                hideColorTypeBtns
+                hidePresets
+                hideEyeDrop
+                height={100}
+                width={221}
+                value={
+                  gradientStopsHandler.selectedTFStop === null
+                    ? undefined
+                    : new Color(gradientStopsHandler.selectedTFStop.color).hex()
+                }
+                onChange={(color) => {
+                  if (gradientStopsHandler.selectedTFStop !== null) {
+                    const hex = new Color(color).hex();
+                    gradientStopsHandler.selectedTFStop.setColor(hex);
+                  }
+                }}
+              />
+            </Popover.Dropdown>
+          </Popover>
+
           <ActionIcon
             variant={"filled"}
             color={"var(--mantine-color-red-9)"}

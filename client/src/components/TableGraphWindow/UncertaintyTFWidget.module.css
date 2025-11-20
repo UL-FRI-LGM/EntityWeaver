@@ -60,3 +60,15 @@
 .colorInput {
   flex-grow: 1;
 }
+
+.colorPicker {
+  background-color: transparent !important;
+}
+
+.colorPicker :global(#rbgcp-hex-input-wrapper-dark) {
+  display: none;
+}
+
+.colorPicker :global(#rbgcp-inputs-wrap-dark) > div {
+  flex-grow: 1;
+}
