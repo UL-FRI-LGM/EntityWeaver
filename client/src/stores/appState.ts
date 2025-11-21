@@ -80,12 +80,12 @@ export class AppState {
   focusedNode: string | null = null;
   holdingShift = false;
   loadingData = false;
-  initialLayout = false;
-  forceAtlasLayout: FA2Layout<NodeType, EdgeType> | null = null;
+  private forceAtlasLayout: FA2Layout<NodeType, EdgeType> | null = null;
   // noOverlapLayout: null = null;
   atlasLayoutInProgress = false;
   noverlapLayoutInProgress = false;
   viewedDocument: Document | null = null;
+  private pendingLayout = false;
 
   tfStops: GradientStopsHandler;
 
@@ -192,20 +192,23 @@ export class AppState {
     this.uiHoveredNode = null;
   }
   runGraphUpdate(runLayout = true) {
-    if (this.sigma) {
-      this.clearGraphState();
-      if (!this.dataset.hasData) {
-        return;
-      }
-      updateGraph(this.sigma, this.dataset, this.uiState.colorByType);
-      if (this.uiState.entityView) {
-        updateEntityViewEdges(this.sigma, this.dataset);
-      }
-      this.sigma.getCamera().animatedReset().catch(console.error);
-      if (runLayout) {
-        this.runLayout();
-        this.initialLayout = true;
-      }
+    if (!this.sigma) {
+      if (runLayout) this.pendingLayout = true;
+      return;
+    }
+
+    this.clearGraphState();
+    if (!this.dataset.hasData) {
+      return;
+    }
+    updateGraph(this.sigma, this.dataset, this.uiState.colorByType);
+    if (this.uiState.entityView) {
+      updateEntityViewEdges(this.sigma, this.dataset);
+    }
+    this.sigma.getCamera().animatedReset().catch(console.error);
+    if (runLayout || this.pendingLayout) {
+      this.pendingLayout = false;
+      this.runLayout();
     }
   }
   runLayout() {
@@ -252,7 +255,6 @@ export class AppState {
   //     attributes.source.setPosition(attributes);
   //   });
   //   this.noverlapLayoutInProgress = false;
-  //   this.initialLayout = false;
   // }
   setHoldingShift(state: boolean) {
     this.holdingShift = state;
