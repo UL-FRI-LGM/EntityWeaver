@@ -47,7 +47,7 @@ const DeleteNodeModal = observer(() => {
           Cancel
         </Button>
         <Tooltip
-          label={"Document can only be deleted if it has attached mentions"}
+          label={"Document can only be deleted if it has no attached mentions."}
           disabled={canDeleteNode}
           position={"bottom"}
         >

@@ -20,8 +20,11 @@ import TypeSelectorCombobox from "@/components/EditorWidget/TypeSelectorCombobox
 const MentionList = observer(({ entity }: { entity: Entity }) => {
   return (
     <Stack className={classes.linkList}>
-      {entity.mentionList.map((mention) => (
-        <MentionLinkEditor key={mention.id} mention={mention} />
+      {entity.mentionLinkList.map((mentionLink) => (
+        <MentionLinkEditor
+          key={mentionLink.mention.id}
+          mention={mentionLink.mention}
+        />
       ))}
     </Stack>
   );

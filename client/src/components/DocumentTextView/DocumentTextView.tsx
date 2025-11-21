@@ -120,7 +120,8 @@ const InsertStarControl = () => {
 
 const TextViewContents = observer(({ document }: { document: Document }) => {
   const appState = useAppState();
-  const initialUpdate = useRef<boolean>(false);
+  const blockNextMentionRerender = useRef<boolean>(false);
+  const blockNextMentionUpdate = useRef<boolean>(false);
 
   const editor = useEditor({
     extensions: [
@@ -131,8 +132,9 @@ const TextViewContents = observer(({ document }: { document: Document }) => {
     ],
     editable: appState.uiState.documentEditMode,
     onUpdate({ editor }) {
-      if (initialUpdate.current) {
-        initialUpdate.current = false;
+      // Block here since updateMentions is debounced
+      if (blockNextMentionUpdate.current) {
+        blockNextMentionUpdate.current = false;
         return;
       }
       updateMentions(editor);
@@ -140,9 +142,13 @@ const TextViewContents = observer(({ document }: { document: Document }) => {
   });
 
   const updateMentions = useDebouncedCallback((editor: Editor) => {
-    if (appState.viewedDocument === null) return;
-    const markType = getMarkType(ClickableMark.name, editor.schema);
+    if (appState.viewedDocument === null) {
+      return;
+    }
+    blockNextMentionRerender.current = true;
+    // console.log("Updating Mentions");
 
+    const markType = getMarkType(ClickableMark.name, editor.schema);
     appState.viewedDocument.setText(editor.getText());
     editor.state.doc.descendants((node, pos) => {
       node.marks.forEach((mark) => {
@@ -164,8 +170,13 @@ const TextViewContents = observer(({ document }: { document: Document }) => {
   }, 500);
 
   useEffect(() => {
-    initialUpdate.current = true;
+    if (blockNextMentionRerender.current) {
+      blockNextMentionRerender.current = false;
+      return;
+    }
+    blockNextMentionUpdate.current = true;
     // console.log("Setting content");
+
     editor.commands.setContent(`<text>${document.text}</text>`);
     queueMicrotask(() => {
       editor.chain().focus();
@@ -184,9 +195,10 @@ const TextViewContents = observer(({ document }: { document: Document }) => {
       });
       // console.log("Calling dispatch");
 
+      blockNextMentionUpdate.current = true;
       view.dispatch(tr);
     });
-  }, [document, editor, document.text]);
+  }, [document, editor, document.text, document.mentionList]);
 
   return (
     <>

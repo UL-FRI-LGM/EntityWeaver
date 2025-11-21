@@ -40,7 +40,7 @@ export class Document extends GraphEntity {
       mentions: true,
       mentionList: computed({ keepAlive: true }),
       textWithEntities: true,
-      canDelete: override,
+      dispose: override,
     });
   }
 
@@ -98,6 +98,7 @@ export class Document extends GraphEntity {
   }
 
   get mentionList() {
+    // console.log("Getting mention list for document:", this.internal_id);
     return Array.from(this.mentions.values()).sort(
       (a, b) => a.start_index - b.start_index,
     );
@@ -127,7 +128,13 @@ export class Document extends GraphEntity {
     return spans;
   }
 
-  get canDelete(): boolean {
-    return this.mentions.size === 0;
+  override dispose() {
+    if (!this.canDelete) return;
+
+    for (const mention of this.mentions.values()) {
+      mention.dispose();
+    }
+
+    super.dispose();
   }
 }

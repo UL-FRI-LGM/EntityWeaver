@@ -18,7 +18,8 @@ import { Dataset, type GraphNodeType } from "@/stores/dataset.ts";
 import type Graph from "graphology";
 import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
 import type { UiState } from "@/stores/uiState.ts";
-import { EntityLink, type Mention } from "@/stores/mention.ts";
+import { type Mention } from "@/stores/mention.ts";
+import type { EntityLink } from "@/stores/entityLink.ts";
 
 function getRandomPosition(generator?: PRNG) {
   return generator ? generator() : Math.random() * 10000;
@@ -338,10 +339,10 @@ export function updateEntityViewEdges(
   });
 
   for (const entity of dataset.entityList) {
-    const mentions = entity.mentionList;
+    const mentionLinks = entity.mentionLinkList;
     const connectedDocuments = new Set<string>();
-    for (const mention of mentions) {
-      connectedDocuments.add(mention.document.id);
+    for (const mentionLink of mentionLinks) {
+      connectedDocuments.add(mentionLink.mention.document.id);
     }
     for (const documentId of connectedDocuments) {
       graph.addUndirectedEdge(entity.id, documentId, {
@@ -354,7 +355,11 @@ export function updateEntityViewEdges(
     const collocatedMentions = new Set<Mention>();
     for (const collocation of dataset.collocationsList) {
       for (const mention of collocation.mentionsList) {
-        if (mentions.some((m) => m.id === mention.id)) {
+        if (
+          mentionLinks.some(
+            (mentionLink) => mentionLink.mention.id === mention.id,
+          )
+        ) {
           collocation.mentionsList.forEach((m) => {
             collocatedMentions.add(m);
           });

@@ -274,6 +274,12 @@ export class AppState {
     if (nodeId === this.selectedNode) {
       this.setHoveredNode(null);
     }
+    if (nodeId === this.uiHoveredNode) {
+      this.setUiHoveredNode(null);
+    }
+    if (nodeId === this.viewedDocument?.id) {
+      this.setViewedDocument(null);
+    }
     this.sigma?.getGraph().dropNode(nodeId);
   }
   deleteEdge(edgeId: string) {

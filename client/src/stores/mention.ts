@@ -1,10 +1,11 @@
 import { GraphEntity } from "@/stores/graphEntity.ts";
-import { computed, makeAutoObservable, makeObservable } from "mobx";
+import { computed, makeObservable, override } from "mobx";
 import type { Dataset } from "@/stores/dataset.ts";
 import { updateMentionNode } from "@/utils/graphHelpers.ts";
 import { Document } from "@/stores/document.ts";
 import { Entity } from "@/stores/entity.ts";
 import { DEFINES } from "@/defines.ts";
+import { EntityLink } from "@/stores/entityLink.ts";
 
 export interface MentionDB {
   id: string;
@@ -23,33 +24,6 @@ export interface MentionDB {
 export interface UncertainEntity {
   entity: Entity;
   confidence: number;
-}
-
-export class EntityLink {
-  entity: Entity;
-  mention: Mention;
-  confidence: number;
-
-  constructor(
-    entity: Entity,
-    mention: Mention,
-    confidence: number,
-    updateGraph = true,
-  ) {
-    this.entity = entity;
-    this.mention = mention;
-    this.confidence = confidence;
-
-    mention.onEntityLinked(this, updateGraph);
-    entity.onMentionLinked(this.mention);
-
-    makeAutoObservable(this);
-  }
-
-  delete(updateGraph = true) {
-    this.mention.onEntityUnlinked(this.entity.id, updateGraph);
-    this.entity.onMentionUnlinked(this.mention);
-  }
 }
 
 export class Mention extends GraphEntity {
@@ -99,6 +73,8 @@ export class Mention extends GraphEntity {
       setType: true,
       setDocument: true,
       setIndices: true,
+
+      dispose: override,
 
       onEntityUnlinked: true,
       setEntityLink: true,
@@ -191,6 +167,17 @@ export class Mention extends GraphEntity {
         label: this.name,
       });
     }
+  }
+
+  override dispose() {
+    if (!this.canDelete) return;
+
+    super.dispose();
+    this.document.mentions.delete(this.id);
+    this.entityLinkList.forEach((link) => {
+      link.delete(false);
+    });
+    return;
   }
 
   onEntityLinked(entityLink: EntityLink, updateGraph = true) {

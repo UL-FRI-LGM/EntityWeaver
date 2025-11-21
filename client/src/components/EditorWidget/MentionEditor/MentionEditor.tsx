@@ -28,8 +28,9 @@ import SearchableCombobox, {
 } from "../../SearchableCombobox/SearchableCombobox.tsx";
 import { typeToColor, typeToString } from "@/utils/helpers.ts";
 import sharedClasses from "../shared.module.css";
-import { EntityLink, type Mention } from "@/stores/mention.ts";
+import { type Mention } from "@/stores/mention.ts";
 import TypeSelectorCombobox from "@/components/EditorWidget/TypeSelectorCombobox.tsx";
+import type { EntityLink } from "@/stores/entityLink.ts";
 
 const EntitySelector = observer(
   ({
