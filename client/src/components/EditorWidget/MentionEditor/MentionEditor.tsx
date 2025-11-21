@@ -48,32 +48,20 @@ const EntitySelector = observer(
       ? appState.dataset.entities.get(entityId)
       : undefined;
 
-    const [searchValue, setSearchValue] = useState(
-      selectedEntity?.searchString ?? "",
+    const options: SearchableComboboxOption[] = appState.dataset.entityList.map(
+      (item) => ({
+        val: item.id,
+        display: item.searchString,
+        props: {
+          onMouseEnter: () => {
+            appState.setUiHoveredNode(item.id);
+          },
+          onMouseLeave: () => {
+            appState.setUiHoveredNode(null);
+          },
+        },
+      }),
     );
-
-    const shouldFilterOptions = selectedEntity?.searchString !== searchValue;
-
-    const filteredOptions = shouldFilterOptions
-      ? appState.dataset.entityList.filter((entity) =>
-          entity.searchString
-            .toLowerCase()
-            .includes(searchValue.toLowerCase().trim()),
-        )
-      : appState.dataset.entityList;
-
-    const options: SearchableComboboxOption[] = filteredOptions.map((item) => ({
-      val: item.id,
-      display: item.searchString,
-      props: {
-        onMouseEnter: () => {
-          appState.setUiHoveredNode(item.id);
-        },
-        onMouseLeave: () => {
-          appState.setUiHoveredNode(null);
-        },
-      },
-    }));
 
     function onChange(id: string) {
       onEntityChange(id);
@@ -84,8 +72,6 @@ const EntitySelector = observer(
         label={label}
         selectedValue={selectedEntity?.searchString}
         onChange={onChange}
-        searchValue={searchValue}
-        setSearchValue={setSearchValue}
         options={options}
         textInputProps={{
           style: { flex: 1 },

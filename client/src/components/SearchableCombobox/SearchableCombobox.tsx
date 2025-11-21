@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   Combobox,
   type TextInputProps,
@@ -15,9 +15,7 @@ export interface SearchableComboboxOption {
 
 interface SearchableComboboxProps {
   selectedValue: string | undefined;
-  onChange: (_id: string) => void;
-  searchValue: string;
-  setSearchValue: (_val: string) => void;
+  onChange: (_id: string, _display: string) => void;
   options: SearchableComboboxOption[];
   label?: string;
   placeholder?: string;
@@ -26,11 +24,14 @@ interface SearchableComboboxProps {
   // comboboxClassNames?: ComboboxProps["classNames"];
 }
 
+type StrictDataAttributes = Record<
+  `data-${string}`,
+  string | number | boolean | undefined
+>;
+
 const SearchableCombobox = ({
   selectedValue,
   onChange,
-  searchValue,
-  setSearchValue,
   options,
   label,
   placeholder,
@@ -38,6 +39,8 @@ const SearchableCombobox = ({
   // textInputClassNames,
   // comboboxClassNames,
 }: SearchableComboboxProps) => {
+  const [searchValue, setSearchValue] = useState(selectedValue ?? "");
+
   const changed = useRef(false);
   const combobox = useCombobox({
     onDropdownClose: () => {
@@ -48,16 +51,35 @@ const SearchableCombobox = ({
     },
   });
 
+  const shouldFilterOptions = selectedValue !== searchValue;
+
+  const filteredOptions = shouldFilterOptions
+    ? options.filter((option) =>
+        option.display.toLowerCase().includes(searchValue.toLowerCase().trim()),
+      )
+    : options;
+
+  const onOptionSubmit = (
+    val: string,
+    optionProps: ComboboxOptionProps & StrictDataAttributes,
+  ) => {
+    const display = optionProps["data-display"]?.toString() ?? "";
+    setSearchValue(display);
+    onChange(val, display);
+    changed.current = true;
+    combobox.closeDropdown();
+  };
+
   return (
     <Combobox
       store={combobox}
       // classNames={comboboxClassNames}
-      onOptionSubmit={(val, optionProps) => {
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
-        setSearchValue(optionProps.children?.toString() ?? "");
-        onChange(val);
-        changed.current = true;
-        combobox.closeDropdown();
+      onOptionSubmit={(val, optionProps: ComboboxOptionProps) => {
+        // ComboboxOptionProps doesn't contain data- attributes
+        onOptionSubmit(
+          val,
+          optionProps as ComboboxOptionProps & StrictDataAttributes,
+        );
       }}
     >
       <Combobox.Target>
@@ -88,8 +110,13 @@ const SearchableCombobox = ({
 
       <Combobox.Dropdown>
         <Combobox.Options mah={200} style={{ overflowY: "auto" }}>
-          {options.map(({ val, display, props }) => (
-            <Combobox.Option key={val} value={val} {...props}>
+          {filteredOptions.map(({ val, display, props }) => (
+            <Combobox.Option
+              key={val}
+              value={val}
+              data-display={display}
+              {...props}
+            >
               {display}
             </Combobox.Option>
           ))}
