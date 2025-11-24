@@ -7,9 +7,14 @@ import { appState, type AppState } from "@/stores/appState.ts";
 import { loadDemo, readFile, sumAndMax } from "@/utils/helpers.ts";
 import { makePersistable } from "mobx-persist-store";
 import { DEFINES } from "@/defines.ts";
-import { type AttributeDB, FilterManager } from "@/stores/filters.ts";
+import {
+  type AttributeDB,
+  FilterManager,
+  FilterSequence,
+} from "@/stores/filters.ts";
 import { DatasetSchema, RecordTypeSchema } from "@/utils/schemas.ts";
 import { z } from "zod";
+import type { GraphEntity } from "@/stores/graphEntity.ts";
 
 export type GraphNodeType = z.output<typeof RecordTypeSchema>;
 
@@ -30,6 +35,8 @@ export class Dataset {
   collocations: Map<string, Collocation> = new Map<string, Collocation>();
 
   fetchingData = false;
+
+  filterActive = false;
   filterManager: FilterManager;
 
   constructor(appState: AppState) {
@@ -273,5 +280,52 @@ export class Dataset {
     return confidenceBins.map((bin) => {
       return { value: Math.min(1, bin / max), count: bin, relative: bin / sum };
     });
+  }
+
+  applyFilterSequence(filterSequence: FilterSequence) {
+    const sigma = this.appState.sigma;
+    if (!sigma) return;
+
+    filterSequence.filters.forEach((filter) => {
+      if (!filter.isValid()) {
+        throw new Error("Invalid filter in filter sequence");
+      }
+    });
+
+    let dataArray: GraphEntity[];
+    if (filterSequence.filterBy === "Mention") {
+      dataArray = this.mentionList;
+    } else if (filterSequence.filterBy === "Entity") {
+      dataArray = this.entityList;
+    } else {
+      dataArray = this.documentList;
+    }
+
+    if (filterSequence.filters.length === 0) {
+      return;
+    }
+
+    dataArray.forEach((entity) => {
+      entity.applyFilter(filterSequence);
+    });
+
+    this.filterActive = true;
+
+    sigma.refresh();
+  }
+
+  removeFilters() {
+    this.mentions.forEach((mention) => {
+      mention.setFiltered(false);
+    });
+    this.documents.forEach((document) => {
+      document.setFiltered(false);
+    });
+    this.entities.forEach((entity) => {
+      entity.setFiltered(false);
+    });
+    this.filterActive = false;
+
+    this.appState.sigma?.refresh();
   }
 }

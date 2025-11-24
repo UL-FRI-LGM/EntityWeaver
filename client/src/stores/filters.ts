@@ -123,6 +123,27 @@ export class FilterInstance {
     makeAutoObservable(this, { id: false, filterSequence: false });
   }
 
+  isValid(): this is this & {
+    attribute: NonNullable<FilterInstance["attribute"]>;
+  } {
+    return this.attribute !== null && this.filterValue !== "";
+  }
+
+  get comparableValue() {
+    if (!this.isValid()) return null;
+
+    if (this.attribute.type === "string") {
+      return this.filterValue;
+    } else if (this.attribute.type === "number") {
+      return parseFloat(this.filterValue);
+    } else if (this.attribute.type === "boolean") {
+      return this.filterValue === "true";
+    } else if (this.attribute.type === "enum") {
+      return this.filterValue;
+    }
+    return this.filterValue;
+  }
+
   setAttribute(attribute: Attribute) {
     this.attribute = attribute;
   }

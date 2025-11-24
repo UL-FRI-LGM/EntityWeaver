@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import { useAppState } from "@/stores/appState.ts";
 import {
   ActionIcon,
+  Button,
   Combobox,
   Flex,
   Group,
@@ -18,7 +19,12 @@ import {
   type OperatorType,
 } from "@/stores/filters.ts";
 import classes from "./FilterWidget.module.css";
-import { IconPlus, IconTrash } from "@tabler/icons-react";
+import {
+  IconFilter,
+  IconFilterOff,
+  IconPlus,
+  IconTrash,
+} from "@tabler/icons-react";
 import clsx from "clsx";
 
 const operatorOptions = Object.values(Operator).map((item) => (
@@ -163,6 +169,28 @@ const FilterWidget = observer(() => {
       <FilterSequenceEditor
         filterSequence={appState.dataset.filterManager.filterSequence}
       />
+      <Group>
+        <Button
+          leftSection={<IconFilter size={14} />}
+          style={{ width: "fit-content" }}
+          onClick={() => {
+            appState.dataset.applyFilterSequence(
+              appState.dataset.filterManager.filterSequence,
+            );
+          }}
+        >
+          Apply Filter
+        </Button>
+        <Button
+          color="gray"
+          leftSection={<IconFilterOff size={14} />}
+          onClick={() => {
+            appState.dataset.removeFilters();
+          }}
+        >
+          Remove Filter
+        </Button>
+      </Group>
     </Stack>
   );
 });

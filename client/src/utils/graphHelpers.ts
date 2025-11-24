@@ -43,6 +43,7 @@ export function isNodeHidden(
   const graph = appState.sigma.getGraph();
 
   return (
+    (appState.dataset.filterActive && !nodeAttributes.source.filtered) ||
     (uiState.entityView && nodeAttributes.nodeType === "Mention") ||
     (!uiState.filters.entities && nodeAttributes.nodeType === "Entity") ||
     (!uiState.filters.mentions && nodeAttributes.nodeType === "Mention") ||
