@@ -1,8 +1,6 @@
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
 import type { Dataset } from "@/stores/dataset.ts";
 import { action, computed, makeObservable, observable } from "mobx";
-import type { FilterSequence } from "@/stores/filters.ts";
-import { bfsFromNode } from "graphology-traversal/bfs";
 
 export abstract class GraphEntity {
   readonly id: string;
@@ -53,35 +51,6 @@ export abstract class GraphEntity {
 
   setFiltered(filtered: boolean) {
     this.filtered = filtered;
-  }
-
-  applyFilter(filterSequence: FilterSequence) {
-    filterSequence.filters.forEach((filter) => {
-      if (!filter.isValid()) {
-        throw new Error("Filter is undefined");
-      }
-      if (Object.hasOwn(this, filter.attribute.name)) {
-        // @ts-expect-error: bad TS inference
-        if (this[filter.attribute.name] === filter.comparableValue) {
-          // entity.setFiltered(true);
-          if (!this.dataset.appState.sigma) {
-            return;
-          }
-          bfsFromNode(
-            this.dataset.appState.sigma.getGraph(),
-            this.id,
-            function (_node, attr, depth) {
-              console.log(attr.label, attr.nodeType, depth);
-              attr.source.setFiltered(true);
-              return (
-                depth > 0 &&
-                (attr.nodeType === "Entity" || attr.nodeType === "Document")
-              );
-            },
-          );
-        }
-      }
-    });
   }
 
   dispose() {

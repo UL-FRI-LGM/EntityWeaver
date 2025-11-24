@@ -1,5 +1,4 @@
-import { makeAutoObservable } from "mobx";
-import { v4 as uuiv4 } from "uuid";
+import { computed, makeAutoObservable } from "mobx";
 import { Dataset, type GraphNodeType } from "@/stores/dataset.ts";
 import {
   type AttributeDataTypeSchema,
@@ -7,26 +6,20 @@ import {
   AttributeValueSchema,
 } from "@/utils/schemas.ts";
 import { z } from "zod";
+import type { Field, RuleGroupType } from "react-querybuilder";
 
 export type AttributeDB = z.output<typeof AttributeSchema>;
 export type AttributeValueDB = z.output<typeof AttributeValueSchema>;
-
-export const Operator = {
-  AND: "AND",
-  OR: "OR",
-} as const;
-
-export type OperatorType = keyof typeof Operator;
 
 export type AttributeDataType = z.output<typeof AttributeDataTypeSchema>;
 
 export class AttributeValue {
   name: string;
-  text: string | undefined;
+  label: string | undefined;
 
-  constructor(name: string, text?: string) {
+  constructor(name: string, label?: string) {
     this.name = name;
-    this.text = text;
+    this.label = label;
 
     makeAutoObservable(this);
   }
@@ -34,7 +27,7 @@ export class AttributeValue {
   toJson(): AttributeValueDB {
     return {
       name: this.name,
-      text: this.text,
+      label: this.label,
     };
   }
 
@@ -42,12 +35,13 @@ export class AttributeValue {
     if (typeof attributeValue === "string") {
       return new AttributeValue(attributeValue);
     }
-    return new AttributeValue(attributeValue.name, attributeValue.text);
+    return new AttributeValue(attributeValue.name, attributeValue.label);
   }
 }
 
 export class Attribute {
   name: string;
+  label: string | undefined;
   type: AttributeDataType;
   records: GraphNodeType[] = [];
   values: AttributeValue[] | undefined;
@@ -56,14 +50,30 @@ export class Attribute {
     name: string,
     type: AttributeDataType,
     records: GraphNodeType[],
+    label?: string,
     values?: AttributeValue[],
   ) {
     this.name = name;
     this.type = type;
     this.records = records;
+    this.label = label;
     this.values = values;
 
-    makeAutoObservable(this);
+    makeAutoObservable(this, { field: computed({ keepAlive: true }) });
+  }
+
+  get field(): Field {
+    return {
+      name: this.name,
+      label: this.label ?? this.name,
+      datatype: this.type,
+      values: this.values?.map((value) => {
+        return {
+          name: value.name,
+          label: value.label ?? value.name,
+        };
+      }),
+    };
   }
 
   toJson(): AttributeDB {
@@ -71,6 +81,7 @@ export class Attribute {
       name: this.name,
       type: this.type,
       records: this.records,
+      label: this.label,
       values: this.values?.map((value) => value.toJson()),
     };
   }
@@ -80,6 +91,7 @@ export class Attribute {
       attribute.name,
       attribute.type,
       attribute.records,
+      attribute.label,
       attribute.values?.map((value) => AttributeValue.fromJson(value)),
     );
   }
@@ -99,96 +111,26 @@ export class Attribute {
 //   new Attribute("title", "string"),
 // ];
 
-export class FilterInstance {
-  attribute: Attribute | null;
-  filterValue: string;
-  operator: OperatorType;
-
-  id: string;
-  filterSequence: FilterSequence;
-
-  constructor(
-    filterSequence: FilterSequence,
-    attribute: Attribute | null = null,
-    filterValue = "",
-    operator: OperatorType = "AND",
-  ) {
-    this.attribute = attribute;
-    this.operator = operator;
-    this.filterValue = filterValue;
-
-    this.id = uuiv4();
-    this.filterSequence = filterSequence;
-
-    makeAutoObservable(this, { id: false, filterSequence: false });
-  }
-
-  isValid(): this is this & {
-    attribute: NonNullable<FilterInstance["attribute"]>;
-  } {
-    return this.attribute !== null && this.filterValue !== "";
-  }
-
-  get comparableValue() {
-    if (!this.isValid()) return null;
-
-    if (this.attribute.type === "string") {
-      return this.filterValue;
-    } else if (this.attribute.type === "number") {
-      return parseFloat(this.filterValue);
-    } else if (this.attribute.type === "boolean") {
-      return this.filterValue === "true";
-    } else if (this.attribute.type === "enum") {
-      return this.filterValue;
-    }
-    return this.filterValue;
-  }
-
-  setAttribute(attribute: Attribute) {
-    this.attribute = attribute;
-  }
-
-  setFilterValue(filterValue: string) {
-    this.filterValue = filterValue;
-  }
-
-  setOperator(operator: OperatorType) {
-    this.operator = operator;
-  }
-}
-
 export class FilterSequence {
   filterManager: FilterManager;
 
   filterBy: GraphNodeType;
 
-  filters: FilterInstance[];
+  query: RuleGroupType = { combinator: "and", rules: [] };
 
   constructor(filterManager: FilterManager, filterBy: GraphNodeType) {
     this.filterManager = filterManager;
     this.filterBy = filterBy;
-    this.filters = [new FilterInstance(this, null, "", "AND")];
 
-    makeAutoObservable(this, { filterManager: false });
+    makeAutoObservable(this, { filterManager: false }, { autoBind: true });
   }
 
-  addFilter(filter?: FilterInstance) {
-    this.filters.push(filter ?? new FilterInstance(this));
-  }
-
-  removeFilter(filter: FilterInstance) {
-    this.filters = this.filters.filter((f) => f !== filter);
+  setQuery(query: RuleGroupType) {
+    this.query = query;
   }
 
   get potentialAttributes() {
     return this.filterManager.attributes.get(this.filterBy) ?? [];
-  }
-
-  getAttributeByName(name: string): Attribute | null {
-    const attribute = this.potentialAttributes.find(
-      (attr) => attr.name === name,
-    );
-    return attribute ?? null;
   }
 }
 

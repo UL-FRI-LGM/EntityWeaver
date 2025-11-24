@@ -48,13 +48,13 @@ export const AttributeValueSchema = z.union([
   z.string(),
   z.object({
     name: z.string().min(1),
-    text: z.optional(z.string()),
+    label: z.optional(z.string()),
   }),
 ]);
 
 export const RecordTypeSchema = z.enum(["Document", "Mention", "Entity"]);
 export const AttributeDataTypeSchema = z.enum([
-  "string",
+  "text",
   "number",
   "boolean",
   "enum",
@@ -63,6 +63,7 @@ export const AttributeDataTypeSchema = z.enum([
 export const AttributeSchema = z
   .object({
     name: z.string(),
+    label: z.optional(z.string()),
     type: AttributeDataTypeSchema,
     records: z.array(RecordTypeSchema).min(1),
     values: z.optional(z.array(AttributeValueSchema)),

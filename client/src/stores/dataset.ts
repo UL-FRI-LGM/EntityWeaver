@@ -14,7 +14,6 @@ import {
 } from "@/stores/filters.ts";
 import { DatasetSchema, RecordTypeSchema } from "@/utils/schemas.ts";
 import { z } from "zod";
-import type { GraphEntity } from "@/stores/graphEntity.ts";
 
 export type GraphNodeType = z.output<typeof RecordTypeSchema>;
 
@@ -286,28 +285,8 @@ export class Dataset {
     const sigma = this.appState.sigma;
     if (!sigma) return;
 
-    filterSequence.filters.forEach((filter) => {
-      if (!filter.isValid()) {
-        throw new Error("Invalid filter in filter sequence");
-      }
-    });
-
-    let dataArray: GraphEntity[];
-    if (filterSequence.filterBy === "Mention") {
-      dataArray = this.mentionList;
-    } else if (filterSequence.filterBy === "Entity") {
-      dataArray = this.entityList;
-    } else {
-      dataArray = this.documentList;
-    }
-
-    if (filterSequence.filters.length === 0) {
-      return;
-    }
-
-    dataArray.forEach((entity) => {
-      entity.applyFilter(filterSequence);
-    });
+    const query = filterSequence.query;
+    console.log(query);
 
     this.filterActive = true;
 

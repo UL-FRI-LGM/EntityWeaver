@@ -2,12 +2,12 @@
   "attributes": [
     {
       "name": "title",
-      "type": "string",
+      "type": "text",
       "records": ["Document"]
     },
     {
       "name": "name",
-      "type": "string",
+      "type": "text",
       "records": ["Mention", "Entity"]
     },
     {
