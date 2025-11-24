@@ -9,6 +9,8 @@ export abstract class GraphEntity {
   y?: number;
   dataset: Dataset;
 
+  filtered = false;
+
   protected constructor(
     internal_id: string,
     id_prefix: string,
@@ -45,6 +47,10 @@ export abstract class GraphEntity {
         y: this.y,
       });
     }
+  }
+
+  setFiltered(filtered: boolean) {
+    this.filtered = filtered;
   }
 
   dispose() {

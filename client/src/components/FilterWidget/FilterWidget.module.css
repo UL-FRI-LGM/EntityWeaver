@@ -1,0 +1,32 @@
+.typeSelection {
+  max-width: 30%;
+  flex: 1;
+}
+
+.valueInput {
+  flex: 1;
+}
+
+.valueInput :global(.mantine-Input-input),
+.typeSelection :global(.mantine-Input-input),
+.rightColumn :global(.mantine-Input-input) {
+  height: 30px !important;
+  min-height: 30px !important;
+}
+
+.rightColumn {
+  max-width: 111px;
+  flex: 1;
+}
+
+.rightColumn :global(.mantine-Input-input) {
+  line-height: 30px;
+}
+
+.filterFlexContainer {
+  gap: 4px !important;
+}
+
+.removeFilter {
+  --ai-size: 30px !important;
+}

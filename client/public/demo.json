@@ -1,4 +1,39 @@
 {
+  "attributes": [
+    {
+      "name": "title",
+      "type": "string",
+      "records": ["Document"]
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "records": ["Mention", "Entity"]
+    },
+    {
+      "name": "type",
+      "type": "enum",
+      "records": ["Mention", "Entity"],
+      "values": [
+        {
+          "name": "PER",
+          "text": "Person"
+        },
+        {
+          "name": "ORG",
+          "text": "Organization"
+        },
+        {
+          "name": "LOC",
+          "text": "Location"
+        },
+        {
+          "name": "MISC",
+          "text": "Miscellaneous"
+        }
+      ]
+    }
+  ],
   "documents": [
     {
       "id": "doc_1",

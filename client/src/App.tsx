@@ -6,8 +6,8 @@ import { observer } from "mobx-react";
 import { useAppState } from "./stores/appState.ts";
 import DocumentTextView from "@/components/DocumentTextView/DocumentTextView.tsx";
 import { Grid, GridCol } from "@mantine/core";
-import FlowWidget from "@/components/FlowWidget/FlowWidget.tsx";
 import TableGraphWindow from "@/components/TableGraphWindow/TableGraphWindow.tsx";
+import FilterWidget from "@/components/FilterWidget/FilterWidget.tsx";
 
 const App = observer(() => {
   const appState = useAppState();
@@ -33,7 +33,7 @@ const App = observer(() => {
             <TableGraphWindow />
           </Grid.Col>
           <GridCol span={4}>
-            <FlowWidget />
+            <FilterWidget />
           </GridCol>
         </Grid>
         <Grid className={classes.lowerGrid}>

@@ -3,14 +3,10 @@ import type { Mention } from "@/stores/mention.ts";
 import type { Dataset } from "@/stores/dataset.ts";
 import { computed, makeObservable, override } from "mobx";
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
+import type { DocumentSchema } from "@/utils/schemas.ts";
+import { z } from "zod";
 
-export interface DocumentDB {
-  id: string;
-  title: string;
-  text: string;
-  x?: number;
-  y?: number;
-}
+export type DocumentDB = z.output<typeof DocumentSchema>;
 
 export class Document extends GraphEntity {
   static prefix = "Document-";

@@ -4,16 +4,12 @@ import type { Dataset } from "@/stores/dataset.ts";
 import { computed, makeObservable, override } from "mobx";
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
 import type { EntityLink } from "@/stores/entityLink.ts";
+import type { EntitySchema } from "@/utils/schemas.ts";
+import { z } from "zod";
 
 export type EntityTypes = keyof typeof DEFINES.entityTypes.names;
 
-export interface EntityDB {
-  id: string;
-  name: string;
-  type: string;
-  x?: number;
-  y?: number;
-}
+export type EntityDB = z.output<typeof EntitySchema>;
 
 export class Entity extends GraphEntity {
   static prefix = "Entity-";

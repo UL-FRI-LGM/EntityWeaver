@@ -5,6 +5,7 @@ import {
   TextInput,
   useCombobox,
   type ComboboxOptionProps,
+  type ComboboxProps,
 } from "@mantine/core";
 
 export interface SearchableComboboxOption {
@@ -13,7 +14,7 @@ export interface SearchableComboboxOption {
   props?: Partial<ComboboxOptionProps>;
 }
 
-interface SearchableComboboxProps {
+type SearchableComboboxProps = {
   selectedValue: string | undefined;
   onChange: (_id: string, _display: string) => void;
   options: SearchableComboboxOption[];
@@ -22,7 +23,7 @@ interface SearchableComboboxProps {
   textInputProps?: TextInputProps;
   // textInputClassNames?: TextInputProps["classNames"];
   // comboboxClassNames?: ComboboxProps["classNames"];
-}
+} & ComboboxProps;
 
 type StrictDataAttributes = Record<
   `data-${string}`,
@@ -36,6 +37,7 @@ const SearchableCombobox = ({
   label,
   placeholder,
   textInputProps,
+  ...props
   // textInputClassNames,
   // comboboxClassNames,
 }: SearchableComboboxProps) => {
@@ -81,6 +83,7 @@ const SearchableCombobox = ({
           optionProps as ComboboxOptionProps & StrictDataAttributes,
         );
       }}
+      {...props}
     >
       <Combobox.Target>
         <TextInput

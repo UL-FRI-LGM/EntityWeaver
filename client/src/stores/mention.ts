@@ -6,20 +6,10 @@ import { Document } from "@/stores/document.ts";
 import { Entity } from "@/stores/entity.ts";
 import { DEFINES } from "@/defines.ts";
 import { EntityLink } from "@/stores/entityLink.ts";
+import { z } from "zod";
+import type { MentionSchema } from "@/utils/schemas.ts";
 
-export interface MentionDB {
-  id: string;
-  type: string;
-  start_index: number;
-  end_index: number;
-  document_id: string;
-  links: {
-    entity_id: string;
-    confidence: number;
-  }[];
-  x?: number;
-  y?: number;
-}
+export type MentionDB = z.output<typeof MentionSchema>;
 
 export interface UncertainEntity {
   entity: Entity;

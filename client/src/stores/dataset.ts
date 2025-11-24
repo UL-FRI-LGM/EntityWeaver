@@ -1,21 +1,19 @@
 import { Mention, type MentionDB } from "@/stores/mention.ts";
 import { Entity, type EntityDB } from "@/stores/entity.ts";
 import { Document, type DocumentDB } from "@/stores/document.ts";
-import { Collocation, type CollocationDB } from "@/stores/collocation.ts";
+import { Collocation } from "@/stores/collocation.ts";
 import { computed, makeAutoObservable, runInAction } from "mobx";
 import { appState, type AppState } from "@/stores/appState.ts";
 import { loadDemo, readFile, sumAndMax } from "@/utils/helpers.ts";
 import { makePersistable } from "mobx-persist-store";
 import { DEFINES } from "@/defines.ts";
+import { type AttributeDB, FilterManager } from "@/stores/filters.ts";
+import { DatasetSchema, RecordTypeSchema } from "@/utils/schemas.ts";
+import { z } from "zod";
 
-export type GraphNodeType = "Document" | "Entity" | "Mention";
+export type GraphNodeType = z.output<typeof RecordTypeSchema>;
 
-export interface DatasetDB {
-  mentions: MentionDB[];
-  entities: EntityDB[];
-  documents: DocumentDB[];
-  collocations: CollocationDB[];
-}
+export type DatasetDB = z.infer<typeof DatasetSchema>;
 
 export interface BinInfo {
   value: number;
@@ -32,6 +30,7 @@ export class Dataset {
   collocations: Map<string, Collocation> = new Map<string, Collocation>();
 
   fetchingData = false;
+  filterManager: FilterManager;
 
   constructor(appState: AppState) {
     this.appState = appState;
@@ -42,7 +41,10 @@ export class Dataset {
       entityList: computed({ keepAlive: true }),
       collocationsList: computed({ keepAlive: true }),
       normalizedConfidenceBins: computed({ keepAlive: true }),
+      filterManager: false,
     });
+
+    this.filterManager = new FilterManager(this);
 
     if (import.meta.env.VITE_STORE_GRAPH === "true") {
       makePersistable(this, {
@@ -99,6 +101,18 @@ export class Dataset {
               );
             },
           },
+          {
+            // @ts-expect-error: bad TS inference
+            key: "filterManager",
+            // @ts-expect-error: bad TS inference
+            serialize: (value) => {
+              return value.toJson();
+            },
+            // @ts-expect-error: bad TS inference
+            deserialize: (value: AttributeDB[]) => {
+              return FilterManager.fromJson(this, value);
+            },
+          },
         ],
       })
         .then(() => {
@@ -116,6 +130,7 @@ export class Dataset {
 
   toJson(): DatasetDB {
     return {
+      attributes: this.filterManager.toJson(),
       mentions: this.mentionList.map((m) => m.toJson()),
       entities: this.entityList.map((e) => e.toJson()),
       documents: this.documentList.map((d) => d.toJson()),
@@ -173,7 +188,9 @@ export class Dataset {
     }
   }
 
-  loadDataset(data: DatasetDB) {
+  loadDataset(inputData: DatasetDB) {
+    const data = DatasetSchema.parse(inputData);
+
     this.mentions.clear();
     this.documents.clear();
     this.entities.clear();
@@ -225,6 +242,10 @@ export class Dataset {
     if (this.documentList.length > 0) {
       appState.setViewedDocument(this.documentList[0]);
     }
+
+    data.attributes.forEach((attribute) => {
+      this.filterManager.addAttribute(attribute);
+    });
 
     appState.runGraphUpdate(recomputeLayout);
   }

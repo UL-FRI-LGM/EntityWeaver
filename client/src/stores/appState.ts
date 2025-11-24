@@ -221,7 +221,6 @@ export class AppState {
     }
     this.atlasLayoutInProgress = true;
     this.forceAtlasLayout.start();
-
     setTimeout(() => {
       this.stopAtlasLayout();
     }, DEFINES.layoutRuntimeInMs);
