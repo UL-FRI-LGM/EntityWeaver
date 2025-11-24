@@ -217,17 +217,17 @@ export class Dataset {
       );
     });
 
-    data.collocations.forEach((collocation) => {
-      try {
-        const collocationInstance = Collocation.fromJson(collocation, this);
-        this.collocations.set(
-          `${Collocation.prefix}${collocation.id}`,
-          collocationInstance,
-        );
-      } catch (error) {
-        console.error(error);
-      }
-    });
+    // data.collocations.forEach((collocation) => {
+    //   try {
+    //     const collocationInstance = Collocation.fromJson(collocation, this);
+    //     this.collocations.set(
+    //       `${Collocation.prefix}${collocation.id}`,
+    //       collocationInstance,
+    //     );
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // });
 
     let recomputeLayout = this.mentionList.some(
       (mention) => mention.x === undefined || mention.y === undefined,

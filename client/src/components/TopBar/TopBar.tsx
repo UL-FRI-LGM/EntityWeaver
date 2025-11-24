@@ -15,7 +15,6 @@ import {
   IconPointer,
   IconRefresh,
   IconSitemap,
-  IconTextScan2,
   IconUpload,
   IconUserCircle,
 } from "@tabler/icons-react";
@@ -175,22 +174,22 @@ const FiltersMenu = observer(() => {
           Miscellaneous
         </Menu.Item>
 
-        <Menu.Divider />
+        {/*<Menu.Divider />*/}
 
-        <Menu.Label>Connections</Menu.Label>
+        {/*<Menu.Label>Connections</Menu.Label>*/}
 
-        <Menu.Item
-          leftSection={<IconTextScan2 size={14} />}
-          rightSection={
-            <Switch checked={appState.uiState.filters.collocations} />
-          }
-          onClick={(event) => {
-            event.preventDefault();
-            appState.uiState.toggleFilter("collocations");
-          }}
-        >
-          Collocations
-        </Menu.Item>
+        {/*<Menu.Item*/}
+        {/*  leftSection={<IconTextScan2 size={14} />}*/}
+        {/*  rightSection={*/}
+        {/*    <Switch checked={appState.uiState.filters.collocations} />*/}
+        {/*  }*/}
+        {/*  onClick={(event) => {*/}
+        {/*    event.preventDefault();*/}
+        {/*    appState.uiState.toggleFilter("collocations");*/}
+        {/*  }}*/}
+        {/*>*/}
+        {/*  Collocations*/}
+        {/*</Menu.Item>*/}
       </Menu.Dropdown>
     </Menu>
   );
