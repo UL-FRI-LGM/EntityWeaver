@@ -6,7 +6,7 @@ import { appState, AppStateProvider } from "./stores/appState.ts";
 import "@mantine/core/styles.css";
 import "@mantine/tiptap/styles.css";
 import "prosemirror-view/style/prosemirror.css";
-import { createTheme, MantineProvider } from "@mantine/core";
+import { Button, createTheme, MantineProvider } from "@mantine/core";
 
 const theme = createTheme({
   cursorType: "pointer",
@@ -16,6 +16,18 @@ const theme = createTheme({
     //   dark: "green",
     //   light: "green",
     // }),
+  },
+  components: {
+    Button: Button.extend({
+      vars: () => {
+        return {
+          root: {
+            "--button-bd":
+              "calc(0.0625rem * var(--mantine-scale)) solid var(--mantine-color-default-border)",
+          },
+        };
+      },
+    }),
   },
 });
 

@@ -14,6 +14,14 @@ import {
 } from "@/stores/filters.ts";
 import { DatasetSchema, RecordTypeSchema } from "@/utils/schemas.ts";
 import { z } from "zod";
+import { formatQuery } from "react-querybuilder";
+import { add_operation, type RulesLogic } from "json-logic-js";
+import { jsonLogicAdditionalOperators } from "react-querybuilder";
+import type { GraphEntity } from "@/stores/graphEntity.ts";
+
+for (const [op, func] of Object.entries(jsonLogicAdditionalOperators)) {
+  add_operation(op, func);
+}
 
 export type GraphNodeType = z.output<typeof RecordTypeSchema>;
 
@@ -286,7 +294,25 @@ export class Dataset {
     if (!sigma) return;
 
     const query = filterSequence.query;
-    console.log(query);
+    const jsonLogic = formatQuery(query, "jsonlogic") as RulesLogic;
+    // this.filterActive = true;
+    // console.log(jsonLogic);
+    let dataArray: GraphEntity[];
+    if (filterSequence.filterBy === "Mention") {
+      dataArray = this.mentionList;
+    } else if (filterSequence.filterBy === "Entity") {
+      dataArray = this.entityList;
+    } else {
+      dataArray = this.documentList;
+    }
+
+    if (this.filterActive) {
+      this.removeFilters();
+    }
+
+    dataArray.forEach((entity) => {
+      entity.applyFilter(jsonLogic);
+    });
 
     this.filterActive = true;
 

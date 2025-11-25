@@ -1,6 +1,8 @@
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
 import type { Dataset } from "@/stores/dataset.ts";
 import { action, computed, makeObservable, observable } from "mobx";
+import { apply, type RulesLogic } from "json-logic-js";
+import { bfsFromNode } from "graphology-traversal";
 
 export abstract class GraphEntity {
   readonly id: string;
@@ -51,6 +53,25 @@ export abstract class GraphEntity {
 
   setFiltered(filtered: boolean) {
     this.filtered = filtered;
+  }
+
+  applyFilter(jsonRulesLogic: RulesLogic) {
+    if (!this.dataset.appState.sigma) {
+      return;
+    }
+    if (apply(jsonRulesLogic, this)) {
+      bfsFromNode(
+        this.dataset.appState.sigma.getGraph(),
+        this.id,
+        function (_node, attr, depth) {
+          attr.source.setFiltered(true);
+          return (
+            depth > 0 &&
+            (attr.nodeType === "Entity" || attr.nodeType === "Document")
+          );
+        },
+      );
+    }
   }
 
   dispose() {

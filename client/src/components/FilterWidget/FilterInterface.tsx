@@ -3,13 +3,21 @@ import { QueryBuilderMantine } from "@react-querybuilder/mantine";
 import {
   type ActionProps,
   defaultOperators,
+  defaultValidator,
   type Field,
+  isOptionGroupArray,
+  type OptionList,
   QueryBuilder,
+  uniqOptList,
+  useValueSelector,
+  type ValueSelectorProps,
 } from "react-querybuilder";
 import { FilterSequence } from "@/stores/filters.ts";
 import { toJS } from "mobx";
-import { ActionIcon, Button } from "@mantine/core";
+import { ActionIcon, Button, MultiSelect, Select } from "@mantine/core";
 import { IconPlus, IconX } from "@tabler/icons-react";
+import { DEFINES } from "@/defines.ts";
+import { useMemo } from "react";
 
 function getOperators(_fieldName: string, { fieldData }: { fieldData: Field }) {
   switch (fieldData.datatype) {
@@ -61,6 +69,9 @@ function getValueEditorType(
 const RemoveButton = (actionProps: ActionProps) => {
   return (
     <ActionIcon
+      variant="filled"
+      color={"gray.8"}
+      style={{ borderColor: "var(--mantine-color-dark-4)" }}
       className={actionProps.className}
       disabled={actionProps.disabled}
       data-testid={actionProps.testID}
@@ -82,6 +93,9 @@ const RemoveButton = (actionProps: ActionProps) => {
 const AddButton = (actionProps: ActionProps) => {
   return (
     <Button
+      variant="filled"
+      color={"gray.8"}
+      style={{ borderColor: "var(--mantine-color-dark-4)" }}
       className={actionProps.className}
       disabled={actionProps.disabled}
       data-testid={actionProps.testID}
@@ -102,22 +116,94 @@ const AddButton = (actionProps: ActionProps) => {
   );
 };
 
+const optionListToComboboxData = (list: OptionList) => {
+  const uniqList = uniqOptList(list);
+  return isOptionGroupArray(uniqList)
+    ? uniqList.map((og) => ({
+        ...og,
+        group: og.label,
+        items: og.options,
+      }))
+    : uniqList.map((opt) => ({
+        name: opt.name,
+        value: opt.name,
+        label: opt.label,
+      }));
+};
+
+const CustomValueSelector = ({
+  className,
+  handleOnChange, // eslint-disable-line @typescript-eslint/unbound-method
+  options,
+  value,
+  title,
+  disabled,
+  multiple,
+  listsAsArrays,
+  testID,
+}: ValueSelectorProps) => {
+  const { onChange, val } = useValueSelector({
+    handleOnChange,
+    listsAsArrays,
+    multiple,
+    value,
+  });
+
+  const data = useMemo(() => optionListToComboboxData(options), [options]);
+  const changeHandler = (v: string[] | string | null) => {
+    onChange(v ?? val ?? "");
+  };
+
+  return multiple ? (
+    <MultiSelect
+      comboboxProps={{ withinPortal: false }}
+      scrollAreaProps={{ type: "auto" }}
+      data-testid={testID}
+      title={title}
+      className={className}
+      data={data}
+      disabled={disabled}
+      value={val as string[] | undefined}
+      onChange={changeHandler}
+    />
+  ) : (
+    <Select
+      comboboxProps={{ withinPortal: false }}
+      scrollAreaProps={{ type: "auto" }}
+      data-testid={testID}
+      title={title}
+      className={className}
+      value={val as string | undefined}
+      data={data}
+      disabled={disabled}
+      onChange={changeHandler}
+    />
+  );
+};
+
 const FilterEditor = observer(
   ({ filterSequence }: { filterSequence: FilterSequence }) => {
-    return (
+    return filterSequence.potentialAttributes.length > 0 ? (
       <QueryBuilderMantine>
         <QueryBuilder
           fields={filterSequence.potentialAttributes.map((a) => a.field)}
-          defaultQuery={toJS(filterSequence.query)}
+          query={toJS(filterSequence.query)}
+          showNotToggle={false}
+          showShiftActions={false}
+          addRuleToNewGroups={true}
+          parseNumbers={true}
+          maxLevels={DEFINES.maxQueryLevels}
           // eslint-disable-next-line @typescript-eslint/unbound-method
           onQueryChange={filterSequence.setQuery}
           getOperators={getOperators}
           getValueEditorType={getValueEditorType}
+          validator={defaultValidator}
           controlElements={{
             removeRuleAction: RemoveButton,
             removeGroupAction: RemoveButton,
             addRuleAction: AddButton,
             addGroupAction: AddButton,
+            valueSelector: CustomValueSelector,
           }}
           translations={{
             addRule: { label: "Rule", title: "Add rule" } as const,
@@ -125,7 +211,7 @@ const FilterEditor = observer(
           }}
         />
       </QueryBuilderMantine>
-    );
+    ) : null;
   },
 );
 

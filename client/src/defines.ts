@@ -9,6 +9,7 @@ import Color from "color";
 const edgeWidth = 2;
 
 export const DEFINES = {
+  maxQueryLevels: 5,
   contextWindow: 30,
   uiStateStorageKey: "graph-ui-state",
   sizePerEdge: 5,

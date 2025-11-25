@@ -14,9 +14,6 @@ const FilterWidget = observer(() => {
       <FilterEditor
         filterSequence={appState.dataset.filterManager.filterSequence}
       />
-      {/*<FilterSequenceEditor*/}
-      {/*  filterSequence={appState.dataset.filterManager.filterSequence}*/}
-      {/*/>*/}
       <Group>
         <Button
           leftSection={<IconFilter size={14} />}

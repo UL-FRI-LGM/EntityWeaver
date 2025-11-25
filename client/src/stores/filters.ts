@@ -97,20 +97,6 @@ export class Attribute {
   }
 }
 
-// const defaultMentionAttributes: Attribute[] = [
-//   new Attribute("type", "string"),
-//   new Attribute("name", "string"),
-// ];
-//
-// const defaultEntityAttributes: Attribute[] = [
-//   new Attribute("type", "string"),
-//   new Attribute("name", "string"),
-// ];
-//
-// const defaultDocumentAttributes: Attribute[] = [
-//   new Attribute("title", "string"),
-// ];
-
 export class FilterSequence {
   filterManager: FilterManager;
 
