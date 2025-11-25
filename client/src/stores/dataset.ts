@@ -289,36 +289,44 @@ export class Dataset {
     });
   }
 
-  applyFilterSequence(filterSequence: FilterSequence) {
+  applyFilterSequences(filterSequences: FilterSequence[]) {
+    if (filterSequences.length === 0) return;
+
     const sigma = this.appState.sigma;
     if (!sigma) return;
-
-    const query = filterSequence.query;
-    const jsonLogic = formatQuery(query, {
-      format: "jsonlogic",
-      validator: defaultValidator,
-    }) as RulesLogic;
-
-    let dataArray: GraphEntity[];
-    if (filterSequence.filterBy === "Mention") {
-      dataArray = this.mentionList;
-    } else if (filterSequence.filterBy === "Entity") {
-      dataArray = this.entityList;
-    } else {
-      dataArray = this.documentList;
-    }
 
     if (this.filterActive) {
       this.removeFilters();
     }
 
-    const includedIds = new Set(filterSequence.includedIds);
+    for (let i = 0; i < filterSequences.length; i += 1) {
+      const sequence = filterSequences[i];
 
-    if (includedIds.size === 0 && jsonLogic === false) return;
+      const query = sequence.query;
+      const jsonLogic = formatQuery(query, {
+        format: "jsonlogic",
+        validator: defaultValidator,
+      }) as RulesLogic;
 
-    dataArray.forEach((entity) => {
-      entity.applyFilter(includedIds, jsonLogic);
-    });
+      if (jsonLogic === false && sequence.includedIds.length === 0) {
+        continue;
+      }
+
+      let dataArray: GraphEntity[];
+      if (sequence.filterBy === "Mention") {
+        dataArray = this.mentionList;
+      } else if (sequence.filterBy === "Entity") {
+        dataArray = this.entityList;
+      } else {
+        dataArray = this.documentList;
+      }
+
+      const includedIdsSet = new Set(sequence.includedIds);
+
+      dataArray.forEach((entity) => {
+        entity.applyFilter(includedIdsSet, jsonLogic, i !== 0);
+      });
+    }
 
     this.filterActive = true;
 
@@ -327,13 +335,13 @@ export class Dataset {
 
   removeFilters() {
     this.mentions.forEach((mention) => {
-      mention.setFiltered(false);
+      mention.removeFilter();
     });
     this.documents.forEach((document) => {
-      document.setFiltered(false);
+      document.removeFilter();
     });
     this.entities.forEach((entity) => {
-      entity.setFiltered(false);
+      entity.removeFilter();
     });
     this.filterActive = false;
 

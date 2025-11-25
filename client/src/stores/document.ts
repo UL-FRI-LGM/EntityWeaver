@@ -30,6 +30,7 @@ export class Document extends GraphEntity {
     makeObservable(this, {
       title: true,
       setTitle: true,
+      name: true,
       text: true,
       setText: true,
       editText: true,
@@ -59,6 +60,10 @@ export class Document extends GraphEntity {
       x: this.x,
       y: this.y,
     };
+  }
+
+  get name() {
+    return this.title;
   }
 
   setTitle(title: string) {

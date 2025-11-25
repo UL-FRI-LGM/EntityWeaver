@@ -12,6 +12,7 @@ export abstract class GraphEntity {
   dataset: Dataset;
 
   filtered = false;
+  unfilteredConnections = 0;
 
   protected constructor(
     internal_id: string,
@@ -55,26 +56,58 @@ export abstract class GraphEntity {
     this.filtered = filtered;
   }
 
-  applyFilter(shownIds: Set<string>, jsonRulesLogic: RulesLogic) {
+  removeFilter() {
+    this.setFiltered(false);
+    this.unfilteredConnections = 0;
+  }
+
+  applyFilter(
+    showsIds: Set<string>,
+    attributeFilter: RulesLogic,
+    excluding: boolean,
+  ) {
     if (!this.dataset.appState.sigma) {
       return;
     }
-    if (shownIds.size > 0 && !shownIds.has(this.id)) {
+
+    if (excluding && !this.filtered) {
       return;
     }
-    if (jsonRulesLogic === false || apply(jsonRulesLogic, this)) {
-      bfsFromNode(
-        this.dataset.appState.sigma.getGraph(),
-        this.id,
-        function (_node, attr, depth) {
-          attr.source.setFiltered(true);
-          return (
-            depth > 0 &&
-            (attr.nodeType === "Entity" || attr.nodeType === "Document")
-          );
-        },
-      );
+
+    const hidden = showsIds.size > 0 && !showsIds.has(this.id);
+    const filtered =
+      hidden || (attributeFilter !== false && !apply(attributeFilter, this));
+
+    if ((!excluding && filtered) || (excluding && !filtered)) {
+      return;
     }
+
+    bfsFromNode(
+      this.dataset.appState.sigma.getGraph(),
+      this.id,
+      function (_node, attr, depth) {
+        if (!excluding) {
+          attr.source.setFiltered(true);
+          if (depth > 0) {
+            attr.source.unfilteredConnections++;
+          }
+        } else {
+          if (depth === 0 || attr.source.unfilteredConnections === 0) {
+            attr.source.setFiltered(false);
+            attr.source.unfilteredConnections = 0;
+          } else {
+            attr.source.unfilteredConnections--;
+            if (attr.source.unfilteredConnections < 1) {
+              attr.source.setFiltered(false);
+            }
+          }
+        }
+        return (
+          depth > 0 &&
+          (attr.nodeType === "Entity" || attr.nodeType === "Document")
+        );
+      },
+    );
   }
 
   dispose() {

@@ -181,7 +181,7 @@ const CustomValueSelector = ({
   );
 };
 
-const FilterEditor = observer(
+const FilterInterface = observer(
   ({ filterSequence }: { filterSequence: FilterSequence }) => {
     return filterSequence.potentialAttributes.length > 0 ? (
       <QueryBuilderMantine>
@@ -215,4 +215,4 @@ const FilterEditor = observer(
   },
 );
 
-export default FilterEditor;
+export default FilterInterface;

@@ -52,7 +52,8 @@ export const AttributeValueSchema = z.union([
   }),
 ]);
 
-export const RecordTypeSchema = z.enum(["Document", "Mention", "Entity"]);
+export const RecordTypes = ["Document", "Mention", "Entity"] as const;
+export const RecordTypeSchema = z.enum(RecordTypes);
 export const AttributeDataTypeSchema = z.enum([
   "text",
   "number",

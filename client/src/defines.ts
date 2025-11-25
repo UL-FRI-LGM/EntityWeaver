@@ -10,6 +10,7 @@ const edgeWidth = 2;
 
 export const DEFINES = {
   maxQueryLevels: 5,
+  maxFilterSequences: 6,
   contextWindow: 30,
   uiStateStorageKey: "graph-ui-state",
   sizePerEdge: 5,
