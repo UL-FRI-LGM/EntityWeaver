@@ -101,6 +101,7 @@ export class FilterSequence {
   filterManager: FilterManager;
 
   filterBy: GraphNodeType;
+  includedIds: string[] = [];
 
   query: RuleGroupType = { combinator: "and", rules: [] };
 
@@ -108,7 +109,14 @@ export class FilterSequence {
     this.filterManager = filterManager;
     this.filterBy = filterBy;
 
-    makeAutoObservable(this, { filterManager: false }, { autoBind: true });
+    makeAutoObservable(
+      this,
+      {
+        filterManager: false,
+        potentialAttributes: computed({ keepAlive: true }),
+      },
+      { autoBind: true },
+    );
   }
 
   setQuery(query: RuleGroupType) {
@@ -117,6 +125,10 @@ export class FilterSequence {
 
   get potentialAttributes() {
     return this.filterManager.attributes.get(this.filterBy) ?? [];
+  }
+
+  setIncludedIds(ids: string[]) {
+    this.includedIds = ids;
   }
 }
 

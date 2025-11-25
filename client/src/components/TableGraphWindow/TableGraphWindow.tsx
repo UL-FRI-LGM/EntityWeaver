@@ -1,5 +1,6 @@
 import { observer } from "mobx-react";
 import classes from "./TableGraphWindow.module.css";
+import sharedClasses from "@/shared.module.css";
 import { useAppState } from "@/stores/appState.ts";
 import TableWidget from "@/components/TableWidget/TableWidget.tsx";
 import EntityGraphWidget from "@/components/EntityGraph/EntityGraph.tsx";
@@ -13,8 +14,8 @@ const TableGraphWindow = observer(() => {
   const [tfMenuOpen, setTfMenuOpen] = useState(false);
 
   return (
-    <div className={classes.main}>
-      <div className={classes.topbar}>
+    <div className={sharedClasses.widgetContainer}>
+      <div className={sharedClasses.widgetTopbar}>
         <SegmentedControl
           value={appState.uiState.tableView ? "table" : "graph"}
           onChange={(value) => {

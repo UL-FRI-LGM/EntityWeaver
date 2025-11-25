@@ -55,11 +55,14 @@ export abstract class GraphEntity {
     this.filtered = filtered;
   }
 
-  applyFilter(jsonRulesLogic: RulesLogic) {
+  applyFilter(shownIds: Set<string>, jsonRulesLogic: RulesLogic) {
     if (!this.dataset.appState.sigma) {
       return;
     }
-    if (apply(jsonRulesLogic, this)) {
+    if (shownIds.size > 0 && !shownIds.has(this.id)) {
+      return;
+    }
+    if (jsonRulesLogic === false || apply(jsonRulesLogic, this)) {
       bfsFromNode(
         this.dataset.appState.sigma.getGraph(),
         this.id,
