@@ -19,3 +19,7 @@
   border: 1px solid red;
   box-shadow: 0 0 3px 3px black;
 }
+
+.menuPopover {
+  /*transition-duration: 50ms !important;*/
+}

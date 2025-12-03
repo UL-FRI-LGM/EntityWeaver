@@ -17,19 +17,23 @@
       "values": [
         {
           "name": "PER",
-          "text": "Person"
+          "label": "Person",
+          "color": "#f5ad76"
         },
         {
           "name": "ORG",
-          "text": "Organization"
+          "label": "Organization",
+          "color": "#e07685"
         },
         {
           "name": "LOC",
-          "text": "Location"
+          "label": "Location",
+          "color": "#96b7a8"
         },
         {
           "name": "MISC",
-          "text": "Miscellaneous"
+          "label": "Miscellaneous",
+          "color": "#468dd3"
         }
       ]
     }

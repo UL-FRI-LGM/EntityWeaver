@@ -49,6 +49,7 @@ export const AttributeValueSchema = z.union([
   z.object({
     name: z.string().min(1),
     label: z.optional(z.string()),
+    color: z.optional(z.string()),
   }),
 ]);
 

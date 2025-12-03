@@ -8,6 +8,7 @@ import {
 import { z } from "zod";
 import type { Field, RuleGroupType } from "react-querybuilder";
 import { v4 as uuidv4 } from "uuid";
+import { DEFINES } from "@/defines.ts";
 
 export type AttributeDB = z.output<typeof AttributeSchema>;
 export type AttributeValueDB = z.output<typeof AttributeValueSchema>;
@@ -17,10 +18,12 @@ export type AttributeDataType = z.output<typeof AttributeDataTypeSchema>;
 export class AttributeValue {
   name: string;
   label: string | undefined;
+  color: string;
 
-  constructor(name: string, label?: string) {
+  constructor(name: string, label?: string, color?: string) {
     this.name = name;
     this.label = label;
+    this.color = color ?? "#ffffff";
 
     makeAutoObservable(this);
   }
@@ -29,6 +32,7 @@ export class AttributeValue {
     return {
       name: this.name,
       label: this.label,
+      color: this.color,
     };
   }
 
@@ -36,7 +40,11 @@ export class AttributeValue {
     if (typeof attributeValue === "string") {
       return new AttributeValue(attributeValue);
     }
-    return new AttributeValue(attributeValue.name, attributeValue.label);
+    return new AttributeValue(
+      attributeValue.name,
+      attributeValue.label,
+      attributeValue.color,
+    );
   }
 }
 
@@ -161,6 +169,12 @@ export class FilterManager {
   selectedFilterIndex = 0;
 
   dataset: Dataset;
+
+  typeColors: Map<GraphNodeType, string> = new Map<GraphNodeType, string>([
+    ["Document", DEFINES.nodes.Document.color],
+    ["Mention", DEFINES.nodes.Mention.color],
+    ["Entity", DEFINES.nodes.Entity.color],
+  ]);
 
   attributes: Map<GraphNodeType, Attribute[]> = new Map<
     GraphNodeType,
