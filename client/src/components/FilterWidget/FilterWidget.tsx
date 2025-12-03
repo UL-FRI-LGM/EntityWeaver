@@ -34,7 +34,7 @@ const FilterEditor = observer(
     return (
       <Stack>
         <MultiSelect
-          label={"Filter by Node"}
+          label={"Query by Node"}
           searchable
           clearable
           limit={300}
@@ -51,7 +51,7 @@ const FilterEditor = observer(
             return { value: entity.id, label: entity.name };
           })}
         />
-        <Input.Wrapper label="Filter by Attributes">
+        <Input.Wrapper label="Query by Attributes">
           <FilterInterface filterSequence={filterSequence} />
         </Input.Wrapper>
       </Stack>
@@ -199,10 +199,10 @@ const FilterWidget = observer(() => {
   return (
     <Stack className={sharedClasses.widgetContainer}>
       <div className={sharedClasses.widgetTopbar}>
-        <h3>Filters</h3>
+        <h3>Query Builder</h3>
       </div>
 
-      <Input.Wrapper label="Filter Sequence">
+      <Input.Wrapper label="Query Sequence">
         <Breadcrumbs
           separator="→"
           separatorMargin="xs"
@@ -236,7 +236,7 @@ const FilterWidget = observer(() => {
             );
           }}
         >
-          Apply Filters
+          Apply Query
         </Button>
         <Button
           color="gray.8"
@@ -245,7 +245,7 @@ const FilterWidget = observer(() => {
             appState.dataset.removeFilters();
           }}
         >
-          Remove Filters
+          Remove Query
         </Button>
       </Group>
       <Divider />
