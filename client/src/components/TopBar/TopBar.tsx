@@ -3,12 +3,9 @@ import classes from "./TopBar.module.css";
 import { Button, Group, Menu, Switch } from "@mantine/core";
 import { useAppState } from "@/stores/appState.ts";
 import {
-  IconAt,
-  IconBorderSides,
   IconColorFilter,
   IconDotsCircleHorizontal,
   IconDownload,
-  IconFile,
   IconFileCode2,
   IconHandFinger,
   IconMapPin,
@@ -94,39 +91,39 @@ const FiltersMenu = observer(() => {
         </ArrowDropdownButton>
       </Menu.Target>
       <Menu.Dropdown>
-        <Menu.Label>Nodes</Menu.Label>
-        <Menu.Item
-          leftSection={<IconBorderSides size={14} />}
-          rightSection={<Switch checked={appState.uiState.filters.entities} />}
-          onClick={(event) => {
-            event.preventDefault();
-            appState.uiState.toggleFilter("entities");
-          }}
-        >
-          Entities
-        </Menu.Item>
-        <Menu.Item
-          leftSection={<IconAt size={14} />}
-          rightSection={<Switch checked={appState.uiState.filters.mentions} />}
-          onClick={(event) => {
-            event.preventDefault();
-            appState.uiState.toggleFilter("mentions");
-          }}
-        >
-          Mentions
-        </Menu.Item>
-        <Menu.Item
-          leftSection={<IconFile size={14} />}
-          rightSection={<Switch checked={appState.uiState.filters.documents} />}
-          onClick={(event) => {
-            event.preventDefault();
-            appState.uiState.toggleFilter("documents");
-          }}
-        >
-          Documents
-        </Menu.Item>
+        {/*<Menu.Label>Nodes</Menu.Label>*/}
+        {/*<Menu.Item*/}
+        {/*  leftSection={<IconBorderSides size={14} />}*/}
+        {/*  rightSection={<Switch checked={appState.uiState.filters.entities} />}*/}
+        {/*  onClick={(event) => {*/}
+        {/*    event.preventDefault();*/}
+        {/*    appState.uiState.toggleFilter("entities");*/}
+        {/*  }}*/}
+        {/*>*/}
+        {/*  Entities*/}
+        {/*</Menu.Item>*/}
+        {/*<Menu.Item*/}
+        {/*  leftSection={<IconAt size={14} />}*/}
+        {/*  rightSection={<Switch checked={appState.uiState.filters.mentions} />}*/}
+        {/*  onClick={(event) => {*/}
+        {/*    event.preventDefault();*/}
+        {/*    appState.uiState.toggleFilter("mentions");*/}
+        {/*  }}*/}
+        {/*>*/}
+        {/*  Mentions*/}
+        {/*</Menu.Item>*/}
+        {/*<Menu.Item*/}
+        {/*  leftSection={<IconFile size={14} />}*/}
+        {/*  rightSection={<Switch checked={appState.uiState.filters.documents} />}*/}
+        {/*  onClick={(event) => {*/}
+        {/*    event.preventDefault();*/}
+        {/*    appState.uiState.toggleFilter("documents");*/}
+        {/*  }}*/}
+        {/*>*/}
+        {/*  Documents*/}
+        {/*</Menu.Item>*/}
 
-        <Menu.Divider />
+        {/*<Menu.Divider />*/}
 
         <Menu.Label>Entity Types</Menu.Label>
         <Menu.Item
