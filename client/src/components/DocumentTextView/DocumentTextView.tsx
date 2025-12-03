@@ -186,13 +186,33 @@ const TextViewContents = observer(({ document }: { document: Document }) => {
 
       const markType = getMarkType(ClickableMark.name, editor.schema);
 
-      document.mentionList.forEach((m) => {
-        tr.addMark(
-          m.start_index + 1,
-          m.end_index + 1,
-          markType.create({ mention: m }),
-        );
-      });
+      for (const mention of document.mentionList) {
+        if (mention.end_index - 1 > document.text.length) {
+          console.warn(
+            "Invalid mention indices",
+            mention.end_index,
+            document.text.length,
+          );
+          continue;
+        }
+        try {
+          tr.addMark(
+            mention.start_index + 1,
+            mention.end_index + 1,
+            markType.create({ mention: mention }),
+          );
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // document.mentionList.forEach((m) => {
+      //   tr.addMark(
+      //     m.start_index + 1,
+      //     m.end_index + 1,
+      //     markType.create({ mention: m }),
+      //   );
+      // });
       // console.log("Calling dispatch");
 
       blockNextMentionUpdate.current = true;

@@ -204,6 +204,10 @@ export class FilterManager {
     return filterManager;
   }
 
+  clearAttributes() {
+    this.attributes.clear();
+  }
+
   addAttribute(attribute: AttributeDB) {
     const attributeInstance = Attribute.fromJson(attribute);
     attribute.records.forEach((recordType) => {

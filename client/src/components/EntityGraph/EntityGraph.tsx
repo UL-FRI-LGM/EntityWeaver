@@ -89,6 +89,8 @@ const sigmaSettings: Partial<Settings<NodeType, EdgeType>> = {
   doubleClickZoomingRatio: 1,
   enableEdgeEvents: true,
   allowInvalidContainer: true,
+  autoRescale: true,
+  // zoomToSizeRatioFunction: (ratio: number) => ratio * 1.2,
   // defaultDrawNodeHover: () => {
   //   return;
   // },
@@ -423,7 +425,7 @@ const EntityGraph = observer(() => {
           </ControlsContainer>
           {appState.dataset.hasData && (
             <ControlsContainer position={"top-left"}>
-              <MiniMap width="200px" height="200px" debounceTime={5} />
+              <MiniMap width="150px" height="150px" debounceTime={5} />
             </ControlsContainer>
           )}
         </SigmaContainer>

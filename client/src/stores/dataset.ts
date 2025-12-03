@@ -203,7 +203,7 @@ export class Dataset {
   }
 
   loadDataset(inputData: DatasetDB) {
-    const data = DatasetSchema.parse(inputData);
+    const data = DatasetSchema.parse(inputData, { jitless: true });
 
     this.mentions.clear();
     this.documents.clear();
@@ -256,6 +256,8 @@ export class Dataset {
     if (this.documentList.length > 0) {
       appState.setViewedDocument(this.documentList[0]);
     }
+
+    this.filterManager.clearAttributes();
 
     data.attributes.forEach((attribute) => {
       this.filterManager.addAttribute(attribute);
