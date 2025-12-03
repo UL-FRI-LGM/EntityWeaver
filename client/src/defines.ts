@@ -62,7 +62,7 @@ export const DEFINES = {
     },
     {
       threshold: 1,
-      color: new Color("hsl(210, 100%, 68%)"),
+      color: new Color("#26AF13"),
     },
   ],
   edges: {
