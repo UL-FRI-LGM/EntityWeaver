@@ -1,7 +1,6 @@
-# NERVIS
-This repository hosts the code for NERVIS, a network graph visualization tool for Named Entities described in the following publication:
-> Uroš Šmajdek and Ciril Bohak (2024), **NERVIS: An Interactive System for Graph-Based Exploration and Editing of Named Entities**
-https://doi.org/10.48550/arXiv.2510.04971
+# EntityWeaver
+This repository hosts the code for EntityWeaver, a network graph visualization tool for Named Entities.  
+Demo available at https://ul-fri-lgm.github.io/EntityWeaver/.
 
 ## Setup
 To set up build and host the client application, run:
