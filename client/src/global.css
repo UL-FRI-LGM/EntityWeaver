@@ -1,5 +1,0 @@
-/* This is how Mantine handles mark coloring, but it isn't declared anywhere */
-:root {
-  --mark-bg-dark: var(--mantine-color-yellow-5);
-  --mark-bg-light: var(--mantine-color-yellow-5);
-}
