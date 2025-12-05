@@ -6,7 +6,7 @@ import personImg from "/person.svg?url";
 import unknownImg from "/unknown.svg?url";
 import Color from "color";
 
-const edgeWidth = 2;
+const edgeWidth = 1;
 
 export const DEFINES = {
   maxQueryLevels: 5,
@@ -30,6 +30,8 @@ export const DEFINES = {
       color: "#f5d96e",
       iconColor: "black",
       size: 30,
+      // size: 20,
+      // size: 15,
       borderSize: 0.1,
       borderColor: "black",
       image: documentImg,
@@ -38,6 +40,8 @@ export const DEFINES = {
       color: "#61b5d4",
       iconColor: "black",
       size: 15,
+      // size: 12,
+      // size: 8,
       borderSize: 0.15,
       borderColor: "black",
     },
@@ -45,6 +49,8 @@ export const DEFINES = {
       color: "#f56563",
       iconColor: "black",
       size: 10,
+      // size: 8,
+      // size: 5,
       borderSize: 0.2,
       borderColor: "#696969",
     },
@@ -118,8 +124,8 @@ export const DEFINES = {
     edgeWeights: {
       MentionToDocument: 3,
       MentionToEntity: 1,
-      EntityToDocument: 0,
-      MentionCollocation: 1,
+      EntityToDocument: 1,
+      MentionCollocation: 0,
       EntityCollocation: 0,
     },
   },

@@ -153,7 +153,7 @@ const EntityTypeProperties = observer(({ entityType }: Props) => {
             />
           </Group>
           {colorValidAttributes !== null && colorValidAttributes.length > 0 && (
-            <Stack>
+            <Stack gap={"xs"}>
               <Group>
                 <Radio
                   checked={colorSource === "attribute"}
