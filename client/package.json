@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write .",
-    "predeploy": "tsc -b && vite build --base=/NERVIS/",
+    "predeploy": "tsc -b && vite build --base=/EntityWeaver/",
     "deploy": "gh-pages -d dist",
     "upgrade:check": "npx npm-check-updates --format group",
     "upgrade": "npx npm-check-updates -u"
