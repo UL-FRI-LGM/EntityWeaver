@@ -2,7 +2,6 @@ import { computed, makeAutoObservable } from "mobx";
 import { Dataset, type GraphNodeType } from "@/stores/dataset.ts";
 import type { RuleGroupType } from "react-querybuilder";
 import { v4 as uuidv4 } from "uuid";
-import { DEFINES } from "@/defines.ts";
 import type { AttributeManager } from "@/stores/nodeAttributes.ts";
 
 const defaultQuery = { combinator: "and", rules: [] };
@@ -40,7 +39,8 @@ export class FilterSequence {
 
   get potentialAttributes() {
     return (
-      this.filterManager.attributeManager.attributes.get(this.filterBy) ?? []
+      this.filterManager.attributeManager.nodeProperties.get(this.filterBy)
+        ?.attributes ?? []
     );
   }
 
@@ -71,12 +71,6 @@ export class FilterManager {
 
   dataset: Dataset;
   attributeManager: AttributeManager;
-
-  typeColors: Map<GraphNodeType, string> = new Map<GraphNodeType, string>([
-    ["Document", DEFINES.nodes.Document.color],
-    ["Mention", DEFINES.nodes.Mention.color],
-    ["Entity", DEFINES.nodes.Entity.color],
-  ]);
 
   constructor(dataset: Dataset, attributeManager: AttributeManager) {
     this.filterSequences = [new FilterSequence(this, "Mention")];

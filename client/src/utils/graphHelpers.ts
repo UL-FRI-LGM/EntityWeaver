@@ -164,6 +164,23 @@ function getNodeColors(
   }
 }
 
+export function setNodeTypeProperties(
+  sigma: Sigma<NodeType, EdgeType> | null,
+  nodeType: GraphNodeType,
+  properties: Partial<NodeType>,
+) {
+  if (!sigma) {
+    return;
+  }
+  const graph = sigma.getGraph();
+  graph.forEachNode((nodeId, attributes) => {
+    if (attributes.nodeType !== nodeType) {
+      return;
+    }
+    graph.mergeNodeAttributes(nodeId, properties);
+  });
+}
+
 export function setColorByType(
   sigma: Sigma<NodeType, EdgeType> | null,
   state: boolean,

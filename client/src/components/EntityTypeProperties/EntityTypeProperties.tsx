@@ -1,5 +1,4 @@
 import { observer } from "mobx-react";
-import type { GraphNodeType } from "@/stores/dataset.ts";
 import {
   ColorInput,
   Group,
@@ -10,7 +9,6 @@ import {
   Tabs,
 } from "@mantine/core";
 import { useState } from "react";
-import { useAppState } from "@/stores/appState.ts";
 import classes from "./EntityTypeProperties.module.css";
 import {
   IconAt,
@@ -22,7 +20,7 @@ import {
   IconSitemap,
   IconUserCircle,
 } from "@tabler/icons-react";
-import type { Attribute } from "@/stores/nodeAttributes.ts";
+import { type Attribute, NodeTypeProperties } from "@/stores/nodeAttributes.ts";
 
 const glyphs = [
   { name: "At", icon: <IconAt size={14} /> },
@@ -99,25 +97,21 @@ const EnumGlyphPicker = observer(
 );
 
 const EntityTypeProperties = observer(
-  ({ entityType }: { entityType: GraphNodeType }) => {
-    const appState = useAppState();
-
+  ({ properties }: { properties: NodeTypeProperties }) => {
     const [selectedView, setSelectedView] = useState<string>("color");
 
-    const [colorSource, setColorSource] = useState<string>("type");
-    const attributes =
-      appState.dataset.attributeManager.attributes.get(entityType);
+    const attributes = properties.attributes;
     const [colorAttribute, setColorAttribute] = useState<Attribute | null>(
       null,
     );
-    const colorValidAttributes = attributes
-      ? attributes.filter(({ type }) => type === "enum")
-      : null;
+    const colorValidAttributes = attributes.filter(
+      ({ type }) => type === "enum",
+    );
 
     const [glyphSource, setGlyphSource] = useState<string>("type");
-    const glyphValidAttributes = attributes
-      ? attributes.filter(({ type }) => type === "enum")
-      : null;
+    const glyphValidAttributes = attributes.filter(
+      ({ type }) => type === "enum",
+    );
     const [glyphAttribute, setGlyphAttribute] = useState<Attribute | null>(
       null,
     );
@@ -131,8 +125,8 @@ const EntityTypeProperties = observer(
           }}
         >
           <Tabs.List grow>
-            <Tabs.Tab value="color">{entityType} Node Color</Tabs.Tab>
-            <Tabs.Tab value="glyph">{entityType} Node Glyph</Tabs.Tab>
+            <Tabs.Tab value="color">{properties.nodeType} Node Color</Tabs.Tab>
+            <Tabs.Tab value="glyph">{properties.nodeType} Node Glyph</Tabs.Tab>
           </Tabs.List>
         </Tabs>
         {selectedView === "color" && (
@@ -140,9 +134,9 @@ const EntityTypeProperties = observer(
             <Group justify={"space-between"}>
               <Group>
                 <Radio
-                  checked={colorSource === "type"}
+                  checked={properties.colorSource === "type"}
                   onChange={() => {
-                    setColorSource("type");
+                    properties.setColorSource("type");
                   }}
                 />
                 By Type
@@ -150,47 +144,46 @@ const EntityTypeProperties = observer(
               <ColorInput
                 style={{ width: 230 }}
                 withEyeDropper={false}
-                disabled={colorSource !== "type"}
-                value={appState.dataset.filterManager.typeColors.get(
-                  entityType,
-                )}
+                disabled={properties.colorSource !== "type"}
+                value={properties.typeColor}
+                onChangeEnd={(color) => {
+                  properties.setTypeColor(color);
+                }}
               />
             </Group>
-            {colorValidAttributes !== null &&
-              colorValidAttributes.length > 0 && (
-                <Stack gap={"xs"}>
-                  <Group>
-                    <Radio
-                      checked={colorSource === "attribute"}
-                      onChange={() => {
-                        setColorSource("attribute");
-                      }}
-                    />
-                    By Attribute
-                    <Select
-                      style={{ width: 230 }}
-                      placeholder="Select Attribute"
-                      disabled={colorSource !== "attribute"}
-                      data={colorValidAttributes.map(({ name }) => name)}
-                      value={colorAttribute?.name || null}
-                      onChange={(value) => {
-                        setColorAttribute(
-                          colorValidAttributes.find(
-                            (attribute) => attribute.name === value,
-                          ) || null,
-                        );
-                      }}
-                    />
-                  </Group>
-                  {colorAttribute !== null &&
-                    colorAttribute.type === "enum" && (
-                      <EnumColorPicker
-                        attribute={colorAttribute}
-                        disabled={colorSource !== "attribute"}
-                      />
-                    )}
-                </Stack>
-              )}
+            {colorValidAttributes.length > 0 && (
+              <Stack gap={"xs"}>
+                <Group>
+                  <Radio
+                    checked={properties.colorSource === "attribute"}
+                    onChange={() => {
+                      properties.setColorSource("attribute");
+                    }}
+                  />
+                  By Attribute
+                  <Select
+                    style={{ width: 230 }}
+                    placeholder="Select Attribute"
+                    disabled={properties.colorSource !== "attribute"}
+                    data={colorValidAttributes.map(({ name }) => name)}
+                    value={colorAttribute?.name || null}
+                    onChange={(value) => {
+                      setColorAttribute(
+                        colorValidAttributes.find(
+                          (attribute) => attribute.name === value,
+                        ) || null,
+                      );
+                    }}
+                  />
+                </Group>
+                {colorAttribute !== null && colorAttribute.type === "enum" && (
+                  <EnumColorPicker
+                    attribute={colorAttribute}
+                    disabled={properties.colorSource !== "attribute"}
+                  />
+                )}
+              </Stack>
+            )}
           </Stack>
         )}
         {selectedView === "glyph" && (
@@ -208,47 +201,45 @@ const EntityTypeProperties = observer(
               <Select
                 style={{ width: 230 }}
                 placeholder="Select glyph"
-                value={defaultGlyphs[entityType].name}
+                value={defaultGlyphs[properties.nodeType].name}
                 data={glyphs.map((glyph) => glyph.name)}
                 renderOption={renderSelectOption}
                 scrollAreaProps={{ type: "auto" }}
               />
             </Group>
-            {glyphValidAttributes !== null &&
-              glyphValidAttributes.length > 0 && (
-                <Stack gap={"xs"}>
-                  <Group>
-                    <Radio
-                      checked={glyphSource === "attribute"}
-                      onChange={() => {
-                        setGlyphSource("attribute");
-                      }}
-                    />
-                    By Attribute
-                    <Select
-                      style={{ width: 230 }}
-                      placeholder="Select Attribute"
-                      disabled={glyphSource !== "attribute"}
-                      data={glyphValidAttributes.map(({ name }) => name)}
-                      value={glyphAttribute?.name || null}
-                      onChange={(value) => {
-                        setGlyphAttribute(
-                          glyphValidAttributes.find(
-                            (attribute) => attribute.name === value,
-                          ) || null,
-                        );
-                      }}
-                    />
-                  </Group>
-                  {glyphAttribute !== null &&
-                    glyphAttribute.type === "enum" && (
-                      <EnumGlyphPicker
-                        attribute={glyphAttribute}
-                        disabled={glyphSource !== "attribute"}
-                      />
-                    )}
-                </Stack>
-              )}
+            {glyphValidAttributes.length > 0 && (
+              <Stack gap={"xs"}>
+                <Group>
+                  <Radio
+                    checked={glyphSource === "attribute"}
+                    onChange={() => {
+                      setGlyphSource("attribute");
+                    }}
+                  />
+                  By Attribute
+                  <Select
+                    style={{ width: 230 }}
+                    placeholder="Select Attribute"
+                    disabled={glyphSource !== "attribute"}
+                    data={glyphValidAttributes.map(({ name }) => name)}
+                    value={glyphAttribute?.name || null}
+                    onChange={(value) => {
+                      setGlyphAttribute(
+                        glyphValidAttributes.find(
+                          (attribute) => attribute.name === value,
+                        ) || null,
+                      );
+                    }}
+                  />
+                </Group>
+                {glyphAttribute !== null && glyphAttribute.type === "enum" && (
+                  <EnumGlyphPicker
+                    attribute={glyphAttribute}
+                    disabled={glyphSource !== "attribute"}
+                  />
+                )}
+              </Stack>
+            )}
           </Stack>
         )}
       </Stack>

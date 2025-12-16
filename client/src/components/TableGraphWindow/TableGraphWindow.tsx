@@ -12,7 +12,7 @@ import EntityTypeProperties from "@/components/EntityTypeProperties/EntityTypePr
 
 type MenuTag = "mentions" | "entities" | "documents" | "edges";
 
-const TableGraphWindow = observer(() => {
+const NodeTypeProperties = observer(() => {
   const appState = useAppState();
 
   const [menuOpen, setMenuOpen] = useState<MenuTag | null>(null);
@@ -20,6 +20,133 @@ const TableGraphWindow = observer(() => {
   function toggleMenu(menuTag: MenuTag) {
     setMenuOpen(menuOpen !== menuTag ? menuTag : null);
   }
+
+  return (
+    <Group>
+      <Popover
+        opened={menuOpen === "mentions"}
+        position="bottom-start"
+        keepMounted={true}
+      >
+        <Popover.Target>
+          <ArrowDropdownButton
+            shownMenu={menuOpen === "mentions"}
+            direction={"down"}
+            onClick={() => {
+              toggleMenu("mentions");
+            }}
+            style={{ height: 30 }}
+          >
+            Mentions
+          </ArrowDropdownButton>
+        </Popover.Target>
+        <Popover.Dropdown
+          className={classes.menuPopover}
+          style={{
+            border: "1px solid var(--mantine-color-gray-5)",
+            boxShadow: "0 0 3px 3px black",
+            backgroundColor: "var(--mantine-color-dark-outline)",
+          }}
+        >
+          <EntityTypeProperties
+            properties={appState.dataset.attributeManager.mentionProperties}
+          />
+        </Popover.Dropdown>
+      </Popover>
+      <Popover
+        opened={menuOpen === "entities"}
+        position="bottom-start"
+        keepMounted={true}
+      >
+        <Popover.Target>
+          <ArrowDropdownButton
+            shownMenu={menuOpen === "entities"}
+            direction={"down"}
+            onClick={() => {
+              toggleMenu("entities");
+            }}
+            style={{ height: 30 }}
+          >
+            Entities
+          </ArrowDropdownButton>
+        </Popover.Target>
+        <Popover.Dropdown
+          className={classes.menuPopover}
+          style={{
+            border: "1px solid var(--mantine-color-gray-5)",
+            boxShadow: "0 0 3px 3px black",
+            backgroundColor: "var(--mantine-color-dark-outline)",
+          }}
+        >
+          <EntityTypeProperties
+            properties={appState.dataset.attributeManager.entityProperties}
+          />
+        </Popover.Dropdown>
+      </Popover>
+      <Popover
+        opened={menuOpen === "documents"}
+        position="bottom-start"
+        keepMounted={true}
+      >
+        <Popover.Target>
+          <ArrowDropdownButton
+            shownMenu={menuOpen === "documents"}
+            direction={"down"}
+            onClick={() => {
+              toggleMenu("documents");
+            }}
+            style={{ height: 30 }}
+          >
+            Documents
+          </ArrowDropdownButton>
+        </Popover.Target>
+        <Popover.Dropdown
+          className={classes.menuPopover}
+          style={{
+            border: "1px solid var(--mantine-color-gray-5)",
+            boxShadow: "0 0 3px 3px black",
+            backgroundColor: "var(--mantine-color-dark-outline)",
+          }}
+        >
+          <EntityTypeProperties
+            properties={appState.dataset.attributeManager.documentProperties}
+          />
+        </Popover.Dropdown>
+      </Popover>
+      <Popover
+        opened={menuOpen === "edges"}
+        position="right-start"
+        keepMounted={true}
+      >
+        <Popover.Target>
+          <ArrowDropdownButton
+            shownMenu={menuOpen === "edges"}
+            direction={"right"}
+            onClick={() => {
+              toggleMenu("edges");
+            }}
+            style={{ height: 30 }}
+          >
+            Edge Coloring
+          </ArrowDropdownButton>
+        </Popover.Target>
+        <Popover.Dropdown
+          className={classes.menuPopover}
+          style={{
+            border: "1px solid var(--mantine-color-gray-5)",
+            boxShadow: "0 0 3px 3px black",
+            backgroundColor: "var(--mantine-color-dark-outline)",
+          }}
+        >
+          <UncertaintyTFWidget />
+        </Popover.Dropdown>
+      </Popover>
+    </Group>
+  );
+});
+
+const TableGraphWindow = observer(() => {
+  const appState = useAppState();
 
   return (
     <div className={sharedClasses.widgetContainer}>
@@ -34,120 +161,7 @@ const TableGraphWindow = observer(() => {
             { label: "Graph View", value: "graph" },
           ]}
         />
-        <Group>
-          <Popover
-            opened={menuOpen === "mentions"}
-            position="bottom-start"
-            keepMounted={true}
-          >
-            <Popover.Target>
-              <ArrowDropdownButton
-                shownMenu={menuOpen === "mentions"}
-                direction={"down"}
-                onClick={() => {
-                  toggleMenu("mentions");
-                }}
-                style={{ height: 30 }}
-              >
-                Mentions
-              </ArrowDropdownButton>
-            </Popover.Target>
-            <Popover.Dropdown
-              className={classes.menuPopover}
-              style={{
-                border: "1px solid var(--mantine-color-gray-5)",
-                boxShadow: "0 0 3px 3px black",
-                backgroundColor: "var(--mantine-color-dark-outline)",
-              }}
-            >
-              <EntityTypeProperties entityType={"Mention"} />
-            </Popover.Dropdown>
-          </Popover>
-          <Popover
-            opened={menuOpen === "entities"}
-            position="bottom-start"
-            keepMounted={true}
-          >
-            <Popover.Target>
-              <ArrowDropdownButton
-                shownMenu={menuOpen === "entities"}
-                direction={"down"}
-                onClick={() => {
-                  toggleMenu("entities");
-                }}
-                style={{ height: 30 }}
-              >
-                Entities
-              </ArrowDropdownButton>
-            </Popover.Target>
-            <Popover.Dropdown
-              className={classes.menuPopover}
-              style={{
-                border: "1px solid var(--mantine-color-gray-5)",
-                boxShadow: "0 0 3px 3px black",
-                backgroundColor: "var(--mantine-color-dark-outline)",
-              }}
-            >
-              <EntityTypeProperties entityType={"Entity"} />
-            </Popover.Dropdown>
-          </Popover>
-          <Popover
-            opened={menuOpen === "documents"}
-            position="bottom-start"
-            keepMounted={true}
-          >
-            <Popover.Target>
-              <ArrowDropdownButton
-                shownMenu={menuOpen === "documents"}
-                direction={"down"}
-                onClick={() => {
-                  toggleMenu("documents");
-                }}
-                style={{ height: 30 }}
-              >
-                Documents
-              </ArrowDropdownButton>
-            </Popover.Target>
-            <Popover.Dropdown
-              className={classes.menuPopover}
-              style={{
-                border: "1px solid var(--mantine-color-gray-5)",
-                boxShadow: "0 0 3px 3px black",
-                backgroundColor: "var(--mantine-color-dark-outline)",
-              }}
-            >
-              <EntityTypeProperties entityType={"Document"} />
-            </Popover.Dropdown>
-          </Popover>
-          <Popover
-            opened={menuOpen === "edges"}
-            position="right-start"
-            keepMounted={true}
-          >
-            <Popover.Target>
-              <ArrowDropdownButton
-                shownMenu={menuOpen === "edges"}
-                direction={"right"}
-                onClick={() => {
-                  toggleMenu("edges");
-                }}
-                style={{ height: 30 }}
-              >
-                Edge Coloring
-              </ArrowDropdownButton>
-            </Popover.Target>
-            <Popover.Dropdown
-              className={classes.menuPopover}
-              style={{
-                border: "1px solid var(--mantine-color-gray-5)",
-                boxShadow: "0 0 3px 3px black",
-                backgroundColor: "var(--mantine-color-dark-outline)",
-              }}
-            >
-              <UncertaintyTFWidget />
-            </Popover.Dropdown>
-          </Popover>
-        </Group>
+        <NodeTypeProperties />
       </div>
       <div className={classes.container}>
         <div
