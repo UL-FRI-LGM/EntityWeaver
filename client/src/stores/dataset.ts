@@ -7,17 +7,14 @@ import { appState, type AppState } from "@/stores/appState.ts";
 import { loadDemo, readFile, sumAndMax } from "@/utils/helpers.ts";
 import { makePersistable } from "mobx-persist-store";
 import { DEFINES } from "@/defines.ts";
-import {
-  type AttributeDB,
-  FilterManager,
-  FilterSequence,
-} from "@/stores/filters.ts";
+import { FilterManager, FilterSequence } from "@/stores/filters.ts";
 import { DatasetSchema, RecordTypeSchema } from "@/utils/schemas.ts";
 import { z } from "zod";
 import { defaultValidator, formatQuery } from "react-querybuilder";
 import { add_operation, type RulesLogic } from "json-logic-js";
 import { jsonLogicAdditionalOperators } from "react-querybuilder";
 import type { GraphEntity } from "@/stores/graphEntity.ts";
+import { type AttributeDB, AttributeManager } from "@/stores/nodeAttributes.ts";
 
 for (const [op, func] of Object.entries(jsonLogicAdditionalOperators)) {
   add_operation(op, func);
@@ -44,6 +41,7 @@ export class Dataset {
   fetchingData = false;
 
   filterActive = false;
+  attributeManager: AttributeManager;
   filterManager: FilterManager;
 
   constructor(appState: AppState) {
@@ -58,7 +56,8 @@ export class Dataset {
       filterManager: false,
     });
 
-    this.filterManager = new FilterManager(this);
+    this.attributeManager = new AttributeManager(this);
+    this.filterManager = new FilterManager(this, this.attributeManager);
 
     if (import.meta.env.VITE_STORE_GRAPH === "true") {
       makePersistable(this, {
@@ -117,14 +116,14 @@ export class Dataset {
           },
           {
             // @ts-expect-error: bad TS inference
-            key: "filterManager",
+            key: "attributeManager",
             // @ts-expect-error: bad TS inference
             serialize: (value) => {
               return value.toJson();
             },
             // @ts-expect-error: bad TS inference
             deserialize: (value: AttributeDB[]) => {
-              return FilterManager.fromJson(this, value);
+              return AttributeManager.fromJson(this, value);
             },
           },
         ],
@@ -144,7 +143,7 @@ export class Dataset {
 
   toJson(): DatasetDB {
     return {
-      attributes: this.filterManager.toJson(),
+      attributes: this.attributeManager.toJson(),
       mentions: this.mentionList.map((m) => m.toJson()),
       entities: this.entityList.map((e) => e.toJson()),
       documents: this.documentList.map((d) => d.toJson()),
@@ -257,10 +256,10 @@ export class Dataset {
       appState.setViewedDocument(this.documentList[0]);
     }
 
-    this.filterManager.clearAttributes();
+    this.attributeManager.clearAttributes();
 
     data.attributes.forEach((attribute) => {
-      this.filterManager.addAttribute(attribute);
+      this.attributeManager.addAttribute(attribute);
     });
 
     appState.runGraphUpdate(recomputeLayout);
