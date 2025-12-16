@@ -1,5 +1,5 @@
 import { Dataset, type GraphNodeType } from "@/stores/dataset.ts";
-import { computed, makeAutoObservable } from "mobx";
+import { computed, makeAutoObservable, observable } from "mobx";
 import { z } from "zod";
 import {
   type AttributeDataTypeSchema,
@@ -8,7 +8,7 @@ import {
 } from "@/utils/schemas.ts";
 import type { Field } from "react-querybuilder";
 import { DEFINES } from "@/defines.ts";
-import { setNodeTypeProperties } from "@/utils/graphHelpers.ts";
+import { setPropertiesForNodesOfType } from "@/utils/graphHelpers.ts";
 
 export type AttributeDB = z.output<typeof AttributeSchema>;
 export type AttributeValueDB = z.output<typeof AttributeValueSchema>;
@@ -20,12 +20,23 @@ export class AttributeValue {
   label: string | undefined;
   color: string;
 
-  constructor(name: string, label?: string, color?: string) {
+  attribute: Attribute;
+
+  constructor(
+    attribute: Attribute,
+    name: string,
+    label?: string,
+    color?: string,
+  ) {
     this.name = name;
     this.label = label;
     this.color = color ?? "#ffffff";
 
-    makeAutoObservable(this);
+    makeAutoObservable(this, {
+      attribute: false,
+    });
+
+    this.attribute = attribute;
   }
 
   toJson(): AttributeValueDB {
@@ -36,11 +47,12 @@ export class AttributeValue {
     };
   }
 
-  static fromJson(attributeValue: AttributeValueDB) {
+  static fromJson(attribute: Attribute, attributeValue: AttributeValueDB) {
     if (typeof attributeValue === "string") {
-      return new AttributeValue(attributeValue);
+      return new AttributeValue(attribute, attributeValue);
     }
     return new AttributeValue(
+      attribute,
       attributeValue.name,
       attributeValue.label,
       attributeValue.color,
@@ -49,6 +61,13 @@ export class AttributeValue {
 
   setColor(color: string) {
     this.color = color;
+
+    if (
+      this.attribute.nodeTypeProperties.colorSource === "attribute" &&
+      this.attribute.nodeTypeProperties.colorAttribute === this.attribute
+    ) {
+      this.attribute.nodeTypeProperties.updateNodeColorsToAttribute();
+    }
   }
 }
 
@@ -56,23 +75,26 @@ export class Attribute {
   name: string;
   label: string | undefined;
   type: AttributeDataType;
-  nodeType: GraphNodeType;
   values: AttributeValue[] | undefined;
 
+  nodeTypeProperties: NodeTypeProperties;
+
   constructor(
+    nodeTypeProperties: NodeTypeProperties,
     name: string,
     type: AttributeDataType,
-    nodeType: GraphNodeType,
     label?: string,
-    values?: AttributeValue[],
   ) {
     this.name = name;
     this.type = type;
-    this.nodeType = nodeType;
     this.label = label;
-    this.values = values;
 
-    makeAutoObservable(this, { field: computed({ keepAlive: true }) });
+    makeAutoObservable(this, {
+      nodeTypeProperties: false,
+      field: computed({ keepAlive: true }),
+    });
+
+    this.nodeTypeProperties = nodeTypeProperties;
   }
 
   get field(): Field {
@@ -93,20 +115,44 @@ export class Attribute {
     return {
       name: this.name,
       type: this.type,
-      records: [this.nodeType],
+      records: [this.nodeTypeProperties.nodeType],
       label: this.label,
       values: this.values?.map((value) => value.toJson()),
     };
   }
 
-  static fromJson(attribute: AttributeDB, nodeType: GraphNodeType): Attribute {
-    return new Attribute(
+  addAttributeValue(value: AttributeValue) {
+    if (this.type !== "enum") {
+      console.warn(
+        `Cannot add value to attribute ${this.name} of type ${this.type}, only enum attributes can have values.`,
+      );
+      return;
+    }
+    if (!this.values) {
+      this.values = [];
+    }
+    this.values.push(value);
+  }
+
+  static fromJson(
+    nodeTypeProperties: NodeTypeProperties,
+    attribute: AttributeDB,
+  ): Attribute {
+    const attributeInstance = new Attribute(
+      nodeTypeProperties,
       attribute.name,
       attribute.type,
-      nodeType,
       attribute.label,
-      attribute.values?.map((value) => AttributeValue.fromJson(value)),
     );
+    if (attribute.values) {
+      for (const attributeValue of attribute.values) {
+        attributeInstance.addAttributeValue(
+          AttributeValue.fromJson(attributeInstance, attributeValue),
+        );
+      }
+    }
+
+    return attributeInstance;
   }
 }
 
@@ -115,10 +161,12 @@ export type colorSource = "type" | "attribute";
 export class NodeTypeProperties {
   nodeType: GraphNodeType;
   typeColor: string;
+  colorAttribute: Attribute | undefined;
+
   colorSource: colorSource;
 
   attributeManager: AttributeManager;
-  attributes: Attribute[];
+  attributeMap: Map<string, Attribute> = new Map<string, Attribute>();
 
   constructor(
     attributeManager: AttributeManager,
@@ -133,17 +181,39 @@ export class NodeTypeProperties {
     makeAutoObservable(this, {
       attributeManager: false,
       updateNodeColorsToType: false,
+      attributes: computed({ keepAlive: true }),
+      attributeMap: observable.shallow,
     });
 
     this.attributeManager = attributeManager;
-    this.attributes = [];
+  }
+
+  get attributes() {
+    return Array.from(this.attributeMap.values());
+  }
+
+  addAttribute(attribute: Attribute) {
+    if (this.attributeMap.has(attribute.name)) {
+      console.warn(
+        `Attribute ${attribute.name} already exists for node type ${this.nodeType}, it will be overwritten.`,
+      );
+    }
+    this.attributeMap.set(attribute.name, attribute);
+  }
+
+  clearAttributes() {
+    this.attributeMap.clear();
   }
 
   setColorSource(source: colorSource) {
+    if (this.colorSource === source) return;
+
     this.colorSource = source;
 
     if (this.colorSource === "type") {
       this.updateNodeColorsToType();
+    } else {
+      this.updateNodeColorsToAttribute();
     }
   }
 
@@ -156,7 +226,7 @@ export class NodeTypeProperties {
   }
 
   updateNodeColorsToType() {
-    setNodeTypeProperties(
+    setPropertiesForNodesOfType(
       this.attributeManager.dataset.appState.sigma,
       this.nodeType,
       {
@@ -165,12 +235,31 @@ export class NodeTypeProperties {
     );
   }
 
-  addAttribute(attribute: Attribute) {
-    this.attributes.push(attribute);
+  updateNodeColorsToAttribute() {
+    const attribute = this.colorAttribute;
+    if (attribute?.type !== "enum") return;
+
+    // updatePropertiesForNodesOfType(
+    //   this.attributeManager.dataset.appState.sigma,
+    //   this.nodeType,
+    //   (attributes) => {
+    //     const attrValueName = attributes[attribute.name];
+    //   },
+    // );
   }
 
-  clearAttributes() {
-    this.attributes = [];
+  setColorAttribute(attributeName: string) {
+    const attribute = this.attributeMap.get(attributeName);
+    if (!attribute) {
+      console.warn(
+        `Attribute ${attributeName} not found for node type ${this.nodeType}`,
+      );
+      return;
+    }
+
+    if (this.colorAttribute === attribute) return;
+
+    this.colorAttribute = attribute;
   }
 }
 
@@ -227,11 +316,11 @@ export class AttributeManager {
   }
 
   static fromJson(dataset: Dataset, attributes: AttributeDB[]) {
-    const filterManager = new AttributeManager(dataset);
+    const attributeManager = new AttributeManager(dataset);
     attributes.forEach((attribute) => {
-      filterManager.addAttribute(attribute);
+      attributeManager.addAttribute(attribute);
     });
-    return filterManager;
+    return attributeManager;
   }
 
   clearAttributes() {
@@ -242,9 +331,18 @@ export class AttributeManager {
 
   addAttribute(attribute: AttributeDB) {
     attribute.records.forEach((recordType) => {
-      const attributeInstance = Attribute.fromJson(attribute, recordType);
       const nodeTypeProperties = this.nodeProperties.get(recordType);
-      nodeTypeProperties?.addAttribute(attributeInstance);
+      if (!nodeTypeProperties) {
+        console.warn(
+          `Node type ${recordType} not found for attribute ${attribute.name}`,
+        );
+        return;
+      }
+      const attributeInstance = Attribute.fromJson(
+        nodeTypeProperties,
+        attribute,
+      );
+      nodeTypeProperties.addAttribute(attributeInstance);
     });
   }
 }

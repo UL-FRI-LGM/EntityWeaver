@@ -64,6 +64,9 @@ const EnumColorPicker = observer(
             withEyeDropper={false}
             disabled={disabled}
             value={attributeValue.color}
+            onChangeEnd={(color) => {
+              attributeValue.setColor(color);
+            }}
           />
         </Group>
       );
@@ -100,16 +103,12 @@ const EntityTypeProperties = observer(
   ({ properties }: { properties: NodeTypeProperties }) => {
     const [selectedView, setSelectedView] = useState<string>("color");
 
-    const attributes = properties.attributes;
-    const [colorAttribute, setColorAttribute] = useState<Attribute | null>(
-      null,
-    );
-    const colorValidAttributes = attributes.filter(
+    const colorValidAttributes = properties.attributes.filter(
       ({ type }) => type === "enum",
     );
 
     const [glyphSource, setGlyphSource] = useState<string>("type");
-    const glyphValidAttributes = attributes.filter(
+    const glyphValidAttributes = properties.attributes.filter(
       ({ type }) => type === "enum",
     );
     const [glyphAttribute, setGlyphAttribute] = useState<Attribute | null>(
@@ -166,19 +165,18 @@ const EntityTypeProperties = observer(
                     placeholder="Select Attribute"
                     disabled={properties.colorSource !== "attribute"}
                     data={colorValidAttributes.map(({ name }) => name)}
-                    value={colorAttribute?.name || null}
+                    value={properties.colorAttribute?.name ?? null}
                     onChange={(value) => {
-                      setColorAttribute(
-                        colorValidAttributes.find(
-                          (attribute) => attribute.name === value,
-                        ) || null,
-                      );
+                      if (value === null) {
+                        return;
+                      }
+                      properties.setColorAttribute(value);
                     }}
                   />
                 </Group>
-                {colorAttribute !== null && colorAttribute.type === "enum" && (
+                {properties.colorAttribute?.type === "enum" && (
                   <EnumColorPicker
-                    attribute={colorAttribute}
+                    attribute={properties.colorAttribute}
                     disabled={properties.colorSource !== "attribute"}
                   />
                 )}

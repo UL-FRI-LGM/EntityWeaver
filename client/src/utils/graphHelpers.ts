@@ -164,7 +164,7 @@ function getNodeColors(
   }
 }
 
-export function setNodeTypeProperties(
+export function setPropertiesForNodesOfType(
   sigma: Sigma<NodeType, EdgeType> | null,
   nodeType: GraphNodeType,
   properties: Partial<NodeType>,
@@ -178,6 +178,23 @@ export function setNodeTypeProperties(
       return;
     }
     graph.mergeNodeAttributes(nodeId, properties);
+  });
+}
+
+export function updatePropertiesForNodesOfType(
+  sigma: Sigma<NodeType, EdgeType> | null,
+  nodeType: GraphNodeType,
+  updater: (_attributes: NodeType) => NodeType,
+) {
+  if (!sigma) {
+    return;
+  }
+  const graph = sigma.getGraph();
+  graph.forEachNode((nodeId, attributes) => {
+    if (attributes.nodeType !== nodeType) {
+      return;
+    }
+    graph.updateNodeAttributes(nodeId, updater);
   });
 }
 
