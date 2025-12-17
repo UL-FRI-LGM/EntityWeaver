@@ -12,22 +12,17 @@ export const GraphNodeSchema = z.object({
   attributes: z.optional(NodeAttributes),
 });
 
-const RequiredEntitySchemaKeys = ["name"] as const;
+export const EntityAttributes = z
+  .object({
+    name: z.string().min(1),
+  })
+  .catchall(AttributeValues);
 
 export const EntitySchema = GraphNodeSchema.extend({
   id: z.string().min(1),
   x: z.optional(z.number()),
   y: z.optional(z.number()),
-  attributes: z
-    .optional(NodeAttributes)
-    .refine(
-      (record) => !record || RequiredEntitySchemaKeys.every((k) => k in record),
-      {
-        message:
-          "Entity must have required attributes: " +
-          RequiredEntitySchemaKeys.join(", "),
-      },
-    ),
+  attributes: z.optional(EntityAttributes),
 });
 
 export const LinkSchema = z.object({
@@ -45,7 +40,11 @@ export const MentionSchema = GraphNodeSchema.extend({
   y: z.optional(z.number()),
 });
 
-const RequiredDocumentSchemaKeys = ["title"] as const;
+export const DocumentAttributes = z
+  .object({
+    title: z.string().min(1),
+  })
+  .catchall(AttributeValues);
 
 export const DocumentSchema = GraphNodeSchema.extend({
   id: z.string().min(1),
@@ -53,17 +52,7 @@ export const DocumentSchema = GraphNodeSchema.extend({
   text: z.string().min(1),
   x: z.optional(z.number()),
   y: z.optional(z.number()),
-  attributes: z
-    .optional(NodeAttributes)
-    .refine(
-      (record) =>
-        !record || RequiredDocumentSchemaKeys.every((k) => k in record),
-      {
-        message:
-          "Document must have required attributes: " +
-          RequiredEntitySchemaKeys.join(", "),
-      },
-    ),
+  attributes: z.optional(DocumentAttributes),
 });
 
 export const CollocationSchema = z.object({

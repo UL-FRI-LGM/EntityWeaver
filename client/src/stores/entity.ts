@@ -4,7 +4,11 @@ import type { Dataset } from "@/stores/dataset.ts";
 import { computed, makeObservable, override } from "mobx";
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
 import type { EntityLink } from "@/stores/entityLink.ts";
-import type { AttributeValuesType, EntitySchema } from "@/utils/schemas.ts";
+import {
+  type AttributeValuesType,
+  EntityAttributes,
+  type EntitySchema,
+} from "@/utils/schemas.ts";
 import { z } from "zod";
 
 export type EntityTypes = keyof typeof DEFINES.entityTypes.names;
@@ -45,11 +49,19 @@ export class Entity extends GraphEntity {
   }
 
   toJson(): EntityDB {
+    const rawAttributes = this.attributesToJson();
+    const attributes: z.infer<typeof EntityAttributes> | undefined =
+      rawAttributes
+        ? "name" in rawAttributes
+          ? { ...rawAttributes, name: String(rawAttributes.name) }
+          : { ...rawAttributes, name: this.internal_id }
+        : undefined;
+
     return {
       id: this.internal_id,
       x: this.x,
       y: this.y,
-      attributes: this.attributesToJson(),
+      attributes: attributes,
     };
   }
 

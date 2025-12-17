@@ -3,7 +3,11 @@ import type { Mention } from "@/stores/mention.ts";
 import type { Dataset } from "@/stores/dataset.ts";
 import { computed, makeObservable, override } from "mobx";
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
-import type { AttributeValuesType, DocumentSchema } from "@/utils/schemas.ts";
+import {
+  type AttributeValuesType,
+  DocumentAttributes,
+  type DocumentSchema,
+} from "@/utils/schemas.ts";
 import { z } from "zod";
 
 export type DocumentDB = z.output<typeof DocumentSchema>;
@@ -51,12 +55,20 @@ export class Document extends GraphEntity {
   }
 
   toJson(): DocumentDB {
+    const rawAttributes = this.attributesToJson();
+    const attributes: z.infer<typeof DocumentAttributes> | undefined =
+      rawAttributes
+        ? "title" in rawAttributes
+          ? { ...rawAttributes, title: String(rawAttributes.title) }
+          : { ...rawAttributes, title: this.internal_id }
+        : undefined;
+
     return {
       id: this.internal_id,
       text: this.text,
       x: this.x,
       y: this.y,
-      attributes: this.attributesToJson(),
+      attributes: attributes,
     };
   }
 
