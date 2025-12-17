@@ -3,7 +3,7 @@ import type { Dataset } from "@/stores/dataset.ts";
 import { makeObservable } from "mobx";
 import { apply, type RulesLogic } from "json-logic-js";
 import { bfsFromNode } from "graphology-traversal";
-import type { GraphNodeType } from "@/utils/schemas.ts";
+import type { GraphNodeType, NodeAttributes } from "@/utils/schemas.ts";
 
 export abstract class GraphEntity {
   readonly id: string;
@@ -11,6 +11,7 @@ export abstract class GraphEntity {
   x?: number;
   y?: number;
   dataset: Dataset;
+  attributes: NodeAttributes;
 
   nodeType: GraphNodeType;
   filtered = false;
@@ -23,6 +24,7 @@ export abstract class GraphEntity {
     x: number | undefined,
     y: number | undefined,
     nodeType: GraphNodeType,
+    attributes?: NodeAttributes,
   ) {
     this.internal_id = internal_id;
     this.id = id_prefix + internal_id;
@@ -31,8 +33,10 @@ export abstract class GraphEntity {
     this.y = y;
 
     this.nodeType = nodeType;
+    this.attributes = attributes ?? {};
 
     makeObservable(this, {
+      attributes: true,
       x: true,
       y: true,
       setPosition: true,
@@ -51,6 +55,11 @@ export abstract class GraphEntity {
   // eslint-disable-next-line @typescript-eslint/class-literal-property-style
   get canDelete(): boolean {
     return true;
+  }
+
+  // This ensures certain that reserved attributes get used for filtering
+  getReservedAttributes(): NodeAttributes {
+    return {};
   }
 
   setPosition(position: { x?: number | null; y?: number | null }) {
@@ -87,8 +96,13 @@ export abstract class GraphEntity {
     }
 
     const hidden = showsIds.size > 0 && !showsIds.has(this.id);
+    const attributes = {
+      ...this.attributes,
+      ...this.getReservedAttributes(),
+    };
     const filtered =
-      hidden || (attributeFilter !== false && !apply(attributeFilter, this));
+      hidden ||
+      (attributeFilter !== false && !apply(attributeFilter, attributes));
 
     if ((!excluding && filtered) || (excluding && !filtered)) {
       return;

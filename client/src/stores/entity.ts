@@ -3,25 +3,29 @@ import type { Dataset } from "@/stores/dataset.ts";
 import { computed, makeObservable, override } from "mobx";
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
 import type { EntityLink } from "@/stores/entityLink.ts";
-import { type EntityAttributes, type EntityDB } from "@/utils/schemas.ts";
+import { type EntityDB, type NodeAttributes } from "@/utils/schemas.ts";
 
 export class Entity extends GraphEntity {
   static prefix = "Entity-";
 
   mentionLinks: Map<string, EntityLink> = new Map<string, EntityLink>();
-  attributes: EntityAttributes;
+
+  // Reserved attributes
+  name: string;
 
   constructor(
     internal_id: string,
+    name: string,
     dataset: Dataset,
-    attributes: EntityAttributes,
+    attributes?: NodeAttributes,
     x?: number,
     y?: number,
   ) {
-    super(internal_id, Entity.prefix, dataset, x, y, "Entity");
+    super(internal_id, Entity.prefix, dataset, x, y, "Entity", attributes);
+
+    this.name = name;
 
     makeObservable(this, {
-      attributes: true,
       name: true,
       type: true,
       setName: true,
@@ -34,29 +38,37 @@ export class Entity extends GraphEntity {
       onMentionLinked: true,
       onMentionUnlinked: true,
     });
-
-    this.attributes = attributes;
   }
 
   static fromJson(data: EntityDB, dataset: Dataset): Entity {
-    return new Entity(data.id, dataset, data.attributes, data.x, data.y);
+    return new Entity(
+      data.id,
+      data.name,
+      dataset,
+      data.attributes,
+      data.x,
+      data.y,
+    );
   }
 
   toJson(): EntityDB {
     return {
       id: this.internal_id,
+      name: this.name,
       x: this.x,
       y: this.y,
       attributes: this.attributes,
     };
   }
 
-  get name(): string {
-    return this.attributes.name;
-  }
-
   get type(): string {
     return "type" in this.attributes ? (this.attributes.type as string) : "";
+  }
+
+  getReservedAttributes(): NodeAttributes {
+    return {
+      name: this.name,
+    };
   }
 
   get mentionLinkList() {

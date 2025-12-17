@@ -5,6 +5,7 @@ import organizationImg from "/organization.svg?url";
 import personImg from "/person.svg?url";
 import unknownImg from "/unknown.svg?url";
 import Color from "color";
+import type { AttributeDB } from "@/utils/schemas.ts";
 
 const edgeWidth = 1;
 
@@ -130,3 +131,18 @@ export const DEFINES = {
     },
   },
 } as const;
+
+export const RESERVED_ATTRIBUTES: AttributeDB[] = [
+  {
+    name: "name",
+    label: "Name",
+    type: "text",
+    records: ["Entity", "Mention"],
+  },
+  {
+    name: "title",
+    label: "Title",
+    type: "text",
+    records: ["Document"],
+  },
+] as const;

@@ -20,7 +20,6 @@ export class Mention extends GraphEntity {
   end_index: number;
 
   entityLinks: Map<string, EntityLink> = new Map<string, EntityLink>();
-  attributes: NodeAttributes;
 
   document: Document;
 
@@ -35,7 +34,7 @@ export class Mention extends GraphEntity {
     x?: number,
     y?: number,
   ) {
-    super(internal_id, Mention.prefix, dataset, x, y, "Mention");
+    super(internal_id, Mention.prefix, dataset, x, y, "Mention", attributes);
     this.start_index = start_index;
     this.end_index = end_index;
     this.document = document;
@@ -47,7 +46,6 @@ export class Mention extends GraphEntity {
     this.document.mentions.set(this.id, this);
 
     makeObservable<Mention>(this, {
-      attributes: true,
       name: computed({ keepAlive: true }),
       type: true,
       start_index: true,
@@ -68,12 +66,16 @@ export class Mention extends GraphEntity {
 
       contextSnippet: computed,
     });
-
-    this.attributes = attributes ?? {};
   }
 
   get type() {
     return "type" in this.attributes ? (this.attributes.type as string) : "";
+  }
+
+  getReservedAttributes(): NodeAttributes {
+    return {
+      name: this.name,
+    };
   }
 
   static fromJson(data: MentionDB, dataset: Dataset): Mention {

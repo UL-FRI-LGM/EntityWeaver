@@ -7,7 +7,7 @@ import {
   type GraphNodeType,
 } from "@/utils/schemas.ts";
 import type { Field } from "react-querybuilder";
-import { DEFINES } from "@/defines.ts";
+import { DEFINES, RESERVED_ATTRIBUTES } from "@/defines.ts";
 import {
   setPropertiesForNodesOfType,
   updatePropertiesForNodesOfType,
@@ -87,15 +87,21 @@ export class Attribute {
 
   nodeTypeProperties: NodeTypeProperties;
 
+  // Prevents deletion
+  reserved: boolean;
+
   constructor(
     nodeTypeProperties: NodeTypeProperties,
     name: string,
     type: AttributeDataType,
     label?: string,
+    reserved = false,
   ) {
     this.name = name;
     this.type = type;
     this.label = label;
+
+    this.reserved = reserved;
 
     makeAutoObservable(this, {
       nodeTypeProperties: false,
@@ -146,8 +152,9 @@ export class Attribute {
     }
     if (this.valueMap.has(value.name)) {
       console.warn(
-        `Value ${value.name} already exists for attribute ${this.name}, it will be overwritten.`,
+        `Value ${value.name} already exists for attribute ${this.name}, skipping.`,
       );
+      return;
     }
     this.valueMap.set(value.name, value);
   }
@@ -155,12 +162,14 @@ export class Attribute {
   static fromJson(
     nodeTypeProperties: NodeTypeProperties,
     attribute: AttributeDB,
+    reserved = false,
   ): Attribute {
     const attributeInstance = new Attribute(
       nodeTypeProperties,
       attribute.name,
       attribute.type,
       attribute.label,
+      reserved,
     );
     if (attribute.values) {
       for (const attributeValue of attribute.values) {
@@ -227,14 +236,19 @@ export class NodeTypeProperties {
   addAttribute(attribute: Attribute) {
     if (this.attributeMap.has(attribute.name)) {
       console.warn(
-        `Attribute ${attribute.name} already exists for node type ${this.nodeType}, it will be overwritten.`,
+        `Attribute ${attribute.name} already exists for node type ${this.nodeType}, skipping.`,
       );
+      return;
     }
     this.attributeMap.set(attribute.name, attribute);
   }
 
   clearAttributes() {
-    this.attributeMap.clear();
+    for (const [name, attribute] of this.attributeMap) {
+      if (!attribute.reserved) {
+        this.attributeMap.delete(name);
+      }
+    }
   }
 
   ////////////
@@ -462,6 +476,10 @@ export class AttributeManager {
     this.nodeProperties.set("Document", this.documentProperties);
     this.nodeProperties.set("Entity", this.entityProperties);
 
+    for (const attribute of RESERVED_ATTRIBUTES) {
+      this.addAttribute(attribute, true);
+    }
+
     makeAutoObservable(this, {
       dataset: false,
     });
@@ -493,7 +511,7 @@ export class AttributeManager {
     });
   }
 
-  addAttribute(attribute: AttributeDB) {
+  addAttribute(attribute: AttributeDB, reserved = false) {
     attribute.records.forEach((recordType) => {
       const nodeTypeProperties = this.nodeProperties.get(recordType);
       if (!nodeTypeProperties) {
@@ -505,6 +523,7 @@ export class AttributeManager {
       const attributeInstance = Attribute.fromJson(
         nodeTypeProperties,
         attribute,
+        reserved,
       );
       nodeTypeProperties.addAttribute(attributeInstance);
     });

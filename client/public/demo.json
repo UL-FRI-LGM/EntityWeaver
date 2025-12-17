@@ -1,22 +1,8 @@
 {
   "attributes": [
     {
-      "name": "title",
-      "type": "text",
-      "records": [
-        "Document"
-      ]
-    },
-    {
-      "name": "name",
-      "type": "text",
-      "records": [
-        "Mention",
-        "Entity"
-      ]
-    },
-    {
       "name": "type",
+      "label": "Type",
       "type": "enum",
       "records": [
         "Mention",
@@ -26,26 +12,22 @@
         {
           "name": "PER",
           "label": "Person",
-          "color": "#f5ad76",
-          "glyph": "Person"
+          "color": "#f5ad76"
         },
         {
           "name": "ORG",
           "label": "Organization",
-          "color": "#e07685",
-          "glyph": "Organization"
+          "color": "#e07685"
         },
         {
           "name": "LOC",
           "label": "Location",
-          "color": "#96b7a8",
-          "glyph": "Location"
+          "color": "#96b7a8"
         },
         {
           "name": "MISC",
           "label": "Miscellaneous",
-          "color": "#468dd3",
-          "glyph": "Miscellaneous"
+          "color": "#468dd3"
         }
       ]
     }
@@ -53,207 +35,199 @@
   "documents": [
     {
       "id": "doc_1",
-      "text": "Alice Johnson and Bob Smith met with representatives from Acme Corp and Delta Inc during the Tech Summit held in San Francisco and Paris. Laura White was also present at the event. The discussions touched on emerging AI trends, and the Cup Final was mentioned as a cultural highlight. The Festival celebrations added a festive atmosphere to the summit, making the gathering both productive and memorable. White later reflected on the significance of AI in shaping future strategies.",
-      "attributes": {
-        "title": "Tech Industry Report 2025"
-      }
+      "title": "Tech Industry Report 2025",
+      "text": "Alice Johnson and Bob Smith met with representatives from Acme Corp and Delta Inc during the Tech Summit held in San Francisco and Paris. Laura White was also present at the event. The discussions touched on emerging AI trends, and the Cup Final was mentioned as a cultural highlight. The Festival celebrations added a festive atmosphere to the summit, making the gathering both productive and memorable. White later reflected on the significance of AI in shaping future strategies."
     },
     {
       "id": "doc_2",
-      "text": "Johnson and Smith participated in a series of meetings alongside Charlie Kim and Sophia Müller in Berlin and London. Acme, Delta, Omega Corp, and Zeta LLC were key organizational players, while the European Union had a strong presence as well. The Summit was followed by the Climate Conference 2025, which attracted international attention. Johnson’s remarks emphasized collaboration between entities such as Acme and the EU to address global challenges.",
-      "attributes": {
-        "title": "European Political Developments"
-      }
+      "title": "European Political Developments",
+      "text": "Johnson and Smith participated in a series of meetings alongside Charlie Kim and Sophia Müller in Berlin and London. Acme, Delta, Omega Corp, and Zeta LLC were key organizational players, while the European Union had a strong presence as well. The Summit was followed by the Climate Conference 2025, which attracted international attention. Johnson’s remarks emphasized collaboration between entities such as Acme and the EU to address global challenges."
     },
     {
       "id": "doc_3",
-      "text": "C. Kim traveled with Müller and Oliver O'Neil to London and Tokyo for a series of events, including the Climate Conference and the Annual Economic Forum. Michael Green also joined them. Omega, Zeta, and the European Union were prominently represented, and the United Nations played a significant role in the proceedings. The Conference gathered experts from around the world to discuss critical topics.",
-      "attributes": {
-        "title": "Global Economic Outlook"
-      }
+      "title": "Global Economic Outlook",
+      "text": "C. Kim traveled with Müller and Oliver O'Neil to London and Tokyo for a series of events, including the Climate Conference and the Annual Economic Forum. Michael Green also joined them. Omega, Zeta, and the European Union were prominently represented, and the United Nations played a significant role in the proceedings. The Conference gathered experts from around the world to discuss critical topics."
     },
     {
       "id": "doc_4",
-      "text": "O'Neil and M. Green attended the Spring Festival in New York City and Paris, accompanied by Laura White. Green delivered a keynote address on global economic trends during the Economic Forum, highlighting the role of the UN. Later, the group attended the World Cup and the Art Biennale, celebrating cultural exchange and international cooperation.",
-      "attributes": {
-        "title": "Cultural Events Around the World"
-      }
+      "title": "Cultural Events Around the World",
+      "text": "O'Neil and M. Green attended the Spring Festival in New York City and Paris, accompanied by Laura White. Green delivered a keynote address on global economic trends during the Economic Forum, highlighting the role of the UN. Later, the group attended the World Cup and the Art Biennale, celebrating cultural exchange and international cooperation."
     }
   ],
   "entities": [
     {
       "id": "entity_1",
+      "name": "Alice Johnson",
       "attributes": {
-        "type": "PER",
-        "name": "Alice Johnson"
+        "type": "PER"
       }
     },
     {
       "id": "entity_2",
+      "name": "Bob Smith",
       "attributes": {
-        "type": "PER",
-        "name": "Bob Smith"
+        "type": "PER"
       }
     },
     {
       "id": "entity_3",
+      "name": "Charlie Kim",
       "attributes": {
-        "type": "PER",
-        "name": "Charlie Kim"
+        "type": "PER"
       }
     },
     {
       "id": "entity_4",
+      "name": "Sophia Müller",
       "attributes": {
-        "type": "PER",
-        "name": "Sophia Müller"
+        "type": "PER"
       }
     },
     {
       "id": "entity_5",
+      "name": "Oliver O'Neil",
       "attributes": {
-        "type": "PER",
-        "name": "Oliver O'Neil"
+        "type": "PER"
       }
     },
     {
       "id": "entity_6",
+      "name": "Michael Green",
       "attributes": {
-        "type": "PER",
-        "name": "Michael Green"
+        "type": "PER"
       }
     },
     {
       "id": "entity_7",
+      "name": "Laura White",
       "attributes": {
-        "type": "PER",
-        "name": "Laura White"
+        "type": "PER"
       }
     },
     {
       "id": "entity_8",
+      "name": "Acme Corp",
       "attributes": {
-        "type": "ORG",
-        "name": "Acme Corp"
+        "type": "ORG"
       }
     },
     {
       "id": "entity_9",
+      "name": "Delta Inc",
       "attributes": {
-        "type": "ORG",
-        "name": "Delta Inc"
+        "type": "ORG"
       }
     },
     {
       "id": "entity_10",
+      "name": "Omega Corp",
       "attributes": {
-        "type": "ORG",
-        "name": "Omega Corp"
+        "type": "ORG"
       }
     },
     {
       "id": "entity_11",
+      "name": "Zeta LLC",
       "attributes": {
-        "type": "ORG",
-        "name": "Zeta LLC"
+        "type": "ORG"
       }
     },
     {
       "id": "entity_12",
+      "name": "European Union",
       "attributes": {
-        "type": "ORG",
-        "name": "European Union"
+        "type": "ORG"
       }
     },
     {
       "id": "entity_13",
+      "name": "United Nations",
       "attributes": {
-        "type": "ORG",
-        "name": "United Nations"
+        "type": "ORG"
       }
     },
     {
       "id": "entity_14",
+      "name": "San Francisco",
       "attributes": {
-        "type": "LOC",
-        "name": "San Francisco"
+        "type": "LOC"
       }
     },
     {
       "id": "entity_15",
+      "name": "Berlin",
       "attributes": {
-        "type": "LOC",
-        "name": "Berlin"
+        "type": "LOC"
       }
     },
     {
       "id": "entity_16",
+      "name": "London",
       "attributes": {
-        "type": "LOC",
-        "name": "London"
+        "type": "LOC"
       }
     },
     {
       "id": "entity_17",
+      "name": "Tokyo",
       "attributes": {
-        "type": "LOC",
-        "name": "Tokyo"
+        "type": "LOC"
       }
     },
     {
       "id": "entity_18",
+      "name": "New York City",
       "attributes": {
-        "type": "LOC",
-        "name": "New York City"
+        "type": "LOC"
       }
     },
     {
       "id": "entity_19",
+      "name": "Paris",
       "attributes": {
-        "type": "LOC",
-        "name": "Paris"
+        "type": "LOC"
       }
     },
     {
       "id": "entity_20",
+      "name": "Tech Summit",
       "attributes": {
-        "type": "MISC",
-        "name": "Tech Summit"
+        "type": "MISC"
       }
     },
     {
       "id": "entity_21",
+      "name": "Spring Festival",
       "attributes": {
-        "type": "MISC",
-        "name": "Spring Festival"
+        "type": "MISC"
       }
     },
     {
       "id": "entity_22",
+      "name": "Climate Conference 2025",
       "attributes": {
-        "type": "MISC",
-        "name": "Climate Conference 2025"
+        "type": "MISC"
       }
     },
     {
       "id": "entity_23",
+      "name": "Annual Economic Forum",
       "attributes": {
-        "type": "MISC",
-        "name": "Annual Economic Forum"
+        "type": "MISC"
       }
     },
     {
       "id": "entity_24",
+      "name": "World Cup",
       "attributes": {
-        "type": "MISC",
-        "name": "World Cup"
+        "type": "MISC"
       }
     },
     {
       "id": "entity_25",
+      "name": "Art Biennale",
       "attributes": {
-        "type": "MISC",
-        "name": "Art Biennale"
+        "type": "MISC"
       }
     }
   ],

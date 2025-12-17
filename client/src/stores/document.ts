@@ -3,7 +3,7 @@ import type { Mention } from "@/stores/mention.ts";
 import type { Dataset } from "@/stores/dataset.ts";
 import { computed, makeObservable, override } from "mobx";
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
-import { type DocumentAttributes, type DocumentDB } from "@/utils/schemas.ts";
+import { type DocumentDB, type NodeAttributes } from "@/utils/schemas.ts";
 
 export class Document extends GraphEntity {
   static prefix = "Document-";
@@ -11,21 +11,23 @@ export class Document extends GraphEntity {
   mentions: Map<string, Mention> = new Map<string, Mention>();
   text: string;
 
-  attributes: DocumentAttributes;
+  // Reserved attributes
+  title: string;
 
   constructor(
     internal_id: string,
+    title: string,
     text: string,
     dataset: Dataset,
-    attributes: DocumentAttributes,
+    attributes?: NodeAttributes,
     x?: number,
     y?: number,
   ) {
-    super(internal_id, Document.prefix, dataset, x, y, "Document");
+    super(internal_id, Document.prefix, dataset, x, y, "Document", attributes);
+    this.title = title;
     this.text = text;
 
     makeObservable(this, {
-      attributes: true,
       title: true,
       setTitle: true,
       name: true,
@@ -37,13 +39,12 @@ export class Document extends GraphEntity {
       textWithEntities: true,
       dispose: override,
     });
-
-    this.attributes = attributes;
   }
 
   static fromJson(data: DocumentDB, dataset: Dataset): Document {
     return new Document(
       data.id,
+      data.title,
       data.text,
       dataset,
       data.attributes,
@@ -55,6 +56,7 @@ export class Document extends GraphEntity {
   toJson(): DocumentDB {
     return {
       id: this.internal_id,
+      title: this.title,
       text: this.text,
       x: this.x,
       y: this.y,
@@ -63,11 +65,13 @@ export class Document extends GraphEntity {
   }
 
   get name() {
-    return this.attributes.title;
+    return this.title;
   }
 
-  get title() {
-    return this.name;
+  getReservedAttributes(): NodeAttributes {
+    return {
+      title: this.title,
+    };
   }
 
   setTitle(title: string) {

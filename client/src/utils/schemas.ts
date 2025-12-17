@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { RESERVED_ATTRIBUTES } from "@/defines.ts";
 
 const AttributeValues = z.union([z.number(), z.string(), z.boolean()]);
 
@@ -12,18 +13,11 @@ const GraphNodeSchema = z.object({
   attributes: z.optional(NodeAttributesSchema),
 });
 
-const EntityAttributesSchema = z
-  .object({
-    name: z.string().min(1),
-  })
-  .catchall(AttributeValues);
-export type EntityAttributes = z.infer<typeof EntityAttributesSchema>;
-
 const EntitySchema = GraphNodeSchema.extend({
   id: z.string().min(1),
   x: z.optional(z.number()),
   y: z.optional(z.number()),
-  attributes: EntityAttributesSchema,
+  name: z.string().min(1),
 });
 export type EntityDB = z.output<typeof EntitySchema>;
 
@@ -43,20 +37,12 @@ const MentionSchema = GraphNodeSchema.extend({
 });
 export type MentionDB = z.output<typeof MentionSchema>;
 
-const DocumentAttributesSchema = z
-  .object({
-    title: z.string().min(1),
-  })
-  .catchall(AttributeValues);
-export type DocumentAttributes = z.infer<typeof DocumentAttributesSchema>;
-
 const DocumentSchema = GraphNodeSchema.extend({
   id: z.string().min(1),
-  // title: z.string().min(1),
+  title: z.string().min(1),
   text: z.string().min(1),
   x: z.optional(z.number()),
   y: z.optional(z.number()),
-  attributes: DocumentAttributesSchema,
 });
 export type DocumentDB = z.output<typeof DocumentSchema>;
 
@@ -87,7 +73,7 @@ export type AttributeDataType = z.infer<typeof AttributeDataTypeSchema>;
 
 const AttributeSchema = z
   .object({
-    name: z.string(),
+    name: z.string().min(1),
     label: z.optional(z.string()),
     type: AttributeDataTypeSchema,
     records: z.array(RecordTypeSchema).min(1),
@@ -98,7 +84,26 @@ const AttributeSchema = z
       attribute.type !== "enum" ||
       (attribute.values !== undefined && attribute.values.length > 0),
     {
-      message: "Enum attributes must have values defined",
+      error: "Enum attributes must have values defined",
+    },
+  )
+  .refine(
+    (attribute) => {
+      for (const reservedAttribute of RESERVED_ATTRIBUTES) {
+        if (
+          attribute.records.some((item) =>
+            reservedAttribute.records.includes(item),
+          ) &&
+          reservedAttribute.name === attribute.name
+        ) {
+          return false;
+        }
+      }
+      return true;
+    },
+    {
+      error: `Attributes contain a reserved attribute name`,
+      abort: true,
     },
   );
 export type AttributeDB = z.output<typeof AttributeSchema>;
