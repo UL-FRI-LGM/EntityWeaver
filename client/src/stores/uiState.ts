@@ -1,16 +1,11 @@
-import { appState, type AppState } from "@/stores/appState.ts";
+import { type AppState } from "@/stores/appState.ts";
 import { makeAutoObservable } from "mobx";
-import { setColorByType } from "@/utils/graphHelpers.ts";
 import { isHydrated, makePersistable } from "mobx-persist-store";
 
 interface Filters {
   entities: boolean;
   documents: boolean;
   mentions: boolean;
-  people: boolean;
-  locations: boolean;
-  organizations: boolean;
-  miscellaneous: boolean;
   collocations: boolean;
 }
 
@@ -22,7 +17,6 @@ export class UiState {
   highlightOnSelect = true;
   highlightOnHover = true;
   entityView = false;
-  colorByType = false;
   mentionContextOpen = false;
   documentEditMode = false;
   tableView = false;
@@ -32,10 +26,6 @@ export class UiState {
     entities: true,
     documents: true,
     mentions: true,
-    people: true,
-    locations: true,
-    organizations: true,
-    miscellaneous: true,
     collocations: false,
   };
 
@@ -50,7 +40,6 @@ export class UiState {
         "highlightOnSelect",
         "highlightOnHover",
         "entityView",
-        "colorByType",
         "filters",
         "documentEditMode",
         "tableView",
@@ -65,11 +54,6 @@ export class UiState {
 
   get isReloading() {
     return isHydrated(this);
-  }
-
-  setColorByType(state: boolean) {
-    this.colorByType = state;
-    setColorByType(appState.sigma, state);
   }
 
   setMentionContextOpen(state: boolean) {

@@ -209,6 +209,12 @@ export class Dataset {
     this.entities.clear();
     this.collocations.clear();
 
+    this.attributeManager.clearAttributes();
+
+    data.attributes.forEach((attribute) => {
+      this.attributeManager.addAttribute(attribute);
+    });
+
     data.documents.forEach((document) => {
       this.documents.set(
         `${Document.prefix}${document.id}`,
@@ -255,12 +261,6 @@ export class Dataset {
     if (this.documentList.length > 0) {
       appState.setViewedDocument(this.documentList[0]);
     }
-
-    this.attributeManager.clearAttributes();
-
-    data.attributes.forEach((attribute) => {
-      this.attributeManager.addAttribute(attribute);
-    });
 
     appState.runGraphUpdate(recomputeLayout);
   }

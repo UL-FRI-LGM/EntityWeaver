@@ -1,17 +1,33 @@
 import { z } from "zod";
 
+export const AttributeValues = z.union([z.number(), z.string(), z.boolean()]);
+export type AttributeValuesType = z.infer<typeof AttributeValues>;
+
+export const NodeAttributes = z.record(z.string(), AttributeValues);
+
 export const GraphNodeSchema = z.object({
   id: z.string().min(1),
   x: z.optional(z.number()),
   y: z.optional(z.number()),
+  attributes: z.optional(NodeAttributes),
 });
+
+const RequiredEntitySchemaKeys = ["name"] as const;
 
 export const EntitySchema = GraphNodeSchema.extend({
   id: z.string().min(1),
-  name: z.string().min(1),
-  type: z.string().min(1),
   x: z.optional(z.number()),
   y: z.optional(z.number()),
+  attributes: z
+    .optional(NodeAttributes)
+    .refine(
+      (record) => !record || RequiredEntitySchemaKeys.every((k) => k in record),
+      {
+        message:
+          "Entity must have required attributes: " +
+          RequiredEntitySchemaKeys.join(", "),
+      },
+    ),
 });
 
 export const LinkSchema = z.object({
@@ -21,7 +37,6 @@ export const LinkSchema = z.object({
 
 export const MentionSchema = GraphNodeSchema.extend({
   id: z.string().min(1),
-  type: z.string().min(1),
   document_id: z.string().min(1),
   start_index: z.int(),
   end_index: z.int(),
@@ -30,12 +45,25 @@ export const MentionSchema = GraphNodeSchema.extend({
   y: z.optional(z.number()),
 });
 
+const RequiredDocumentSchemaKeys = ["title"] as const;
+
 export const DocumentSchema = GraphNodeSchema.extend({
   id: z.string().min(1),
-  title: z.string().min(1),
+  // title: z.string().min(1),
   text: z.string().min(1),
   x: z.optional(z.number()),
   y: z.optional(z.number()),
+  attributes: z
+    .optional(NodeAttributes)
+    .refine(
+      (record) =>
+        !record || RequiredDocumentSchemaKeys.every((k) => k in record),
+      {
+        message:
+          "Document must have required attributes: " +
+          RequiredEntitySchemaKeys.join(", "),
+      },
+    ),
 });
 
 export const CollocationSchema = z.object({

@@ -8,7 +8,11 @@ import {
 } from "@/utils/schemas.ts";
 import type { Field } from "react-querybuilder";
 import { DEFINES } from "@/defines.ts";
-import { setPropertiesForNodesOfType } from "@/utils/graphHelpers.ts";
+import {
+  setPropertiesForNodesOfType,
+  updatePropertiesForNodesOfType,
+} from "@/utils/graphHelpers.ts";
+import type { NodeSource } from "@/stores/appState.ts";
 
 export type AttributeDB = z.output<typeof AttributeSchema>;
 export type AttributeValueDB = z.output<typeof AttributeValueSchema>;
@@ -75,7 +79,7 @@ export class Attribute {
   name: string;
   label: string | undefined;
   type: AttributeDataType;
-  values: AttributeValue[] | undefined;
+  valueMap: Map<string, AttributeValue> | undefined;
 
   nodeTypeProperties: NodeTypeProperties;
 
@@ -92,9 +96,14 @@ export class Attribute {
     makeAutoObservable(this, {
       nodeTypeProperties: false,
       field: computed({ keepAlive: true }),
+      values: computed({ keepAlive: true }),
     });
 
     this.nodeTypeProperties = nodeTypeProperties;
+  }
+
+  get values(): AttributeValue[] | undefined {
+    return this.valueMap ? Array.from(this.valueMap.values()) : undefined;
   }
 
   get field(): Field {
@@ -128,10 +137,15 @@ export class Attribute {
       );
       return;
     }
-    if (!this.values) {
-      this.values = [];
+    if (!this.valueMap) {
+      this.valueMap = new Map<string, AttributeValue>();
     }
-    this.values.push(value);
+    if (this.valueMap.has(value.name)) {
+      console.warn(
+        `Value ${value.name} already exists for attribute ${this.name}, it will be overwritten.`,
+      );
+    }
+    this.valueMap.set(value.name, value);
   }
 
   static fromJson(
@@ -239,13 +253,41 @@ export class NodeTypeProperties {
     const attribute = this.colorAttribute;
     if (attribute?.type !== "enum") return;
 
-    // updatePropertiesForNodesOfType(
-    //   this.attributeManager.dataset.appState.sigma,
-    //   this.nodeType,
-    //   (attributes) => {
-    //     const attrValueName = attributes[attribute.name];
-    //   },
-    // );
+    updatePropertiesForNodesOfType(
+      this.attributeManager.dataset.appState.sigma,
+      this.nodeType,
+      (attributes) => {
+        return {
+          ...attributes,
+          color: this.getColorForNode(attributes.source),
+        };
+      },
+    );
+  }
+
+  getColorForNode(nodeSource: NodeSource): string {
+    if (this.colorSource === "type") {
+      return this.typeColor;
+    } else {
+      const attribute = this.colorAttribute;
+      if (attribute?.type !== "enum") {
+        return this.typeColor;
+      }
+
+      const attributeValue = nodeSource.attributes.get(attribute.name);
+      if (!attributeValue) {
+        return this.typeColor;
+      }
+
+      const attributeValueInstance = attribute.valueMap?.get(
+        attributeValue as string,
+      );
+      if (!attributeValueInstance) {
+        return this.typeColor;
+      }
+
+      return attributeValueInstance.color;
+    }
   }
 
   setColorAttribute(attributeName: string) {
@@ -260,6 +302,7 @@ export class NodeTypeProperties {
     if (this.colorAttribute === attribute) return;
 
     this.colorAttribute = attribute;
+    this.updateNodeColorsToAttribute();
   }
 }
 

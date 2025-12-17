@@ -3,7 +3,7 @@ import type { Mention } from "@/stores/mention.ts";
 import type { Dataset } from "@/stores/dataset.ts";
 import { computed, makeObservable, override } from "mobx";
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
-import type { DocumentSchema } from "@/utils/schemas.ts";
+import type { AttributeValuesType, DocumentSchema } from "@/utils/schemas.ts";
 import { z } from "zod";
 
 export type DocumentDB = z.output<typeof DocumentSchema>;
@@ -11,20 +11,18 @@ export type DocumentDB = z.output<typeof DocumentSchema>;
 export class Document extends GraphEntity {
   static prefix = "Document-";
 
-  title: string;
   mentions: Map<string, Mention> = new Map<string, Mention>();
   text: string;
 
   constructor(
     internal_id: string,
-    title: string,
     text: string,
     dataset: Dataset,
     x?: number,
     y?: number,
+    attributes?: Record<string, AttributeValuesType>,
   ) {
-    super(internal_id, Document.prefix, dataset, x, y);
-    this.title = title;
+    super(internal_id, Document.prefix, dataset, x, y, "Document", attributes);
     this.text = text;
 
     makeObservable(this, {
@@ -44,32 +42,36 @@ export class Document extends GraphEntity {
   static fromJson(data: DocumentDB, dataset: Dataset): Document {
     return new Document(
       data.id,
-      data.title,
       data.text,
       dataset,
       data.x,
       data.y,
+      data.attributes,
     );
   }
 
   toJson(): DocumentDB {
     return {
       id: this.internal_id,
-      title: this.title,
       text: this.text,
       x: this.x,
       y: this.y,
+      attributes: this.attributesToJson(),
     };
   }
 
   get name() {
-    return this.title;
+    return (this.attributes.get("title") as string | undefined) ?? "";
+  }
+
+  get title() {
+    return this.name;
   }
 
   setTitle(title: string) {
-    this.title = title;
+    this.attributes.set("title", title);
     updateNodeProperties(this.dataset.appState.sigma, this.id, {
-      label: this.title,
+      label: title,
     });
   }
 

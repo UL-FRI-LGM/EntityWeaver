@@ -4,7 +4,7 @@ import type { Dataset } from "@/stores/dataset.ts";
 import { computed, makeObservable, override } from "mobx";
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
 import type { EntityLink } from "@/stores/entityLink.ts";
-import type { EntitySchema } from "@/utils/schemas.ts";
+import type { AttributeValuesType, EntitySchema } from "@/utils/schemas.ts";
 import { z } from "zod";
 
 export type EntityTypes = keyof typeof DEFINES.entityTypes.names;
@@ -14,21 +14,16 @@ export type EntityDB = z.output<typeof EntitySchema>;
 export class Entity extends GraphEntity {
   static prefix = "Entity-";
 
-  name: string;
-  type: string;
   mentionLinks: Map<string, EntityLink> = new Map<string, EntityLink>();
 
   constructor(
     internal_id: string,
-    name: string,
-    type: string,
     dataset: Dataset,
     x?: number,
     y?: number,
+    attributes?: Record<string, AttributeValuesType>,
   ) {
-    super(internal_id, Entity.prefix, dataset, x, y);
-    this.name = name;
-    this.type = type;
+    super(internal_id, Entity.prefix, dataset, x, y, "Entity", attributes);
 
     makeObservable(this, {
       name: true,
@@ -46,17 +41,24 @@ export class Entity extends GraphEntity {
   }
 
   static fromJson(data: EntityDB, dataset: Dataset): Entity {
-    return new Entity(data.id, data.name, data.type, dataset, data.x, data.y);
+    return new Entity(data.id, dataset, data.x, data.y, data.attributes);
   }
 
   toJson(): EntityDB {
     return {
       id: this.internal_id,
-      name: this.name,
-      type: this.type,
       x: this.x,
       y: this.y,
+      attributes: this.attributesToJson(),
     };
+  }
+
+  get name(): string {
+    return (this.attributes.get("name") as string | undefined) ?? "";
+  }
+
+  get type(): string {
+    return (this.attributes.get("type") as string | undefined) ?? "";
   }
 
   get mentionLinkList() {
@@ -64,12 +66,12 @@ export class Entity extends GraphEntity {
   }
 
   setName(name: string) {
-    this.name = name;
+    this.attributes.set("name", name);
     updateNodeProperties(this.dataset.appState.sigma, this.id, { label: name });
   }
 
   setType(type: string) {
-    this.type = type;
+    this.attributes.set("type", type);
     updateNodeProperties(this.dataset.appState.sigma, this.id, { type: type });
   }
 

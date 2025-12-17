@@ -3,7 +3,6 @@ import classes from "./TopBar.module.css";
 import { Button, Group, Menu, Switch } from "@mantine/core";
 import { useAppState } from "@/stores/appState.ts";
 import {
-  IconColorFilter,
   IconDownload,
   IconFileCode2,
   IconHandFinger,
@@ -35,16 +34,6 @@ const DisplayMenu = observer(() => {
         </ArrowDropdownButton>
       </Menu.Target>
       <Menu.Dropdown>
-        <Menu.Item
-          leftSection={<IconColorFilter size={14} />}
-          rightSection={<Switch checked={appState.uiState.colorByType} />}
-          onClick={(event) => {
-            event.preventDefault();
-            appState.uiState.setColorByType(!appState.uiState.colorByType);
-          }}
-        >
-          Color By Entity Type
-        </Menu.Item>
         <Menu.Item
           leftSection={<IconPointer size={14} />}
           rightSection={<Switch checked={appState.uiState.highlightOnHover} />}

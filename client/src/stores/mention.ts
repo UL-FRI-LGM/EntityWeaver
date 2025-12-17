@@ -7,7 +7,7 @@ import { Entity } from "@/stores/entity.ts";
 import { DEFINES } from "@/defines.ts";
 import { EntityLink } from "@/stores/entityLink.ts";
 import { z } from "zod";
-import type { MentionSchema } from "@/utils/schemas.ts";
+import type { AttributeValuesType, MentionSchema } from "@/utils/schemas.ts";
 
 export type MentionDB = z.output<typeof MentionSchema>;
 
@@ -19,7 +19,6 @@ export interface UncertainEntity {
 export class Mention extends GraphEntity {
   static prefix = "Mention-";
 
-  type: string;
   start_index: number;
   end_index: number;
 
@@ -29,7 +28,6 @@ export class Mention extends GraphEntity {
 
   constructor(
     internal_id: string,
-    type: string,
     start_index: number,
     end_index: number,
     document: Document,
@@ -37,9 +35,9 @@ export class Mention extends GraphEntity {
     entities: (Entity | UncertainEntity)[] = [],
     x?: number,
     y?: number,
+    attributes?: Record<string, AttributeValuesType>,
   ) {
-    super(internal_id, Mention.prefix, dataset, x, y);
-    this.type = type;
+    super(internal_id, Mention.prefix, dataset, x, y, "Mention", attributes);
     this.start_index = start_index;
     this.end_index = end_index;
     this.document = document;
@@ -73,6 +71,10 @@ export class Mention extends GraphEntity {
     });
   }
 
+  get type() {
+    return (this.attributes.get("type") as string | undefined) ?? "";
+  }
+
   static fromJson(data: MentionDB, dataset: Dataset): Mention {
     const documentId = Document.prefix + data.document_id;
     const document = dataset.documents.get(documentId);
@@ -95,7 +97,6 @@ export class Mention extends GraphEntity {
     });
     return new Mention(
       data.id,
-      data.type,
       data.start_index,
       data.end_index,
       document,
@@ -103,13 +104,13 @@ export class Mention extends GraphEntity {
       entities,
       data.x,
       data.y,
+      data.attributes,
     );
   }
 
   toJson(): MentionDB {
     return {
       id: this.internal_id,
-      type: this.type,
       start_index: this.start_index,
       end_index: this.end_index,
       document_id: this.document.internal_id,
@@ -119,6 +120,7 @@ export class Mention extends GraphEntity {
       })),
       x: this.x,
       y: this.y,
+      attributes: this.attributesToJson(),
     };
   }
 
@@ -135,7 +137,7 @@ export class Mention extends GraphEntity {
   }
 
   setType(type: string) {
-    this.type = type;
+    this.attributes.set("type", type);
     if (this.dataset.appState.sigma) {
       updateMentionNode(this.dataset.appState.sigma, this.id, { type: type });
     }

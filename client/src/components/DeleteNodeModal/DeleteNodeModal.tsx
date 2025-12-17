@@ -29,7 +29,7 @@ const DeleteNodeModal = observer(() => {
         <>
           <Text>
             Are you sure you want to delete the following{" "}
-            {nodeAttributes?.nodeType}?
+            {nodeAttributes?.source.nodeType}?
           </Text>
           <Text fs="italic">{nodeAttributes?.label}</Text>
         </>
@@ -57,7 +57,7 @@ const DeleteNodeModal = observer(() => {
             onClick={onDeleteNode}
             disabled={!canDeleteNode}
           >
-            Delete {nodeAttributes?.nodeType}
+            Delete {nodeAttributes?.source.nodeType}
           </Button>
         </Tooltip>
       </Group>

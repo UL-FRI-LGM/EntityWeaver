@@ -1,8 +1,9 @@
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
-import type { Dataset } from "@/stores/dataset.ts";
-import { action, computed, makeObservable, observable } from "mobx";
+import type { Dataset, GraphNodeType } from "@/stores/dataset.ts";
+import { makeObservable } from "mobx";
 import { apply, type RulesLogic } from "json-logic-js";
 import { bfsFromNode } from "graphology-traversal";
+import { type AttributeValuesType } from "@/utils/schemas.ts";
 
 export abstract class GraphEntity {
   readonly id: string;
@@ -11,6 +12,12 @@ export abstract class GraphEntity {
   y?: number;
   dataset: Dataset;
 
+  attributes: Map<string, AttributeValuesType> = new Map<
+    string,
+    AttributeValuesType
+  >();
+
+  nodeType: GraphNodeType;
   filtered = false;
   unfilteredConnections = 0;
 
@@ -20,6 +27,8 @@ export abstract class GraphEntity {
     dataset: Dataset,
     x: number | undefined,
     y: number | undefined,
+    nodeType: GraphNodeType,
+    attributes?: Record<string, AttributeValuesType>,
   ) {
     this.internal_id = internal_id;
     this.id = id_prefix + internal_id;
@@ -27,13 +36,37 @@ export abstract class GraphEntity {
     this.x = x;
     this.y = y;
 
+    this.nodeType = nodeType;
+
     makeObservable(this, {
-      x: observable,
-      y: observable,
-      setPosition: action.bound,
-      dispose: action.bound,
-      canDelete: computed,
+      x: true,
+      y: true,
+      setPosition: true,
+      dispose: true,
+      canDelete: true,
+      attributes: true,
     });
+
+    const attributeMap =
+      this.dataset.attributeManager.nodeProperties.get(nodeType)?.attributeMap;
+
+    if (!attributeMap) {
+      throw new Error(`No attribute map found for node type ${nodeType}`);
+    }
+
+    if (attributes) {
+      for (const [attributeName, attributeValue] of Object.entries(
+        attributes,
+      )) {
+        const attribute = attributeMap.get(attributeName);
+        if (!attribute) {
+          throw new Error(
+            `No attribute found with name ${attributeName} for node type ${nodeType}`,
+          );
+        }
+        this.attributes.set(attributeName, attributeValue);
+      }
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/class-literal-property-style
@@ -104,10 +137,16 @@ export abstract class GraphEntity {
         }
         return (
           depth > 0 &&
-          (attr.nodeType === "Entity" || attr.nodeType === "Document")
+          (attr.source.nodeType === "Entity" ||
+            attr.source.nodeType === "Document")
         );
       },
     );
+  }
+
+  attributesToJson(): Record<string, AttributeValuesType> | undefined {
+    if (this.attributes.size === 0) return undefined;
+    return Object.fromEntries(this.attributes);
   }
 
   dispose() {

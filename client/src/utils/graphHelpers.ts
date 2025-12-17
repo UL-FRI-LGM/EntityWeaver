@@ -5,12 +5,11 @@ import {
   appState,
   AppState,
   type EdgeType,
+  type NodeSource,
   type NodeType,
 } from "@/stores/appState.ts";
 import {
   edgeTypeToProperties,
-  typeIconToColor,
-  typeToColor,
   typeToImage,
   uncertaintyToEdgeColor,
 } from "./helpers.ts";
@@ -20,6 +19,7 @@ import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
 import type { UiState } from "@/stores/uiState.ts";
 import { type Mention } from "@/stores/mention.ts";
 import type { EntityLink } from "@/stores/entityLink.ts";
+import type { AttributeManager } from "@/stores/nodeAttributes.ts";
 
 function getRandomPosition(generator?: PRNG) {
   return generator ? generator() : Math.random() * 10000;
@@ -44,14 +44,13 @@ export function isNodeHidden(
 
   return (
     (appState.dataset.filterActive && !nodeAttributes.source.filtered) ||
-    (uiState.entityView && nodeAttributes.nodeType === "Mention") ||
-    (!uiState.filters.entities && nodeAttributes.nodeType === "Entity") ||
-    (!uiState.filters.mentions && nodeAttributes.nodeType === "Mention") ||
-    (!uiState.filters.documents && nodeAttributes.nodeType === "Document") ||
-    (!uiState.filters.people && nodeAttributes.entityType === "PER") ||
-    (!uiState.filters.locations && nodeAttributes.entityType === "LOC") ||
-    (!uiState.filters.organizations && nodeAttributes.entityType === "ORG") ||
-    (!uiState.filters.miscellaneous && nodeAttributes.entityType === "MISC") ||
+    (uiState.entityView && nodeAttributes.source.nodeType === "Mention") ||
+    (!uiState.filters.entities &&
+      nodeAttributes.source.nodeType === "Entity") ||
+    (!uiState.filters.mentions &&
+      nodeAttributes.source.nodeType === "Mention") ||
+    (!uiState.filters.documents &&
+      nodeAttributes.source.nodeType === "Document") ||
     (appState.focusedNode &&
       nodeId !== appState.focusedNode &&
       !areVisibleNeighbors(
@@ -146,22 +145,22 @@ export function computeLayoutContribution(sigma: Sigma<NodeType, EdgeType>) {
 }
 
 function getNodeColors(
-  nodeType: GraphNodeType,
-  entityType: string,
-  colorByEntityType: boolean,
-) {
-  if (colorByEntityType) {
-    return {
-      color: typeToColor(entityType) ?? DEFINES.entityTypes.colors.MISC,
-      pictogramColor:
-        typeIconToColor(entityType) ?? DEFINES.entityTypes.iconColor.MISC,
-    };
-  } else {
-    return {
-      color: DEFINES.nodes[nodeType].color,
-      pictogramColor: DEFINES.nodes[nodeType].iconColor,
-    };
+  nodeSource: NodeSource,
+  attributeManager: AttributeManager,
+): { color: string; pictogramColor: string } {
+  const nodeProperties = attributeManager.nodeProperties.get(
+    nodeSource.nodeType,
+  );
+  if (!nodeProperties) {
+    throw new Error(`Node type ${nodeSource.nodeType} not found.`);
   }
+
+  const color = nodeProperties.getColorForNode(nodeSource);
+
+  return {
+    color: color,
+    pictogramColor: "black",
+  };
 }
 
 export function setPropertiesForNodesOfType(
@@ -174,7 +173,7 @@ export function setPropertiesForNodesOfType(
   }
   const graph = sigma.getGraph();
   graph.forEachNode((nodeId, attributes) => {
-    if (attributes.nodeType !== nodeType) {
+    if (attributes.source.nodeType !== nodeType) {
       return;
     }
     graph.mergeNodeAttributes(nodeId, properties);
@@ -191,32 +190,10 @@ export function updatePropertiesForNodesOfType(
   }
   const graph = sigma.getGraph();
   graph.forEachNode((nodeId, attributes) => {
-    if (attributes.nodeType !== nodeType) {
+    if (attributes.source.nodeType !== nodeType) {
       return;
     }
     graph.updateNodeAttributes(nodeId, updater);
-  });
-}
-
-export function setColorByType(
-  sigma: Sigma<NodeType, EdgeType> | null,
-  state: boolean,
-) {
-  if (!sigma) {
-    return;
-  }
-  const graph = sigma.getGraph();
-  graph.forEachNode((nodeId, attributes) => {
-    if (attributes.nodeType === "Document" || !attributes.entityType) {
-      return;
-    }
-    const { color, pictogramColor } = getNodeColors(
-      attributes.nodeType,
-      attributes.entityType,
-      state,
-    );
-    graph.setNodeAttribute(nodeId, "color", color);
-    graph.setNodeAttribute(nodeId, "pictogramColor", pictogramColor);
   });
 }
 
@@ -423,7 +400,6 @@ export function updateEntityViewEdges(
 export function updateGraph(
   sigma: Sigma<NodeType, EdgeType>,
   dataset: Dataset,
-  colorByEntityType: boolean,
   seed = "hello.",
 ) {
   const rng = seedrandom(seed);
@@ -441,7 +417,6 @@ export function updateGraph(
       pictogramColor: DEFINES.nodes.Document.iconColor,
       type: "pictogram",
       borderSize: DEFINES.nodes.Document.borderSize,
-      nodeType: "Document",
       zIndex: 0,
       source: document,
     });
@@ -449,9 +424,8 @@ export function updateGraph(
   dataset.entities.forEach((entity) => {
     const entityImage = typeToImage(entity.type);
     const { color, pictogramColor } = getNodeColors(
-      "Entity",
-      entity.type,
-      colorByEntityType,
+      entity,
+      dataset.attributeManager,
     );
     graph.addNode(entity.id, {
       x: entity.x ?? getRandomPosition(rng),
@@ -464,8 +438,6 @@ export function updateGraph(
       type: "pictogram",
       borderSize: DEFINES.nodes.Entity.borderSize,
       borderColor: DEFINES.nodes.Entity.borderColor,
-      nodeType: "Entity",
-      entityType: entity.type,
       zIndex: 10,
       source: entity,
     });
@@ -473,9 +445,8 @@ export function updateGraph(
   dataset.mentions.forEach((mention) => {
     const entityImage = typeToImage(mention.type);
     const { color, pictogramColor } = getNodeColors(
-      "Mention",
-      mention.type,
-      colorByEntityType,
+      mention,
+      dataset.attributeManager,
     );
     graph.addNode(mention.id, {
       x: mention.x ?? getRandomPosition(rng),
@@ -488,8 +459,6 @@ export function updateGraph(
       type: "pictogram",
       borderSize: DEFINES.nodes.Mention.borderSize,
       borderColor: DEFINES.nodes.Mention.borderColor,
-      nodeType: "Mention",
-      entityType: mention.type,
       zIndex: 20,
       source: mention,
     });

@@ -1,5 +1,5 @@
 import type Sigma from "sigma";
-import { Dataset, type GraphNodeType } from "@/stores/dataset.ts";
+import { Dataset } from "@/stores/dataset.ts";
 import { UiState } from "@/stores/uiState.ts";
 import { createContext, use } from "react";
 import { makeAutoObservable } from "mobx";
@@ -27,6 +27,8 @@ configurePersistable(
   { delay: 200 },
 );
 
+export type NodeSource = Document | Mention | Entity;
+
 export type ConnectionType =
   | "MentionToDocument"
   | "MentionToEntity"
@@ -47,11 +49,9 @@ export interface NodeType {
   image: string;
   pictogramColor: string;
   type: string;
-  nodeType: GraphNodeType;
-  entityType?: string;
   zIndex?: number;
 
-  source: Entity | Document | Mention;
+  source: NodeSource;
 }
 export interface EdgeType {
   size: number;
@@ -201,7 +201,7 @@ export class AppState {
     if (!this.dataset.hasData) {
       return;
     }
-    updateGraph(this.sigma, this.dataset, this.uiState.colorByType);
+    updateGraph(this.sigma, this.dataset);
     if (this.uiState.entityView) {
       updateEntityViewEdges(this.sigma, this.dataset);
     }
