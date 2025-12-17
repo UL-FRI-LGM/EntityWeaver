@@ -3,14 +3,7 @@ import type { Mention } from "@/stores/mention.ts";
 import type { Dataset } from "@/stores/dataset.ts";
 import { computed, makeObservable, override } from "mobx";
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
-import {
-  type AttributeValuesType,
-  DocumentAttributes,
-  type DocumentSchema,
-} from "@/utils/schemas.ts";
-import { z } from "zod";
-
-export type DocumentDB = z.output<typeof DocumentSchema>;
+import { type DocumentAttributes, type DocumentDB } from "@/utils/schemas.ts";
 
 export class Document extends GraphEntity {
   static prefix = "Document-";
@@ -18,18 +11,21 @@ export class Document extends GraphEntity {
   mentions: Map<string, Mention> = new Map<string, Mention>();
   text: string;
 
+  attributes: DocumentAttributes;
+
   constructor(
     internal_id: string,
     text: string,
     dataset: Dataset,
+    attributes: DocumentAttributes,
     x?: number,
     y?: number,
-    attributes?: Record<string, AttributeValuesType>,
   ) {
-    super(internal_id, Document.prefix, dataset, x, y, "Document", attributes);
+    super(internal_id, Document.prefix, dataset, x, y, "Document");
     this.text = text;
 
     makeObservable(this, {
+      attributes: true,
       title: true,
       setTitle: true,
       name: true,
@@ -41,6 +37,8 @@ export class Document extends GraphEntity {
       textWithEntities: true,
       dispose: override,
     });
+
+    this.attributes = attributes;
   }
 
   static fromJson(data: DocumentDB, dataset: Dataset): Document {
@@ -48,32 +46,24 @@ export class Document extends GraphEntity {
       data.id,
       data.text,
       dataset,
+      data.attributes,
       data.x,
       data.y,
-      data.attributes,
     );
   }
 
   toJson(): DocumentDB {
-    const rawAttributes = this.attributesToJson();
-    const attributes: z.infer<typeof DocumentAttributes> | undefined =
-      rawAttributes
-        ? "title" in rawAttributes
-          ? { ...rawAttributes, title: String(rawAttributes.title) }
-          : { ...rawAttributes, title: this.internal_id }
-        : undefined;
-
     return {
       id: this.internal_id,
       text: this.text,
       x: this.x,
       y: this.y,
-      attributes: attributes,
+      attributes: this.attributes,
     };
   }
 
   get name() {
-    return (this.attributes.get("title") as string | undefined) ?? "";
+    return this.attributes.title;
   }
 
   get title() {
@@ -81,7 +71,7 @@ export class Document extends GraphEntity {
   }
 
   setTitle(title: string) {
-    this.attributes.set("title", title);
+    this.attributes.title = title;
     updateNodeProperties(this.dataset.appState.sigma, this.id, {
       label: title,
     });

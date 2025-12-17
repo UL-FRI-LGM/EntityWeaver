@@ -2,10 +2,7 @@ import { Mention } from "@/stores/mention.ts";
 import { Document } from "@/stores/document.ts";
 import { computed, makeAutoObservable } from "mobx";
 import type { Dataset } from "@/stores/dataset.ts";
-import { z } from "zod";
-import { CollocationSchema } from "@/utils/schemas.ts";
-
-export type CollocationDB = z.output<typeof CollocationSchema>;
+import type { CollocationDB } from "@/utils/schemas.ts";
 
 export class Collocation {
   static prefix = "Collocation-";

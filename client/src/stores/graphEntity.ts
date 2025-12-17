@@ -1,9 +1,9 @@
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
-import type { Dataset, GraphNodeType } from "@/stores/dataset.ts";
+import type { Dataset } from "@/stores/dataset.ts";
 import { makeObservable } from "mobx";
 import { apply, type RulesLogic } from "json-logic-js";
 import { bfsFromNode } from "graphology-traversal";
-import { type AttributeValuesType } from "@/utils/schemas.ts";
+import type { GraphNodeType } from "@/utils/schemas.ts";
 
 export abstract class GraphEntity {
   readonly id: string;
@@ -11,11 +11,6 @@ export abstract class GraphEntity {
   x?: number;
   y?: number;
   dataset: Dataset;
-
-  attributes: Map<string, AttributeValuesType> = new Map<
-    string,
-    AttributeValuesType
-  >();
 
   nodeType: GraphNodeType;
   filtered = false;
@@ -28,7 +23,6 @@ export abstract class GraphEntity {
     x: number | undefined,
     y: number | undefined,
     nodeType: GraphNodeType,
-    attributes?: Record<string, AttributeValuesType>,
   ) {
     this.internal_id = internal_id;
     this.id = id_prefix + internal_id;
@@ -44,7 +38,6 @@ export abstract class GraphEntity {
       setPosition: true,
       dispose: true,
       canDelete: true,
-      attributes: true,
     });
 
     const attributeMap =
@@ -52,20 +45,6 @@ export abstract class GraphEntity {
 
     if (!attributeMap) {
       throw new Error(`No attribute map found for node type ${nodeType}`);
-    }
-
-    if (attributes) {
-      for (const [attributeName, attributeValue] of Object.entries(
-        attributes,
-      )) {
-        const attribute = attributeMap.get(attributeName);
-        if (!attribute) {
-          throw new Error(
-            `No attribute found with name ${attributeName} for node type ${nodeType}`,
-          );
-        }
-        this.attributes.set(attributeName, attributeValue);
-      }
     }
   }
 
@@ -142,11 +121,6 @@ export abstract class GraphEntity {
         );
       },
     );
-  }
-
-  attributesToJson(): Record<string, AttributeValuesType> | undefined {
-    if (this.attributes.size === 0) return undefined;
-    return Object.fromEntries(this.attributes);
   }
 
   dispose() {

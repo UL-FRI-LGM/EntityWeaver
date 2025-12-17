@@ -1,35 +1,27 @@
-import { DEFINES } from "@/defines.ts";
 import { GraphEntity } from "@/stores/graphEntity.ts";
 import type { Dataset } from "@/stores/dataset.ts";
 import { computed, makeObservable, override } from "mobx";
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
 import type { EntityLink } from "@/stores/entityLink.ts";
-import {
-  type AttributeValuesType,
-  EntityAttributes,
-  type EntitySchema,
-} from "@/utils/schemas.ts";
-import { z } from "zod";
-
-export type EntityTypes = keyof typeof DEFINES.entityTypes.names;
-
-export type EntityDB = z.output<typeof EntitySchema>;
+import { type EntityAttributes, type EntityDB } from "@/utils/schemas.ts";
 
 export class Entity extends GraphEntity {
   static prefix = "Entity-";
 
   mentionLinks: Map<string, EntityLink> = new Map<string, EntityLink>();
+  attributes: EntityAttributes;
 
   constructor(
     internal_id: string,
     dataset: Dataset,
+    attributes: EntityAttributes,
     x?: number,
     y?: number,
-    attributes?: Record<string, AttributeValuesType>,
   ) {
-    super(internal_id, Entity.prefix, dataset, x, y, "Entity", attributes);
+    super(internal_id, Entity.prefix, dataset, x, y, "Entity");
 
     makeObservable(this, {
+      attributes: true,
       name: true,
       type: true,
       setName: true,
@@ -42,35 +34,29 @@ export class Entity extends GraphEntity {
       onMentionLinked: true,
       onMentionUnlinked: true,
     });
+
+    this.attributes = attributes;
   }
 
   static fromJson(data: EntityDB, dataset: Dataset): Entity {
-    return new Entity(data.id, dataset, data.x, data.y, data.attributes);
+    return new Entity(data.id, dataset, data.attributes, data.x, data.y);
   }
 
   toJson(): EntityDB {
-    const rawAttributes = this.attributesToJson();
-    const attributes: z.infer<typeof EntityAttributes> | undefined =
-      rawAttributes
-        ? "name" in rawAttributes
-          ? { ...rawAttributes, name: String(rawAttributes.name) }
-          : { ...rawAttributes, name: this.internal_id }
-        : undefined;
-
     return {
       id: this.internal_id,
       x: this.x,
       y: this.y,
-      attributes: attributes,
+      attributes: this.attributes,
     };
   }
 
   get name(): string {
-    return (this.attributes.get("name") as string | undefined) ?? "";
+    return this.attributes.name;
   }
 
   get type(): string {
-    return (this.attributes.get("type") as string | undefined) ?? "";
+    return "type" in this.attributes ? (this.attributes.type as string) : "";
   }
 
   get mentionLinkList() {
@@ -78,12 +64,12 @@ export class Entity extends GraphEntity {
   }
 
   setName(name: string) {
-    this.attributes.set("name", name);
+    this.attributes.name = name;
     updateNodeProperties(this.dataset.appState.sigma, this.id, { label: name });
   }
 
   setType(type: string) {
-    this.attributes.set("type", type);
+    this.attributes.type = type;
     updateNodeProperties(this.dataset.appState.sigma, this.id, { type: type });
   }
 

@@ -13,13 +13,14 @@ import {
   typeToImage,
   uncertaintyToEdgeColor,
 } from "./helpers.ts";
-import { Dataset, type GraphNodeType } from "@/stores/dataset.ts";
+import { Dataset } from "@/stores/dataset.ts";
 import type Graph from "graphology";
 import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
 import type { UiState } from "@/stores/uiState.ts";
 import { type Mention } from "@/stores/mention.ts";
 import type { EntityLink } from "@/stores/entityLink.ts";
 import type { AttributeManager } from "@/stores/nodeAttributes.ts";
+import type { GraphNodeType } from "@/utils/schemas.ts";
 
 function getRandomPosition(generator?: PRNG) {
   return generator ? generator() : Math.random() * 10000;

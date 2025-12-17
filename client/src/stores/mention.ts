@@ -6,10 +6,7 @@ import { Document } from "@/stores/document.ts";
 import { Entity } from "@/stores/entity.ts";
 import { DEFINES } from "@/defines.ts";
 import { EntityLink } from "@/stores/entityLink.ts";
-import { z } from "zod";
-import type { AttributeValuesType, MentionSchema } from "@/utils/schemas.ts";
-
-export type MentionDB = z.output<typeof MentionSchema>;
+import type { MentionDB, NodeAttributes } from "@/utils/schemas.ts";
 
 export interface UncertainEntity {
   entity: Entity;
@@ -23,6 +20,7 @@ export class Mention extends GraphEntity {
   end_index: number;
 
   entityLinks: Map<string, EntityLink> = new Map<string, EntityLink>();
+  attributes: NodeAttributes;
 
   document: Document;
 
@@ -33,11 +31,11 @@ export class Mention extends GraphEntity {
     document: Document,
     dataset: Dataset,
     entities: (Entity | UncertainEntity)[] = [],
+    attributes?: NodeAttributes,
     x?: number,
     y?: number,
-    attributes?: Record<string, AttributeValuesType>,
   ) {
-    super(internal_id, Mention.prefix, dataset, x, y, "Mention", attributes);
+    super(internal_id, Mention.prefix, dataset, x, y, "Mention");
     this.start_index = start_index;
     this.end_index = end_index;
     this.document = document;
@@ -49,6 +47,7 @@ export class Mention extends GraphEntity {
     this.document.mentions.set(this.id, this);
 
     makeObservable<Mention>(this, {
+      attributes: true,
       name: computed({ keepAlive: true }),
       type: true,
       start_index: true,
@@ -69,10 +68,12 @@ export class Mention extends GraphEntity {
 
       contextSnippet: computed,
     });
+
+    this.attributes = attributes ?? {};
   }
 
   get type() {
-    return (this.attributes.get("type") as string | undefined) ?? "";
+    return "type" in this.attributes ? (this.attributes.type as string) : "";
   }
 
   static fromJson(data: MentionDB, dataset: Dataset): Mention {
@@ -102,9 +103,9 @@ export class Mention extends GraphEntity {
       document,
       dataset,
       entities,
+      data.attributes,
       data.x,
       data.y,
-      data.attributes,
     );
   }
 
@@ -120,7 +121,7 @@ export class Mention extends GraphEntity {
       })),
       x: this.x,
       y: this.y,
-      attributes: this.attributesToJson(),
+      attributes: this.attributes,
     };
   }
 
@@ -137,7 +138,7 @@ export class Mention extends GraphEntity {
   }
 
   setType(type: string) {
-    this.attributes.set("type", type);
+    this.attributes.type = type;
     if (this.dataset.appState.sigma) {
       updateMentionNode(this.dataset.appState.sigma, this.id, { type: type });
     }

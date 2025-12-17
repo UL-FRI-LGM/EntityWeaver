@@ -1,6 +1,6 @@
-import { Mention, type MentionDB } from "@/stores/mention.ts";
-import { Entity, type EntityDB } from "@/stores/entity.ts";
-import { Document, type DocumentDB } from "@/stores/document.ts";
+import { Mention } from "@/stores/mention.ts";
+import { Entity } from "@/stores/entity.ts";
+import { Document } from "@/stores/document.ts";
 import { Collocation } from "@/stores/collocation.ts";
 import { computed, makeAutoObservable, runInAction } from "mobx";
 import { appState, type AppState } from "@/stores/appState.ts";
@@ -8,21 +8,23 @@ import { loadDemo, readFile, sumAndMax } from "@/utils/helpers.ts";
 import { makePersistable } from "mobx-persist-store";
 import { DEFINES } from "@/defines.ts";
 import { FilterManager, FilterSequence } from "@/stores/filters.ts";
-import { DatasetSchema, RecordTypeSchema } from "@/utils/schemas.ts";
-import { z } from "zod";
+import {
+  type AttributeDB,
+  type DatasetDB,
+  DatasetSchema,
+  type DocumentDB,
+  type EntityDB,
+  type MentionDB,
+} from "@/utils/schemas.ts";
 import { defaultValidator, formatQuery } from "react-querybuilder";
 import { add_operation, type RulesLogic } from "json-logic-js";
 import { jsonLogicAdditionalOperators } from "react-querybuilder";
 import type { GraphEntity } from "@/stores/graphEntity.ts";
-import { type AttributeDB, AttributeManager } from "@/stores/nodeAttributes.ts";
+import { AttributeManager } from "@/stores/nodeAttributes.ts";
 
 for (const [op, func] of Object.entries(jsonLogicAdditionalOperators)) {
   add_operation(op, func);
 }
-
-export type GraphNodeType = z.output<typeof RecordTypeSchema>;
-
-export type DatasetDB = z.infer<typeof DatasetSchema>;
 
 export interface BinInfo {
   value: number;

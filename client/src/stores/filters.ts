@@ -1,8 +1,9 @@
 import { computed, makeAutoObservable } from "mobx";
-import { Dataset, type GraphNodeType } from "@/stores/dataset.ts";
+import { Dataset } from "@/stores/dataset.ts";
 import type { RuleGroupType } from "react-querybuilder";
 import { v4 as uuidv4 } from "uuid";
 import type { AttributeManager } from "@/stores/nodeAttributes.ts";
+import type { GraphNodeType } from "@/utils/schemas.ts";
 
 const defaultQuery = { combinator: "and", rules: [] };
 

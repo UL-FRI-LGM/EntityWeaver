@@ -1,36 +1,38 @@
 import { z } from "zod";
 
-export const AttributeValues = z.union([z.number(), z.string(), z.boolean()]);
-export type AttributeValuesType = z.infer<typeof AttributeValues>;
+const AttributeValues = z.union([z.number(), z.string(), z.boolean()]);
 
-export const NodeAttributes = z.record(z.string(), AttributeValues);
+const NodeAttributesSchema = z.record(z.string(), AttributeValues);
+export type NodeAttributes = z.infer<typeof NodeAttributesSchema>;
 
-export const GraphNodeSchema = z.object({
+const GraphNodeSchema = z.object({
   id: z.string().min(1),
   x: z.optional(z.number()),
   y: z.optional(z.number()),
-  attributes: z.optional(NodeAttributes),
+  attributes: z.optional(NodeAttributesSchema),
 });
 
-export const EntityAttributes = z
+const EntityAttributesSchema = z
   .object({
     name: z.string().min(1),
   })
   .catchall(AttributeValues);
+export type EntityAttributes = z.infer<typeof EntityAttributesSchema>;
 
-export const EntitySchema = GraphNodeSchema.extend({
+const EntitySchema = GraphNodeSchema.extend({
   id: z.string().min(1),
   x: z.optional(z.number()),
   y: z.optional(z.number()),
-  attributes: z.optional(EntityAttributes),
+  attributes: EntityAttributesSchema,
 });
+export type EntityDB = z.output<typeof EntitySchema>;
 
 export const LinkSchema = z.object({
   entity_id: z.string().min(1),
   confidence: z.number().min(0).max(1),
 });
 
-export const MentionSchema = GraphNodeSchema.extend({
+const MentionSchema = GraphNodeSchema.extend({
   id: z.string().min(1),
   document_id: z.string().min(1),
   start_index: z.int(),
@@ -39,29 +41,33 @@ export const MentionSchema = GraphNodeSchema.extend({
   x: z.optional(z.number()),
   y: z.optional(z.number()),
 });
+export type MentionDB = z.output<typeof MentionSchema>;
 
-export const DocumentAttributes = z
+const DocumentAttributesSchema = z
   .object({
     title: z.string().min(1),
   })
   .catchall(AttributeValues);
+export type DocumentAttributes = z.infer<typeof DocumentAttributesSchema>;
 
-export const DocumentSchema = GraphNodeSchema.extend({
+const DocumentSchema = GraphNodeSchema.extend({
   id: z.string().min(1),
   // title: z.string().min(1),
   text: z.string().min(1),
   x: z.optional(z.number()),
   y: z.optional(z.number()),
-  attributes: z.optional(DocumentAttributes),
+  attributes: DocumentAttributesSchema,
 });
+export type DocumentDB = z.output<typeof DocumentSchema>;
 
-export const CollocationSchema = z.object({
+const CollocationSchema = z.object({
   id: z.string().min(1),
   document_id: z.string().min(1),
   mentions: z.array(z.string().min(1)),
 });
+export type CollocationDB = z.output<typeof CollocationSchema>;
 
-export const AttributeValueSchema = z.union([
+const AttributeValueSchema = z.union([
   z.string(),
   z.object({
     name: z.string().min(1),
@@ -69,17 +75,16 @@ export const AttributeValueSchema = z.union([
     color: z.optional(z.string()),
   }),
 ]);
+export type AttributeValueDB = z.output<typeof AttributeValueSchema>;
 
 export const RecordTypes = ["Document", "Mention", "Entity"] as const;
-export const RecordTypeSchema = z.enum(RecordTypes);
-export const AttributeDataTypeSchema = z.enum([
-  "text",
-  "number",
-  "boolean",
-  "enum",
-]);
+const RecordTypeSchema = z.enum(RecordTypes);
+export type GraphNodeType = z.infer<typeof RecordTypeSchema>;
 
-export const AttributeSchema = z
+const AttributeDataTypeSchema = z.enum(["text", "number", "boolean", "enum"]);
+export type AttributeDataType = z.infer<typeof AttributeDataTypeSchema>;
+
+const AttributeSchema = z
   .object({
     name: z.string(),
     label: z.optional(z.string()),
@@ -95,6 +100,7 @@ export const AttributeSchema = z
       message: "Enum attributes must have values defined",
     },
   );
+export type AttributeDB = z.output<typeof AttributeSchema>;
 
 export const DatasetSchema = z.object({
   attributes: z.array(AttributeSchema),
@@ -103,3 +109,4 @@ export const DatasetSchema = z.object({
   mentions: z.array(MentionSchema),
   collocations: z.array(CollocationSchema),
 });
+export type DatasetDB = z.output<typeof DatasetSchema>;

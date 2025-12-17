@@ -1,8 +1,8 @@
 import { DEFINES } from "../defines.ts";
-import type { DatasetDB } from "@/stores/dataset.ts";
 import demoJsonUrl from "/demo.json?url";
 import Color, { type ColorInstance } from "color";
 import type { AppState } from "@/stores/appState.ts";
+import type { DatasetDB } from "@/utils/schemas.ts";
 
 interface ErrorResponse {
   message: string;

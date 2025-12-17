@@ -23,9 +23,8 @@ import {
 import "react-querybuilder/dist/query-builder.css";
 import sharedClasses from "@/shared.module.css";
 import { FilterManager, type FilterSequence } from "@/stores/filters.ts";
-import type { GraphNodeType } from "@/stores/dataset.ts";
 import FilterInterface from "./FilterInterface.tsx";
-import { RecordTypes } from "@/utils/schemas.ts";
+import { type GraphNodeType, RecordTypes } from "@/utils/schemas.ts";
 import classes from "./FilterWidget.module.css";
 import { DEFINES } from "@/defines.ts";
 

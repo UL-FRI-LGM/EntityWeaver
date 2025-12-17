@@ -1,10 +1,10 @@
-import { Dataset, type GraphNodeType } from "@/stores/dataset.ts";
+import { Dataset } from "@/stores/dataset.ts";
 import { computed, makeAutoObservable, observable } from "mobx";
-import { z } from "zod";
 import {
-  type AttributeDataTypeSchema,
-  type AttributeSchema,
-  AttributeValueSchema,
+  type AttributeDataType,
+  type AttributeDB,
+  type AttributeValueDB,
+  type GraphNodeType,
 } from "@/utils/schemas.ts";
 import type { Field } from "react-querybuilder";
 import { DEFINES } from "@/defines.ts";
@@ -13,11 +13,6 @@ import {
   updatePropertiesForNodesOfType,
 } from "@/utils/graphHelpers.ts";
 import type { NodeSource } from "@/stores/appState.ts";
-
-export type AttributeDB = z.output<typeof AttributeSchema>;
-export type AttributeValueDB = z.output<typeof AttributeValueSchema>;
-
-export type AttributeDataType = z.output<typeof AttributeDataTypeSchema>;
 
 export class AttributeValue {
   name: string;
@@ -274,11 +269,11 @@ export class NodeTypeProperties {
         return this.typeColor;
       }
 
-      const attributeValue = nodeSource.attributes.get(attribute.name);
-      if (!attributeValue) {
+      if (!(attribute.name in nodeSource.attributes)) {
         return this.typeColor;
       }
 
+      const attributeValue = nodeSource.attributes[attribute.name];
       const attributeValueInstance = attribute.valueMap?.get(
         attributeValue as string,
       );
