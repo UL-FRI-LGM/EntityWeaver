@@ -67,10 +67,14 @@ const nodePictogramProgram = createNodeCompoundProgram<NodeType, EdgeType>([
   nodeBorderProgram as NodeProgramType<NodeType, EdgeType>,
   createNodeImageProgram({
     keepWithinCircle: true,
-    correctCentering: true,
+    correctCentering: false,
     drawingMode: "color",
     colorAttribute: "pictogramColor",
     padding: 0.15,
+    size: {
+      mode: "force",
+      value: 128,
+    },
   }),
 ]);
 

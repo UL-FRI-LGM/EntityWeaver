@@ -423,18 +423,19 @@ export function updateGraph(
     });
   });
   dataset.entities.forEach((entity) => {
-    const entityImage = typeToImage(entity.type);
     const { color, pictogramColor } = getNodeColors(
       entity,
       dataset.attributeManager,
     );
+    const glyph =
+      dataset.attributeManager.entityProperties.getGlyphForNode(entity);
     graph.addNode(entity.id, {
       x: entity.x ?? getRandomPosition(rng),
       y: entity.y ?? getRandomPosition(rng),
       size: DEFINES.nodes.Entity.size,
       label: entity.name,
       color: color,
-      image: entityImage,
+      image: glyph,
       pictogramColor: pictogramColor,
       type: "pictogram",
       borderSize: DEFINES.nodes.Entity.borderSize,
@@ -444,18 +445,19 @@ export function updateGraph(
     });
   });
   dataset.mentions.forEach((mention) => {
-    const entityImage = typeToImage(mention.type);
     const { color, pictogramColor } = getNodeColors(
       mention,
       dataset.attributeManager,
     );
+    const glyph =
+      dataset.attributeManager.mentionProperties.getGlyphForNode(mention);
     graph.addNode(mention.id, {
       x: mention.x ?? getRandomPosition(rng),
       y: mention.y ?? getRandomPosition(rng),
       size: DEFINES.nodes.Mention.size,
       label: mention.name,
       color: color,
-      image: entityImage,
+      image: glyph,
       pictogramColor: pictogramColor,
       type: "pictogram",
       borderSize: DEFINES.nodes.Mention.borderSize,

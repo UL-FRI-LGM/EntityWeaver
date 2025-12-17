@@ -73,6 +73,7 @@ const AttributeValueSchema = z.union([
     name: z.string().min(1),
     label: z.optional(z.string()),
     color: z.optional(z.string()),
+    glyph: z.optional(z.string()),
   }),
 ]);
 export type AttributeValueDB = z.output<typeof AttributeValueSchema>;

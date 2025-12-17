@@ -13,11 +13,13 @@ import {
   updatePropertiesForNodesOfType,
 } from "@/utils/graphHelpers.ts";
 import type { NodeSource } from "@/stores/appState.ts";
+import { defaultIcon, type Icon, IconMap } from "@/utils/iconsHelper.tsx";
 
 export class AttributeValue {
   name: string;
   label: string | undefined;
   color: string;
+  glyph: Icon | undefined;
 
   attribute: Attribute;
 
@@ -26,10 +28,12 @@ export class AttributeValue {
     name: string,
     label?: string,
     color?: string,
+    glyph?: Icon,
   ) {
     this.name = name;
     this.label = label;
     this.color = color ?? "#ffffff";
+    this.glyph = glyph;
 
     makeAutoObservable(this, {
       attribute: false,
@@ -43,6 +47,7 @@ export class AttributeValue {
       name: this.name,
       label: this.label,
       color: this.color,
+      glyph: this.glyph?.url,
     };
   }
 
@@ -50,11 +55,15 @@ export class AttributeValue {
     if (typeof attributeValue === "string") {
       return new AttributeValue(attribute, attributeValue);
     }
+    const glyph = attributeValue.glyph
+      ? IconMap.get(attributeValue.glyph)
+      : undefined;
     return new AttributeValue(
       attribute,
       attributeValue.name,
       attributeValue.label,
       attributeValue.color,
+      glyph,
     );
   }
 
@@ -165,14 +174,19 @@ export class Attribute {
   }
 }
 
-export type colorSource = "type" | "attribute";
+export type ColorSource = "type" | "attribute";
+export type GlyphSource = "type" | "attribute";
 
 export class NodeTypeProperties {
   nodeType: GraphNodeType;
+
+  colorSource: ColorSource;
   typeColor: string;
   colorAttribute: Attribute | undefined;
 
-  colorSource: colorSource;
+  glyphSource: GlyphSource;
+  typeGlyph: Icon;
+  glyphAttribute: Attribute | undefined;
 
   attributeManager: AttributeManager;
   attributeMap: Map<string, Attribute> = new Map<string, Attribute>();
@@ -180,12 +194,21 @@ export class NodeTypeProperties {
   constructor(
     attributeManager: AttributeManager,
     nodeType: GraphNodeType,
+
+    colorSource: ColorSource,
     typeColor: string,
-    colorSource: colorSource,
+
+    glyphSource: GlyphSource,
+    typeGlyph: string,
   ) {
     this.nodeType = nodeType;
-    this.typeColor = typeColor;
+
     this.colorSource = colorSource;
+    this.typeColor = typeColor;
+
+    this.glyphSource = glyphSource;
+    const icon = IconMap.get(typeGlyph);
+    this.typeGlyph = icon ?? defaultIcon;
 
     makeAutoObservable(this, {
       attributeManager: false,
@@ -214,7 +237,11 @@ export class NodeTypeProperties {
     this.attributeMap.clear();
   }
 
-  setColorSource(source: colorSource) {
+  ////////////
+  // COLORS
+  ///////////
+
+  setColorSource(source: ColorSource) {
     if (this.colorSource === source) return;
 
     this.colorSource = source;
@@ -231,6 +258,46 @@ export class NodeTypeProperties {
 
     if (this.colorSource === "type") {
       this.updateNodeColorsToType();
+    }
+  }
+
+  setColorAttribute(attributeName: string) {
+    const attribute = this.attributeMap.get(attributeName);
+    if (!attribute) {
+      console.warn(
+        `Attribute ${attributeName} not found for node type ${this.nodeType}`,
+      );
+      return;
+    }
+
+    if (this.colorAttribute === attribute) return;
+
+    this.colorAttribute = attribute;
+    this.updateNodeColorsToAttribute();
+  }
+
+  getColorForNode(nodeSource: NodeSource): string {
+    if (this.colorSource === "type") {
+      return this.typeColor;
+    } else {
+      const attribute = this.colorAttribute;
+      if (attribute?.type !== "enum") {
+        return this.typeColor;
+      }
+
+      if (!(attribute.name in nodeSource.attributes)) {
+        return this.typeColor;
+      }
+
+      const attributeValue = nodeSource.attributes[attribute.name];
+      const attributeValueInstance = attribute.valueMap?.get(
+        attributeValue as string,
+      );
+      if (!attributeValueInstance) {
+        return this.typeColor;
+      }
+
+      return attributeValueInstance.color;
     }
   }
 
@@ -260,32 +327,34 @@ export class NodeTypeProperties {
     );
   }
 
-  getColorForNode(nodeSource: NodeSource): string {
-    if (this.colorSource === "type") {
-      return this.typeColor;
+  ////////////
+  // GLYPHS
+  ///////////
+
+  setGlyphSource(source: GlyphSource) {
+    if (this.glyphSource === source) return;
+    this.glyphSource = source;
+    if (this.glyphSource === "type") {
+      this.updateNodeGlyphToType();
     } else {
-      const attribute = this.colorAttribute;
-      if (attribute?.type !== "enum") {
-        return this.typeColor;
-      }
-
-      if (!(attribute.name in nodeSource.attributes)) {
-        return this.typeColor;
-      }
-
-      const attributeValue = nodeSource.attributes[attribute.name];
-      const attributeValueInstance = attribute.valueMap?.get(
-        attributeValue as string,
-      );
-      if (!attributeValueInstance) {
-        return this.typeColor;
-      }
-
-      return attributeValueInstance.color;
+      this.updateNodeGlyphToAttribute();
     }
   }
 
-  setColorAttribute(attributeName: string) {
+  setTypeGlyph(glyph: string) {
+    const icon = IconMap.get(glyph);
+    if (!icon) {
+      console.warn(`Icon ${glyph} not found.`);
+      return;
+    }
+
+    this.typeGlyph = icon;
+    if (this.glyphSource === "type") {
+      this.updateNodeGlyphToType();
+    }
+  }
+
+  setGlyphAttribute(attributeName: string) {
     const attribute = this.attributeMap.get(attributeName);
     if (!attribute) {
       console.warn(
@@ -294,10 +363,61 @@ export class NodeTypeProperties {
       return;
     }
 
-    if (this.colorAttribute === attribute) return;
+    if (this.glyphAttribute === attribute) return;
 
-    this.colorAttribute = attribute;
-    this.updateNodeColorsToAttribute();
+    this.glyphAttribute = attribute;
+    this.updateNodeGlyphToAttribute();
+  }
+
+  getGlyphForNode(nodeSource: NodeSource): string {
+    if (this.glyphSource === "type") {
+      return this.typeGlyph.url;
+    } else {
+      const attribute = this.glyphAttribute;
+      if (attribute?.type !== "enum") {
+        return this.typeGlyph.url;
+      }
+
+      if (!(attribute.name in nodeSource.attributes)) {
+        return this.typeGlyph.url;
+      }
+
+      const attributeValue = nodeSource.attributes[attribute.name];
+      const attributeValueInstance = attribute.valueMap?.get(
+        attributeValue as string,
+      );
+      if (!attributeValueInstance?.glyph?.url) {
+        return this.typeGlyph.url;
+      }
+
+      return attributeValueInstance.glyph.url;
+    }
+  }
+
+  updateNodeGlyphToType() {
+    setPropertiesForNodesOfType(
+      this.attributeManager.dataset.appState.sigma,
+      this.nodeType,
+      {
+        image: this.typeGlyph.url,
+      },
+    );
+  }
+
+  updateNodeGlyphToAttribute() {
+    const attribute = this.glyphAttribute;
+    if (attribute?.type !== "enum") return;
+
+    updatePropertiesForNodesOfType(
+      this.attributeManager.dataset.appState.sigma,
+      this.nodeType,
+      (attributes) => {
+        return {
+          ...attributes,
+          image: this.getGlyphForNode(attributes.source),
+        };
+      },
+    );
   }
 }
 
@@ -317,20 +437,26 @@ export class AttributeManager {
     this.mentionProperties = new NodeTypeProperties(
       this,
       "Mention",
+      "type",
       DEFINES.nodes.Mention.color,
       "type",
+      "Mention",
     );
     this.documentProperties = new NodeTypeProperties(
       this,
       "Document",
+      "type",
       DEFINES.nodes.Document.color,
       "type",
+      "Document",
     );
     this.entityProperties = new NodeTypeProperties(
       this,
       "Entity",
+      "type",
       DEFINES.nodes.Entity.color,
       "type",
+      "Entity",
     );
     this.nodeProperties.set("Mention", this.mentionProperties);
     this.nodeProperties.set("Document", this.documentProperties);

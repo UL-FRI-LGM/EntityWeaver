@@ -26,22 +26,26 @@
         {
           "name": "PER",
           "label": "Person",
-          "color": "#f5ad76"
+          "color": "#f5ad76",
+          "glyph": "Person"
         },
         {
           "name": "ORG",
           "label": "Organization",
-          "color": "#e07685"
+          "color": "#e07685",
+          "glyph": "Organization"
         },
         {
           "name": "LOC",
           "label": "Location",
-          "color": "#96b7a8"
+          "color": "#96b7a8",
+          "glyph": "Location"
         },
         {
           "name": "MISC",
           "label": "Miscellaneous",
-          "color": "#468dd3"
+          "color": "#468dd3",
+          "glyph": "Miscellaneous"
         }
       ]
     }

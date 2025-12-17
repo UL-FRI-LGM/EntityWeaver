@@ -10,44 +10,37 @@ import {
 } from "@mantine/core";
 import { useState } from "react";
 import classes from "./EntityTypeProperties.module.css";
-import {
-  IconAt,
-  IconBorderSides,
-  IconCheck,
-  IconDotsCircleHorizontal,
-  IconFile,
-  IconMapPin,
-  IconSitemap,
-  IconUserCircle,
-} from "@tabler/icons-react";
+import { IconCheck } from "@tabler/icons-react";
 import { type Attribute, NodeTypeProperties } from "@/stores/nodeAttributes.ts";
+import { IconMap, Icons } from "@/utils/iconsHelper.tsx";
 
-const glyphs = [
-  { name: "At", icon: <IconAt size={14} /> },
-  { name: "Box", icon: <IconBorderSides size={14} /> },
-  { name: "File", icon: <IconFile size={14} /> },
-  { name: "Person", icon: <IconUserCircle size={14} /> },
-  { name: "Hierarchy", icon: <IconSitemap size={14} /> },
-  { name: "Map Pin", icon: <IconMapPin size={14} /> },
-  { name: "Dot", icon: <IconDotsCircleHorizontal size={14} /> },
-];
+// const glyphs = [
+//   { name: "At", icon: <IconAt size={14} /> },
+//   { name: "Box", icon: <IconBorderSides size={14} /> },
+//   { name: "File", icon: <IconFile size={14} /> },
+//   { name: "Person", icon: <IconUserCircle size={14} /> },
+//   { name: "Hierarchy", icon: <IconSitemap size={14} /> },
+//   { name: "Map Pin", icon: <IconMapPin size={14} /> },
+//   { name: "Dot", icon: <IconDotsCircleHorizontal size={14} /> },
+// ];
 
-const defaultGlyphs = {
-  Document: glyphs[2],
-  Mention: glyphs[0],
-  Entity: glyphs[1],
-  PER: glyphs[3],
-  ORG: glyphs[4],
-  LOC: glyphs[5],
-  MISC: glyphs[6],
-};
+// const defaultGlyphs = {
+//   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+//   Document: glyphs.get("File")!,
+//   Mention: glyphs.get("Mention")!,
+//   Entity: glyphs[1],
+//   PER: glyphs[3],
+//   ORG: glyphs[4],
+//   LOC: glyphs[5],
+//   MISC: glyphs[6],
+// };
 
-const renderSelectOption: SelectProps["renderOption"] = ({
+const renderGylphOption: SelectProps["renderOption"] = ({
   option,
   checked,
 }) => (
   <Group flex="1" gap="xs">
-    {glyphs.find((glyph) => option.value === glyph.name)?.icon}
+    {IconMap.get(option.value)?.component}
     {option.label}
     {checked && <IconCheck style={{ marginInlineStart: "auto" }} />}
   </Group>
@@ -84,13 +77,9 @@ const EnumGlyphPicker = observer(
             className={classes.enumColorInput}
             disabled={disabled}
             placeholder="Select glyph"
-            value={
-              // @ts-expect-error it is so bad
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-              defaultGlyphs[attributeValue.name]?.name
-            }
-            data={glyphs.map((glyph) => glyph.name)}
-            renderOption={renderSelectOption}
+            value={attributeValue.glyph?.name}
+            data={Icons.map(({ name }) => name)}
+            renderOption={renderGylphOption}
             scrollAreaProps={{ type: "auto" }}
           />
         </Group>
@@ -107,12 +96,8 @@ const EntityTypeProperties = observer(
       ({ type }) => type === "enum",
     );
 
-    const [glyphSource, setGlyphSource] = useState<string>("type");
     const glyphValidAttributes = properties.attributes.filter(
       ({ type }) => type === "enum",
-    );
-    const [glyphAttribute, setGlyphAttribute] = useState<Attribute | null>(
-      null,
     );
 
     return (
@@ -189,9 +174,9 @@ const EntityTypeProperties = observer(
             <Group justify={"space-between"}>
               <Group>
                 <Radio
-                  checked={glyphSource === "type"}
+                  checked={properties.glyphSource === "type"}
                   onChange={() => {
-                    setGlyphSource("type");
+                    properties.setGlyphSource("type");
                   }}
                 />
                 By Type
@@ -199,9 +184,13 @@ const EntityTypeProperties = observer(
               <Select
                 style={{ width: 230 }}
                 placeholder="Select glyph"
-                value={defaultGlyphs[properties.nodeType].name}
-                data={glyphs.map((glyph) => glyph.name)}
-                renderOption={renderSelectOption}
+                value={properties.typeGlyph.name}
+                data={Icons.map(({ name }) => name)}
+                onChange={(value) => {
+                  if (!value) return;
+                  properties.setTypeGlyph(value);
+                }}
+                renderOption={renderGylphOption}
                 scrollAreaProps={{ type: "auto" }}
               />
             </Group>
@@ -209,31 +198,28 @@ const EntityTypeProperties = observer(
               <Stack gap={"xs"}>
                 <Group>
                   <Radio
-                    checked={glyphSource === "attribute"}
+                    checked={properties.glyphSource === "attribute"}
                     onChange={() => {
-                      setGlyphSource("attribute");
+                      properties.setGlyphSource("attribute");
                     }}
                   />
                   By Attribute
                   <Select
                     style={{ width: 230 }}
                     placeholder="Select Attribute"
-                    disabled={glyphSource !== "attribute"}
+                    disabled={properties.glyphSource !== "attribute"}
                     data={glyphValidAttributes.map(({ name }) => name)}
-                    value={glyphAttribute?.name || null}
+                    value={properties.glyphAttribute?.name || null}
                     onChange={(value) => {
-                      setGlyphAttribute(
-                        glyphValidAttributes.find(
-                          (attribute) => attribute.name === value,
-                        ) || null,
-                      );
+                      if (value === null) return;
+                      properties.setGlyphAttribute(value);
                     }}
                   />
                 </Group>
-                {glyphAttribute !== null && glyphAttribute.type === "enum" && (
+                {properties.glyphAttribute?.type === "enum" && (
                   <EnumGlyphPicker
-                    attribute={glyphAttribute}
-                    disabled={glyphSource !== "attribute"}
+                    attribute={properties.glyphAttribute}
+                    disabled={properties.glyphSource !== "attribute"}
                   />
                 )}
               </Stack>
