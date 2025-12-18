@@ -14,28 +14,7 @@ import { IconCheck } from "@tabler/icons-react";
 import { type Attribute, NodeTypeProperties } from "@/stores/nodeAttributes.ts";
 import { IconMap, Icons } from "@/utils/iconsHelper.tsx";
 
-// const glyphs = [
-//   { name: "At", icon: <IconAt size={14} /> },
-//   { name: "Box", icon: <IconBorderSides size={14} /> },
-//   { name: "File", icon: <IconFile size={14} /> },
-//   { name: "Person", icon: <IconUserCircle size={14} /> },
-//   { name: "Hierarchy", icon: <IconSitemap size={14} /> },
-//   { name: "Map Pin", icon: <IconMapPin size={14} /> },
-//   { name: "Dot", icon: <IconDotsCircleHorizontal size={14} /> },
-// ];
-
-// const defaultGlyphs = {
-//   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-//   Document: glyphs.get("File")!,
-//   Mention: glyphs.get("Mention")!,
-//   Entity: glyphs[1],
-//   PER: glyphs[3],
-//   ORG: glyphs[4],
-//   LOC: glyphs[5],
-//   MISC: glyphs[6],
-// };
-
-const renderGylphOption: SelectProps["renderOption"] = ({
+const renderGlyphOption: SelectProps["renderOption"] = ({
   option,
   checked,
 }) => (
@@ -79,7 +58,7 @@ const EnumGlyphPicker = observer(
             placeholder="Select glyph"
             value={attributeValue.glyph?.name}
             data={Icons.map(({ name }) => name)}
-            renderOption={renderGylphOption}
+            renderOption={renderGlyphOption}
             scrollAreaProps={{ type: "auto" }}
             onChange={(value) => {
               if (!value) return;
@@ -153,7 +132,10 @@ const EntityTypeProperties = observer(
                     style={{ width: 230 }}
                     placeholder="Select Attribute"
                     disabled={properties.colorSource !== "attribute"}
-                    data={colorValidAttributes.map(({ name }) => name)}
+                    data={colorValidAttributes.map((attribute) => ({
+                      value: attribute.name,
+                      label: attribute.displayName,
+                    }))}
                     value={properties.colorAttribute?.name ?? null}
                     onChange={(value) => {
                       if (value === null) {
@@ -194,7 +176,7 @@ const EntityTypeProperties = observer(
                   if (!value) return;
                   properties.setTypeGlyph(value);
                 }}
-                renderOption={renderGylphOption}
+                renderOption={renderGlyphOption}
                 scrollAreaProps={{ type: "auto" }}
               />
             </Group>
@@ -212,7 +194,10 @@ const EntityTypeProperties = observer(
                     style={{ width: 230 }}
                     placeholder="Select Attribute"
                     disabled={properties.glyphSource !== "attribute"}
-                    data={glyphValidAttributes.map(({ name }) => name)}
+                    data={glyphValidAttributes.map((attribute) => ({
+                      value: attribute.name,
+                      label: attribute.displayName,
+                    }))}
                     value={properties.glyphAttribute?.name || null}
                     onChange={(value) => {
                       if (value === null) return;
