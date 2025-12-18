@@ -1,9 +1,13 @@
 import { updateNodeProperties } from "@/utils/graphHelpers.ts";
 import type { Dataset } from "@/stores/dataset.ts";
-import { makeObservable } from "mobx";
+import { computed, makeObservable } from "mobx";
 import { apply, type RulesLogic } from "json-logic-js";
 import { bfsFromNode } from "graphology-traversal";
-import type { GraphNodeType, NodeAttributes } from "@/utils/schemas.ts";
+import type {
+  AttributeType,
+  GraphNodeType,
+  NodeAttributes,
+} from "@/utils/schemas.ts";
 
 export abstract class GraphEntity {
   readonly id: string;
@@ -42,6 +46,10 @@ export abstract class GraphEntity {
       setPosition: true,
       dispose: true,
       canDelete: true,
+
+      reservedAttributes: computed,
+      allAttributes: computed,
+      setAttributeValue: true,
     });
 
     const attributeMap =
@@ -58,8 +66,41 @@ export abstract class GraphEntity {
   }
 
   // This ensures certain that reserved attributes get used for filtering
-  getReservedAttributes(): NodeAttributes {
+  get reservedAttributes(): NodeAttributes {
     return {};
+  }
+
+  get allAttributes(): NodeAttributes {
+    return { ...this.attributes, ...this.reservedAttributes };
+  }
+
+  setAttributeValue(attributeName: string, value: AttributeType) {
+    const attribute = this.dataset.attributeManager.nodeProperties
+      .get(this.nodeType)
+      ?.attributeMap.get(attributeName);
+    if (!attribute) {
+      throw new Error(
+        `Attribute ${attributeName} not found for node type ${this.nodeType}`,
+      );
+    }
+
+    if (attribute.type === "text") {
+      this.attributes[attributeName] = String(value);
+    } else if (attribute.type === "number") {
+      this.attributes[attributeName] = Number(value);
+    } else if (attribute.type === "boolean") {
+      this.attributes[attributeName] = Boolean(value);
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    } else if (attribute.type === "enum") {
+      const val = String(value);
+      const attributeValue = attribute.valueMap?.get(val);
+      if (!attributeValue) {
+        throw new Error(
+          `Value ${val} not found for enum attribute ${attributeName} for node type ${this.nodeType}`,
+        );
+      }
+      this.attributes[attributeName] = value;
+    }
   }
 
   setPosition(position: { x?: number | null; y?: number | null }) {
@@ -96,13 +137,10 @@ export abstract class GraphEntity {
     }
 
     const hidden = showsIds.size > 0 && !showsIds.has(this.id);
-    const attributes = {
-      ...this.attributes,
-      ...this.getReservedAttributes(),
-    };
     const filtered =
       hidden ||
-      (attributeFilter !== false && !apply(attributeFilter, attributes));
+      (attributeFilter !== false &&
+        !apply(attributeFilter, this.allAttributes));
 
     if ((!excluding && filtered) || (excluding && !filtered)) {
       return;

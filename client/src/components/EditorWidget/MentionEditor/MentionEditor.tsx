@@ -5,7 +5,6 @@ import {
   Fieldset,
   Stack,
   TextInput,
-  useCombobox,
   Text,
   Paper,
   Divider,
@@ -28,8 +27,11 @@ import SearchableCombobox, {
 } from "../../SearchableCombobox/SearchableCombobox.tsx";
 import sharedClasses from "../shared.module.css";
 import { type Mention } from "@/stores/mention.ts";
-import TypeSelectorCombobox from "@/components/EditorWidget/TypeSelectorCombobox.tsx";
 import type { EntityLink } from "@/stores/entityLink.ts";
+import { hasDifferenceOrAddition } from "@/utils/helpers.ts";
+import type { NodeAttributes } from "@/utils/schemas.ts";
+import AttributeSelectors from "@/components/AttributeSelectors/AttributeSelectors.tsx";
+import { redrawNode } from "@/utils/graphHelpers.ts";
 
 const EntitySelector = observer(
   ({
@@ -146,15 +148,17 @@ const MentionToEntityLinkEditor = observer(
 
 const MentionEditor = observer(({ mention }: { mention: Mention }) => {
   const appState = useAppState();
-  const entityTypeCombobox = useCombobox();
 
   const [name, setName] = useState(mention.name);
-  const [entityType, setEntityType] = useState(mention.type);
   const [entityId, setEntityId] = useState<string | null>(null);
+  const [changes, setChanges] = useState<NodeAttributes>(mention.attributes);
 
   function applyChanges() {
     mention.setName(name);
-    mention.setType(entityType);
+    for (const [attributeName, value] of Object.entries(changes)) {
+      mention.setAttributeValue(attributeName, value);
+    }
+    redrawNode(appState.sigma, mention);
   }
 
   function setLinkedEntity() {
@@ -162,7 +166,9 @@ const MentionEditor = observer(({ mention }: { mention: Mention }) => {
     mention.setEntityLink(entityId, !appState.holdingShift);
   }
 
-  const canApplyChanges = mention.name !== name || mention.type !== entityType;
+  const canApplyChanges =
+    mention.name !== name ||
+    hasDifferenceOrAddition(changes, mention.attributes);
 
   const canAddEntity =
     entityId !== null &&
@@ -183,21 +189,29 @@ const MentionEditor = observer(({ mention }: { mention: Mention }) => {
     >
       {/*<NodeActions node={mention} />*/}
       <Stack gap={10}>
-        <Group>
-          <TextInput
-            label="Name"
-            value={name}
-            onChange={(event) => {
-              setName(event.currentTarget.value);
-            }}
-            style={{ flexGrow: 1 }}
-          />
-          <TypeSelectorCombobox
-            combobox={entityTypeCombobox}
-            entityType={entityType}
-            setEntityType={setEntityType}
-          />
-        </Group>
+        <TextInput
+          label="Name"
+          value={name}
+          onChange={(event) => {
+            setName(event.currentTarget.value);
+          }}
+          style={{ flexGrow: 1 }}
+        />
+
+        <AttributeSelectors
+          // nodeSource={entity}
+          values={changes}
+          attributes={
+            mention.dataset.attributeManager.mentionProperties
+              .nonReservedAttributes
+          }
+          onSetAttribute={(attribute, value) => {
+            setChanges((prevChanges) => ({
+              ...prevChanges,
+              [attribute.name]: value,
+            }));
+          }}
+        />
         <Group>
           <Button
             disabled={!canApplyChanges}

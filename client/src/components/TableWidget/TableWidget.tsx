@@ -6,34 +6,21 @@ import {
   Text,
 } from "@mantine/core";
 import { useMemo } from "react";
-import { useAppState } from "@/stores/appState.ts";
+import { type NodeSource, useAppState } from "@/stores/appState.ts";
 import classes from "./TableWidget.module.css";
 import type { tableContents } from "@/stores/uiState.ts";
+import type { Attribute } from "@/stores/nodeAttributes.ts";
 
-const DocumentHeader = (
-  <Table.Tr>
-    <Table.Th className={classes.idColumn}>ID</Table.Th>
-    <Table.Th className={classes.titleColumn}>Title</Table.Th>
-    <Table.Th className={classes.contentColumn}>Content</Table.Th>
-  </Table.Tr>
-);
-
-const EntityHeader = (
-  <Table.Tr>
-    <Table.Th className={classes.idColumn}>ID</Table.Th>
-    <Table.Th className={classes.typeColumn}>Type</Table.Th>
-    <Table.Th className={classes.nameColumn}>Name</Table.Th>
-  </Table.Tr>
-);
-
-const MentionHeader = (
-  <Table.Tr>
-    <Table.Th className={classes.idColumn}>ID</Table.Th>
-    <Table.Th className={classes.documentColumn}>Document</Table.Th>
-    <Table.Th className={classes.typeColumn}>Type</Table.Th>
-    <Table.Th className={classes.nameColumn}>Name</Table.Th>
-  </Table.Tr>
-);
+const DataHeader = observer(({ attributes }: { attributes: Attribute[] }) => {
+  return (
+    <Table.Tr>
+      <Table.Th className={classes.idColumn}>ID</Table.Th>
+      {attributes.map((attribute) => (
+        <Table.Th key={attribute.id}>{attribute.displayName}</Table.Th>
+      ))}
+    </Table.Tr>
+  );
+});
 
 const TableText = ({ ...props }: ElementProps<typeof Text>) => {
   return <Text lineClamp={2} {...props} />;
@@ -60,23 +47,46 @@ const TableRow = observer(
   },
 );
 
+const DataRow = observer(
+  ({
+    nodeSource,
+    attributes,
+  }: {
+    nodeSource: NodeSource;
+    attributes: Attribute[];
+  }) => {
+    return (
+      <TableRow id={nodeSource.id}>
+        <Table.Td className={classes.idColumn}>
+          <TableText>{nodeSource.internal_id}</TableText>
+        </Table.Td>
+        {attributes.map((attribute) => (
+          <Table.Td key={attribute.id}>
+            <TableText>
+              {attribute.name in nodeSource.allAttributes
+                ? nodeSource.allAttributes[attribute.name]
+                : "-"}
+            </TableText>
+          </Table.Td>
+        ))}
+      </TableRow>
+    );
+  },
+);
+
 const TableWidget = observer(() => {
   const appState = useAppState();
 
   const documentRows = useMemo(() => {
     return appState.dataset.documentList.map((document) => {
       return (
-        <TableRow id={document.id} key={document.id}>
-          <Table.Td className={classes.idColumn}>
-            <TableText>{document.internal_id}</TableText>
-          </Table.Td>
-          <Table.Td className={classes.titleColumn}>
-            <TableText>{document.title}</TableText>
-          </Table.Td>
-          <Table.Td className={classes.contentColumn}>
-            <TableText>{document.text}</TableText>
-          </Table.Td>
-        </TableRow>
+        <DataRow
+          key={document.id}
+          nodeSource={document}
+          attributes={
+            document.dataset.attributeManager.documentProperties.attributes
+          }
+        />
       );
     });
   }, [appState.dataset.documentList]);
@@ -84,17 +94,13 @@ const TableWidget = observer(() => {
   const entityRows = useMemo(() => {
     return appState.dataset.entityList.map((entity) => {
       return (
-        <TableRow id={entity.id} key={entity.id}>
-          <Table.Td className={classes.idColumn}>
-            <TableText>{entity.internal_id}</TableText>
-          </Table.Td>
-          <Table.Td className={classes.typeColumn}>
-            <TableText>{entity.type}</TableText>
-          </Table.Td>
-          <Table.Td className={classes.nameColumn}>
-            <TableText>{entity.name}</TableText>
-          </Table.Td>
-        </TableRow>
+        <DataRow
+          key={entity.id}
+          nodeSource={entity}
+          attributes={
+            entity.dataset.attributeManager.entityProperties.attributes
+          }
+        />
       );
     });
   }, [appState.dataset.entityList]);
@@ -102,20 +108,13 @@ const TableWidget = observer(() => {
   const mentionRows = useMemo(() => {
     return appState.dataset.mentionList.map((mention) => {
       return (
-        <TableRow id={mention.id} key={mention.id}>
-          <Table.Td className={classes.idColumn}>
-            <TableText>{mention.internal_id}</TableText>
-          </Table.Td>
-          <Table.Td className={classes.documentColumn}>
-            <TableText> {mention.document.title}</TableText>
-          </Table.Td>
-          <Table.Td className={classes.typeColumn}>
-            <TableText>{mention.type}</TableText>
-          </Table.Td>
-          <Table.Td className={classes.nameColumn}>
-            <TableText>{mention.name}</TableText>
-          </Table.Td>
-        </TableRow>
+        <DataRow
+          key={mention.id}
+          nodeSource={mention}
+          attributes={
+            mention.dataset.attributeManager.mentionProperties.attributes
+          }
+        />
       );
     });
   }, [appState.dataset.mentionList]);
@@ -147,11 +146,26 @@ const TableWidget = observer(() => {
           className={classes.table}
         >
           <Table.Thead>
-            {appState.uiState.tableContents === "documents"
-              ? DocumentHeader
-              : appState.uiState.tableContents === "entities"
-                ? EntityHeader
-                : MentionHeader}
+            {appState.uiState.tableContents === "documents" ? (
+              <DataHeader
+                attributes={
+                  appState.dataset.attributeManager.documentProperties
+                    .attributes
+                }
+              />
+            ) : appState.uiState.tableContents === "entities" ? (
+              <DataHeader
+                attributes={
+                  appState.dataset.attributeManager.entityProperties.attributes
+                }
+              />
+            ) : (
+              <DataHeader
+                attributes={
+                  appState.dataset.attributeManager.mentionProperties.attributes
+                }
+              />
+            )}
           </Table.Thead>
           <Table.Tbody>
             {appState.uiState.tableContents === "documents"

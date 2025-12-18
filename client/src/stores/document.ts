@@ -38,6 +38,8 @@ export class Document extends GraphEntity {
 
       color: computed({ keepAlive: true }),
 
+      reservedAttributes: override,
+
       mentionList: computed({ keepAlive: true }),
       textWithEntities: true,
       dispose: override,
@@ -67,6 +69,12 @@ export class Document extends GraphEntity {
     };
   }
 
+  get reservedAttributes(): NodeAttributes {
+    return {
+      title: this.title,
+    };
+  }
+
   get color() {
     return this.dataset.attributeManager.documentProperties.getColorForNode(
       this,
@@ -75,12 +83,6 @@ export class Document extends GraphEntity {
 
   get name() {
     return this.title;
-  }
-
-  getReservedAttributes(): NodeAttributes {
-    return {
-      title: this.title,
-    };
   }
 
   setTitle(title: string) {

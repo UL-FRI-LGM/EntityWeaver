@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { RESERVED_ATTRIBUTES } from "@/defines.ts";
 
-const AttributeValues = z.union([z.number(), z.string(), z.boolean()]);
+const AttributeTypeSchema = z.union([z.number(), z.string(), z.boolean()]);
+export type AttributeType = z.infer<typeof AttributeTypeSchema>;
 
-const NodeAttributesSchema = z.record(z.string(), AttributeValues);
+const NodeAttributesSchema = z.record(z.string(), AttributeTypeSchema);
 export type NodeAttributes = z.infer<typeof NodeAttributesSchema>;
 
 const GraphNodeSchema = z.object({

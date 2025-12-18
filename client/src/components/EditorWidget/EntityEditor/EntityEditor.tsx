@@ -1,20 +1,16 @@
 import { observer } from "mobx-react";
 import classes from "./EntityEditor.module.css";
 import sharedClasses from "../shared.module.css";
-import {
-  Button,
-  Fieldset,
-  Stack,
-  TextInput,
-  useCombobox,
-  Divider,
-  Group,
-} from "@mantine/core";
+import { Button, Fieldset, Stack, TextInput, Divider } from "@mantine/core";
 import { useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
 import MentionLinkEditor from "@/components/EditorWidget/MentionLinkEditor.tsx";
 import type { Entity } from "@/stores/entity.ts";
-import TypeSelectorCombobox from "@/components/EditorWidget/TypeSelectorCombobox.tsx";
+import AttributeSelectors from "@/components/AttributeSelectors/AttributeSelectors.tsx";
+import type { NodeAttributes } from "@/utils/schemas.ts";
+import { hasDifferenceOrAddition } from "@/utils/helpers.ts";
+import { redrawNode } from "@/utils/graphHelpers.ts";
+import { useAppState } from "@/stores/appState.ts";
 
 const MentionList = observer(({ entity }: { entity: Entity }) => {
   return (
@@ -30,17 +26,20 @@ const MentionList = observer(({ entity }: { entity: Entity }) => {
 });
 
 const EntityEditor = observer(({ entity }: { entity: Entity }) => {
-  const entityTypeCombobox = useCombobox();
-
+  const appState = useAppState();
   const [name, setName] = useState(entity.name);
-  const [entityType, setEntityType] = useState(entity.type);
+  const [changes, setChanges] = useState<NodeAttributes>(entity.attributes);
 
   function applyChanges() {
     entity.setName(name);
-    entity.setType(entityType);
+    for (const [attributeName, value] of Object.entries(changes)) {
+      entity.setAttributeValue(attributeName, value);
+    }
+    redrawNode(appState.sigma, entity);
   }
 
-  const canApplyChanges = entity.name !== name || entity.type !== entityType;
+  const canApplyChanges =
+    entity.name !== name || hasDifferenceOrAddition(changes, entity.attributes);
 
   return (
     <Fieldset
@@ -56,21 +55,31 @@ const EntityEditor = observer(({ entity }: { entity: Entity }) => {
       }}
     >
       <Stack gap={10}>
-        <Group>
-          <TextInput
-            label="Name"
-            value={name}
-            onChange={(event) => {
-              setName(event.currentTarget.value);
-            }}
-            style={{ flexGrow: 1 }}
-          />
-          <TypeSelectorCombobox
-            combobox={entityTypeCombobox}
-            entityType={entityType}
-            setEntityType={setEntityType}
-          />
-        </Group>
+        <TextInput
+          label="Name"
+          value={name}
+          onChange={(event) => {
+            setName(event.currentTarget.value);
+          }}
+          style={{ flexGrow: 1 }}
+        />
+
+        <AttributeSelectors
+          // nodeSource={entity}
+          values={changes}
+          attributes={
+            entity.dataset.attributeManager.entityProperties
+              .nonReservedAttributes
+          }
+          onSetAttribute={(attribute, value) => {
+            setChanges((prevChanges) => ({
+              ...prevChanges,
+              [attribute.name]: value,
+            }));
+          }}
+        />
+
+        {/*{entity.dataset.attributeManager.entityProperties.attributes.map()}*/}
 
         <Button
           disabled={!canApplyChanges}

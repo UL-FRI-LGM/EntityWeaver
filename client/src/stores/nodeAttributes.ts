@@ -15,6 +15,7 @@ import {
 import type { NodeSource } from "@/stores/appState.ts";
 import { defaultIcon, type Icon, IconMap } from "@/utils/iconsHelper.tsx";
 import { getDefaultColor } from "@/utils/helpers.ts";
+import { v4 as uuidv4 } from "uuid";
 
 export class AttributeValue {
   name: string;
@@ -109,6 +110,7 @@ export class AttributeValue {
 }
 
 export class Attribute {
+  id: string;
   name: string;
   label: string | undefined;
   type: AttributeDataType;
@@ -126,6 +128,7 @@ export class Attribute {
     label?: string,
     reserved = false,
   ) {
+    this.id = uuidv4();
     this.name = name;
     this.type = type;
     this.label = label;
@@ -136,6 +139,7 @@ export class Attribute {
       nodeTypeProperties: false,
       field: computed({ keepAlive: true }),
       values: computed({ keepAlive: true }),
+      id: false,
     });
 
     this.nodeTypeProperties = nodeTypeProperties;
@@ -275,6 +279,7 @@ export class NodeTypeProperties {
       attributeManager: false,
       updateNodeColorsToType: false,
       attributes: computed({ keepAlive: true }),
+      nonReservedAttributes: computed({ keepAlive: true }),
       attributeMap: observable.shallow,
     });
 
@@ -283,6 +288,10 @@ export class NodeTypeProperties {
 
   get attributes() {
     return Array.from(this.attributeMap.values());
+  }
+
+  get nonReservedAttributes() {
+    return this.attributes.filter((attribute) => !attribute.reserved);
   }
 
   addAttribute(attribute: Attribute) {

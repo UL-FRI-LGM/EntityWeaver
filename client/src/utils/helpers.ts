@@ -197,3 +197,18 @@ export function sumAndMax(arr: number[]): { sum: number; max: number | null } {
 export function getDefaultColor(index: number): string {
   return DEFINES.defaultColors[index % DEFINES.defaultColors.length];
 }
+
+export function hasDifferenceOrAddition(
+  first: Record<string, unknown>,
+  second: Record<string, unknown>,
+): boolean {
+  return Object.keys(first).some((key) => {
+    // key exists in first but not in second
+    if (!(key in second)) {
+      return true;
+    }
+
+    // value differs
+    return first[key] !== second[key];
+  });
+}

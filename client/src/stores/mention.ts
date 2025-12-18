@@ -47,7 +47,6 @@ export class Mention extends GraphEntity {
 
     makeObservable<Mention>(this, {
       name: computed({ keepAlive: true }),
-      type: true,
       start_index: true,
       end_index: true,
       entityLinks: true,
@@ -55,9 +54,10 @@ export class Mention extends GraphEntity {
 
       color: computed({ keepAlive: true }),
 
+      reservedAttributes: override,
+
       entityLinkList: computed({ keepAlive: true }),
       setName: true,
-      setType: true,
       setDocument: true,
       setIndices: true,
 
@@ -70,17 +70,13 @@ export class Mention extends GraphEntity {
     });
   }
 
-  get type() {
-    return "type" in this.attributes ? (this.attributes.type as string) : "";
-  }
-
   get color() {
     return this.dataset.attributeManager.mentionProperties.getColorForNode(
       this,
     );
   }
 
-  getReservedAttributes(): NodeAttributes {
+  get reservedAttributes(): NodeAttributes {
     return {
       name: this.name,
     };
@@ -147,12 +143,6 @@ export class Mention extends GraphEntity {
     this.document.editText(this.start_index, this.end_index, name);
   }
 
-  setType(type: string) {
-    this.attributes.type = type;
-    if (this.dataset.appState.sigma) {
-      updateMentionNode(this.dataset.appState.sigma, this.id, { type: type });
-    }
-  }
   setDocument(document: Document) {
     this.document = document;
     if (this.dataset.appState.sigma) {

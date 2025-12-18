@@ -184,6 +184,29 @@ export function updatePropertiesForNodesOfType(
   });
 }
 
+export function redrawNode(
+  sigma: Sigma<NodeType, EdgeType> | null,
+  nodeSource: NodeSource,
+) {
+  if (!sigma) {
+    return;
+  }
+
+  const properties = nodeSource.dataset.attributeManager.nodeProperties.get(
+    nodeSource.nodeType,
+  );
+  if (!properties) {
+    throw new Error(`No properties found for node type ${nodeSource.nodeType}`);
+  }
+  const glyph = properties.getGlyphForNode(nodeSource);
+  const graph = sigma.getGraph();
+  graph.mergeNodeAttributes(nodeSource.id, {
+    label: nodeSource.name,
+    color: nodeSource.color,
+    image: glyph,
+  });
+}
+
 export function updateNodeProperties(
   sigma: Sigma<NodeType, EdgeType> | null,
   nodeId: string,

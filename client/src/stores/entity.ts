@@ -27,11 +27,11 @@ export class Entity extends GraphEntity {
 
     makeObservable(this, {
       name: true,
-      type: true,
       setName: true,
-      setType: true,
 
       color: computed({ keepAlive: true }),
+
+      reservedAttributes: override,
 
       searchString: true,
       mentionLinkList: computed({ keepAlive: true }),
@@ -63,15 +63,11 @@ export class Entity extends GraphEntity {
     };
   }
 
-  get type(): string {
-    return "type" in this.attributes ? (this.attributes.type as string) : "";
-  }
-
   get color() {
     return this.dataset.attributeManager.entityProperties.getColorForNode(this);
   }
 
-  getReservedAttributes(): NodeAttributes {
+  get reservedAttributes(): NodeAttributes {
     return {
       name: this.name,
     };
@@ -84,11 +80,6 @@ export class Entity extends GraphEntity {
   setName(name: string) {
     this.attributes.name = name;
     updateNodeProperties(this.dataset.appState.sigma, this.id, { label: name });
-  }
-
-  setType(type: string) {
-    this.attributes.type = type;
-    updateNodeProperties(this.dataset.appState.sigma, this.id, { type: type });
   }
 
   get searchString() {

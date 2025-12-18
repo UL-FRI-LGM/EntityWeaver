@@ -87,26 +87,6 @@ export const DEFINES = {
       width: edgeWidth,
     },
   },
-  entityTypes: {
-    colors: {
-      PER: "#f5ad76",
-      ORG: "#e07685",
-      LOC: "#96b7a8",
-      MISC: "#468dd3",
-    },
-    iconColor: {
-      PER: "black",
-      ORG: "black",
-      LOC: "black",
-      MISC: "black",
-    },
-    names: {
-      PER: "Person",
-      ORG: "Organization",
-      LOC: "Location",
-      MISC: "Miscellaneous",
-    },
-  },
   layout: {
     edgeWeights: {
       MentionToDocument: 3,
