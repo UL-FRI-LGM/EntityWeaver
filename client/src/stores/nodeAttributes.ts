@@ -14,6 +14,7 @@ import {
 } from "@/utils/graphHelpers.ts";
 import type { NodeSource } from "@/stores/appState.ts";
 import { defaultIcon, type Icon, IconMap } from "@/utils/iconsHelper.tsx";
+import { getDefaultColor } from "@/utils/helpers.ts";
 
 export class AttributeValue {
   name: string;
@@ -32,7 +33,9 @@ export class AttributeValue {
   ) {
     this.name = name;
     this.label = label;
-    this.color = color ?? "#ffffff";
+
+    // Very hackish, TODO improve this
+    this.color = color ?? getDefaultColor(attribute.valueMap?.size ?? 0);
 
     if (glyph) {
       this.glyph = IconMap.get(glyph);
@@ -184,6 +187,7 @@ export class Attribute {
       );
       return;
     }
+
     this.valueMap.set(value.name, value);
   }
 

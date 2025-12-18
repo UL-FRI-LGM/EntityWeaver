@@ -225,3 +225,7 @@ export function sumAndMax(arr: number[]): { sum: number; max: number | null } {
     { sum: 0, max: arr.length ? arr[0] : null },
   );
 }
+
+export function getDefaultColor(index: number): string {
+  return DEFINES.defaultColors[index % DEFINES.defaultColors.length];
+}

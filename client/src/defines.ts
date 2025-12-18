@@ -130,6 +130,7 @@ export const DEFINES = {
       EntityCollocation: 0,
     },
   },
+  defaultColors: ["#f5ad76", "#e07685", "#96b7a8", "#468dd3"],
 } as const;
 
 export const RESERVED_ATTRIBUTES: AttributeDB[] = [

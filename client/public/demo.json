@@ -12,23 +12,19 @@
       "values": [
         {
           "name": "PER",
-          "label": "Person",
-          "color": "#f5ad76"
+          "label": "Person"
         },
         {
           "name": "ORG",
-          "label": "Organization",
-          "color": "#e07685"
+          "label": "Organization"
         },
         {
           "name": "LOC",
-          "label": "Location",
-          "color": "#96b7a8"
+          "label": "Location"
         },
         {
           "name": "MISC",
-          "label": "Miscellaneous",
-          "color": "#468dd3"
+          "label": "Miscellaneous"
         }
       ]
     }
