@@ -8,11 +8,7 @@ import {
   type NodeSource,
   type NodeType,
 } from "@/stores/appState.ts";
-import {
-  edgeTypeToProperties,
-  typeToImage,
-  uncertaintyToEdgeColor,
-} from "./helpers.ts";
+import { edgeTypeToProperties, uncertaintyToEdgeColor } from "./helpers.ts";
 import { Dataset } from "@/stores/dataset.ts";
 import type Graph from "graphology";
 import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
@@ -263,8 +259,11 @@ export function updateMentionNode(
   }
 
   if (update.type !== undefined && update.type !== node.type) {
-    const entityImage = typeToImage(update.type);
-    graph.setNodeAttribute(nodeId, "image", entityImage);
+    const properties = node.source.dataset.attributeManager.mentionProperties;
+    const glyph = properties.getGlyphForNode(node.source);
+    const color = properties.getColorForNode(node.source);
+    graph.setNodeAttribute(nodeId, "image", glyph);
+    graph.setNodeAttribute(nodeId, "color", color);
   }
 
   if (update.documentId !== undefined) {
@@ -408,13 +407,15 @@ export function updateGraph(
   graph.clear();
 
   dataset.documents.forEach((document) => {
+    const glyph =
+      dataset.attributeManager.documentProperties.getGlyphForNode(document);
     graph.addNode(document.id, {
       x: document.x ?? getRandomPosition(rng),
       y: document.y ?? getRandomPosition(rng),
       size: DEFINES.nodes.Document.size,
       label: document.title,
       color: DEFINES.nodes.Document.color,
-      image: DEFINES.nodes.Document.image,
+      image: glyph,
       pictogramColor: DEFINES.nodes.Document.iconColor,
       type: "pictogram",
       borderSize: DEFINES.nodes.Document.borderSize,

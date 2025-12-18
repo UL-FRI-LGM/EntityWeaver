@@ -1,9 +1,3 @@
-import documentImg from "/document.svg?url";
-import locationImg from "/location.svg?url";
-import miscImg from "/miscellaneous.svg?url";
-import organizationImg from "/organization.svg?url";
-import personImg from "/person.svg?url";
-import unknownImg from "/unknown.svg?url";
 import Color from "color";
 import type { AttributeDB } from "@/utils/schemas.ts";
 
@@ -35,7 +29,6 @@ export const DEFINES = {
       size: 15,
       borderSize: 0.1,
       borderColor: "black",
-      image: documentImg,
     },
     Entity: {
       color: "#61b5d4",
@@ -112,13 +105,6 @@ export const DEFINES = {
       ORG: "Organization",
       LOC: "Location",
       MISC: "Miscellaneous",
-    },
-    images: {
-      PER: personImg,
-      ORG: organizationImg,
-      LOC: locationImg,
-      MISC: miscImg,
-      default: unknownImg,
     },
   },
   layout: {

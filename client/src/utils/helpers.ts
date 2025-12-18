@@ -79,14 +79,6 @@ export function typeIconToColor(type: string) {
   return null;
 }
 
-export function typeToImage(type: string) {
-  if (type in DEFINES.entityTypes.images)
-    return DEFINES.entityTypes.images[
-      type as keyof typeof DEFINES.entityTypes.images
-    ];
-  return DEFINES.entityTypes.images.default;
-}
-
 export function edgeTypeToProperties(type: keyof typeof DEFINES.edges) {
   return DEFINES.edges[type];
 }
