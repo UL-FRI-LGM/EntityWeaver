@@ -17,7 +17,6 @@ import ParagraphExtension from "@tiptap/extension-paragraph";
 import clsx from "clsx";
 import { MarkViewContent, type MarkViewRendererProps } from "@tiptap/react";
 import globalClasses from "@/styles/global.module.css";
-import { typeToColor } from "@/utils/helpers.ts";
 import { DEFINES } from "@/defines.ts";
 import { IconPencil } from "@tabler/icons-react";
 import type { Mention } from "@/stores/mention.ts";
@@ -29,8 +28,6 @@ const ClickableMarkComponent = observer((props: MarkViewRendererProps) => {
   const markRef = useRef<HTMLElement | null>(null);
 
   const mention = props.mark.attrs.mention as Mention;
-  const color =
-    typeToColor(mention.type) ?? "var(--mantine-primary-color-filled)";
 
   const outline = useMemo(() => {
     if (appState.selectedNode === mention.id) {
@@ -52,7 +49,7 @@ const ClickableMarkComponent = observer((props: MarkViewRendererProps) => {
       style={{
         outline: outline,
       }}
-      color={color}
+      color={mention.color}
       onClick={() => {
         appState.setSelectedNode(mention.id);
       }}

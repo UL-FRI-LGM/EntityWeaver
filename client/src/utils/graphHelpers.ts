@@ -15,7 +15,6 @@ import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
 import type { UiState } from "@/stores/uiState.ts";
 import { type Mention } from "@/stores/mention.ts";
 import type { EntityLink } from "@/stores/entityLink.ts";
-import type { AttributeManager } from "@/stores/nodeAttributes.ts";
 import type { GraphNodeType } from "@/utils/schemas.ts";
 
 function getRandomPosition(generator?: PRNG) {
@@ -141,21 +140,12 @@ export function computeLayoutContribution(sigma: Sigma<NodeType, EdgeType>) {
   }
 }
 
-function getNodeColors(
-  nodeSource: NodeSource,
-  attributeManager: AttributeManager,
-): { color: string; pictogramColor: string } {
-  const nodeProperties = attributeManager.nodeProperties.get(
-    nodeSource.nodeType,
-  );
-  if (!nodeProperties) {
-    throw new Error(`Node type ${nodeSource.nodeType} not found.`);
-  }
-
-  const color = nodeProperties.getColorForNode(nodeSource);
-
+function getNodeColors(nodeSource: NodeSource): {
+  color: string;
+  pictogramColor: string;
+} {
   return {
-    color: color,
+    color: nodeSource.color,
     pictogramColor: "black",
   };
 }
@@ -261,9 +251,8 @@ export function updateMentionNode(
   if (update.type !== undefined && update.type !== node.type) {
     const properties = node.source.dataset.attributeManager.mentionProperties;
     const glyph = properties.getGlyphForNode(node.source);
-    const color = properties.getColorForNode(node.source);
     graph.setNodeAttribute(nodeId, "image", glyph);
-    graph.setNodeAttribute(nodeId, "color", color);
+    graph.setNodeAttribute(nodeId, "color", node.source.color);
   }
 
   if (update.documentId !== undefined) {
@@ -424,10 +413,7 @@ export function updateGraph(
     });
   });
   dataset.entities.forEach((entity) => {
-    const { color, pictogramColor } = getNodeColors(
-      entity,
-      dataset.attributeManager,
-    );
+    const { color, pictogramColor } = getNodeColors(entity);
     const glyph =
       dataset.attributeManager.entityProperties.getGlyphForNode(entity);
     graph.addNode(entity.id, {
@@ -446,10 +432,7 @@ export function updateGraph(
     });
   });
   dataset.mentions.forEach((mention) => {
-    const { color, pictogramColor } = getNodeColors(
-      mention,
-      dataset.attributeManager,
-    );
+    const { color, pictogramColor } = getNodeColors(mention);
     const glyph =
       dataset.attributeManager.mentionProperties.getGlyphForNode(mention);
     graph.addNode(mention.id, {

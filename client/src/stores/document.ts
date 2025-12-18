@@ -35,6 +35,9 @@ export class Document extends GraphEntity {
       setText: true,
       editText: true,
       mentions: true,
+
+      color: computed({ keepAlive: true }),
+
       mentionList: computed({ keepAlive: true }),
       textWithEntities: true,
       dispose: override,
@@ -62,6 +65,12 @@ export class Document extends GraphEntity {
       y: this.y,
       attributes: this.attributes,
     };
+  }
+
+  get color() {
+    return this.dataset.attributeManager.documentProperties.getColorForNode(
+      this,
+    );
   }
 
   get name() {

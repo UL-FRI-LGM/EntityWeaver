@@ -31,6 +31,8 @@ export class Entity extends GraphEntity {
       setName: true,
       setType: true,
 
+      color: computed({ keepAlive: true }),
+
       searchString: true,
       mentionLinkList: computed({ keepAlive: true }),
       dispose: override,
@@ -63,6 +65,10 @@ export class Entity extends GraphEntity {
 
   get type(): string {
     return "type" in this.attributes ? (this.attributes.type as string) : "";
+  }
+
+  get color() {
+    return this.dataset.attributeManager.entityProperties.getColorForNode(this);
   }
 
   getReservedAttributes(): NodeAttributes {

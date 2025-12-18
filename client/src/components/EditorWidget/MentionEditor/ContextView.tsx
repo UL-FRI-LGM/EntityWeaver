@@ -2,7 +2,6 @@ import { observer } from "mobx-react";
 import { Accordion, Mark, Text } from "@mantine/core";
 import type { Mention } from "@/stores/mention.ts";
 import classes from "./ContextView.module.css";
-import { typeToColor } from "@/utils/helpers.ts";
 import { IconFileBroken } from "@tabler/icons-react";
 import { useAppState } from "@/stores/appState.ts";
 import globalClasses from "@/styles/global.module.css";
@@ -11,8 +10,6 @@ const ContextView = observer(({ mention }: { mention: Mention }) => {
   const appState = useAppState();
 
   const contextSnippet = mention.contextSnippet;
-  const color =
-    typeToColor(mention.type) ?? "var(--mantine-primary-color-filled)";
 
   return (
     <Accordion
@@ -30,7 +27,7 @@ const ContextView = observer(({ mention }: { mention: Mention }) => {
         <Accordion.Panel>
           <Text>
             {contextSnippet.before}
-            <Mark className={globalClasses.mark} color={color}>
+            <Mark className={globalClasses.mark} color={mention.color}>
               {contextSnippet.mention}
             </Mark>
             {contextSnippet.after}

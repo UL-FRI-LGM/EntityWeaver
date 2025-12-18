@@ -63,22 +63,6 @@ export function typeToString(type: string) {
   return type;
 }
 
-export function typeToColor(type: string) {
-  if (type in DEFINES.entityTypes.colors)
-    return DEFINES.entityTypes.colors[
-      type as keyof typeof DEFINES.entityTypes.colors
-    ];
-  return null;
-}
-
-export function typeIconToColor(type: string) {
-  if (type in DEFINES.entityTypes.iconColor)
-    return DEFINES.entityTypes.iconColor[
-      type as keyof typeof DEFINES.entityTypes.iconColor
-    ];
-  return null;
-}
-
 export function edgeTypeToProperties(type: keyof typeof DEFINES.edges) {
   return DEFINES.edges[type];
 }

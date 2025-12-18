@@ -29,7 +29,7 @@ const ICON_SIZE = 14;
 
 export const defaultIcon: Icon = {
   name: "Default",
-  url: "miscellaneousImg",
+  url: miscellaneousImg,
   component: <IconDotsCircleHorizontal size={ICON_SIZE} />,
 } as const;
 

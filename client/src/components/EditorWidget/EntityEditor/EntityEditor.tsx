@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
-import { typeToColor, typeToString } from "@/utils/helpers.ts";
+import { typeToString } from "@/utils/helpers.ts";
 import MentionLinkEditor from "@/components/EditorWidget/MentionLinkEditor.tsx";
 import type { Entity } from "@/stores/entity.ts";
 import TypeSelectorCombobox from "@/components/EditorWidget/TypeSelectorCombobox.tsx";
@@ -49,10 +49,10 @@ const EntityEditor = observer(({ entity }: { entity: Entity }) => {
       legend={typeToString(entity.type)}
       styles={{
         root: {
-          borderColor: typeToColor(entity.type) ?? undefined,
+          borderColor: entity.color,
         },
         legend: {
-          color: typeToColor(entity.type) ?? undefined,
+          color: entity.color,
         },
       }}
     >

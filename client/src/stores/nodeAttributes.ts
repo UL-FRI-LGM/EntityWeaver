@@ -367,7 +367,7 @@ export class NodeTypeProperties {
       (attributes) => {
         return {
           ...attributes,
-          color: this.getColorForNode(attributes.source),
+          color: attributes.source.color,
         };
       },
     );

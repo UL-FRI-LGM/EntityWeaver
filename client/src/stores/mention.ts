@@ -53,6 +53,8 @@ export class Mention extends GraphEntity {
       entityLinks: true,
       document: true,
 
+      color: computed({ keepAlive: true }),
+
       entityLinkList: computed({ keepAlive: true }),
       setName: true,
       setType: true,
@@ -70,6 +72,12 @@ export class Mention extends GraphEntity {
 
   get type() {
     return "type" in this.attributes ? (this.attributes.type as string) : "";
+  }
+
+  get color() {
+    return this.dataset.attributeManager.mentionProperties.getColorForNode(
+      this,
+    );
   }
 
   getReservedAttributes(): NodeAttributes {
