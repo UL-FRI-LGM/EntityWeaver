@@ -70,7 +70,7 @@ const nodePictogramProgram = createNodeCompoundProgram<NodeType, EdgeType>([
     correctCentering: false,
     drawingMode: "color",
     colorAttribute: "pictogramColor",
-    padding: 0.15,
+    padding: 0.25,
     size: {
       mode: "force",
       value: 128,

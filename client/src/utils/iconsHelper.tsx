@@ -1,11 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
 
-import locationImg from "@tabler/icons/outline/map-pin.svg?url";
-import userImg from "@tabler/icons/outline/user-circle.svg?url";
-import fileImg from "@tabler/icons/outline/file.svg?url";
+import locationImg from "@tabler/icons/filled/map-pin.svg?url";
+import userImg from "@tabler/icons/filled/user.svg?url";
+import fileImg from "@tabler/icons/filled/file.svg?url";
 import miscellaneousImg from "@tabler/icons/outline/dots-circle-horizontal.svg?url";
 import mentionImg from "@tabler/icons/outline/at.svg?url";
 import entityImg from "@tabler/icons/outline/border-sides.svg?url";
+import organizationImg from "@tabler/icons/filled/sitemap.svg?url";
 
 import type { JSX } from "react";
 import {
@@ -15,7 +16,7 @@ import {
   IconFile,
   IconMapPin,
   IconSitemap,
-  IconUserCircle,
+  IconUser,
 } from "@tabler/icons-react";
 
 export interface Icon {
@@ -56,10 +57,10 @@ export const Icons: Icon[] = [
   {
     url: userImg,
     name: "Person",
-    component: <IconUserCircle size={ICON_SIZE} />,
+    component: <IconUser size={ICON_SIZE} />,
   },
   {
-    url: userImg,
+    url: organizationImg,
     name: "Organization",
     component: <IconSitemap size={ICON_SIZE} />,
   },

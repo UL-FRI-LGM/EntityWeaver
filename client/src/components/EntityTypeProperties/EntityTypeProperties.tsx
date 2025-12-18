@@ -81,6 +81,10 @@ const EnumGlyphPicker = observer(
             data={Icons.map(({ name }) => name)}
             renderOption={renderGylphOption}
             scrollAreaProps={{ type: "auto" }}
+            onChange={(value) => {
+              if (!value) return;
+              attributeValue.setGlyph(value);
+            }}
           />
         </Group>
       );

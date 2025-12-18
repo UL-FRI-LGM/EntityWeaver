@@ -146,3 +146,35 @@ export const RESERVED_ATTRIBUTES: AttributeDB[] = [
     records: ["Document"],
   },
 ] as const;
+
+export interface DefaultAttributeSettings {
+  attribute: Omit<AttributeDB, "values">;
+  defaultSettings: {
+    values: Record<string, { glyph?: string; color?: string }>;
+  };
+}
+export const DEFAULT_ATTRIBUTE_SETTINGS: DefaultAttributeSettings[] = [
+  {
+    attribute: {
+      name: "type",
+      type: "enum",
+      records: ["Entity", "Mention"],
+    },
+    defaultSettings: {
+      values: {
+        PER: {
+          glyph: "Person",
+        },
+        ORG: {
+          glyph: "Organization",
+        },
+        LOC: {
+          glyph: "Location",
+        },
+        MISC: {
+          glyph: "Miscellaneous",
+        },
+      },
+    },
+  },
+];

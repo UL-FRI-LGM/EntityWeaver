@@ -7,7 +7,11 @@ import {
   type GraphNodeType,
 } from "@/utils/schemas.ts";
 import type { Field } from "react-querybuilder";
-import { DEFINES, RESERVED_ATTRIBUTES } from "@/defines.ts";
+import {
+  DEFAULT_ATTRIBUTE_SETTINGS,
+  DEFINES,
+  RESERVED_ATTRIBUTES,
+} from "@/defines.ts";
 import {
   setPropertiesForNodesOfType,
   updatePropertiesForNodesOfType,
@@ -75,6 +79,22 @@ export class AttributeValue {
       this.attribute.nodeTypeProperties.colorAttribute === this.attribute
     ) {
       this.attribute.nodeTypeProperties.updateNodeColorsToAttribute();
+    }
+  }
+
+  setGlyph(glyph: string) {
+    const icon = IconMap.get(glyph);
+    if (!icon) {
+      console.warn(`Icon ${glyph} not found.`);
+      return;
+    }
+
+    this.glyph = icon;
+    if (
+      this.attribute.nodeTypeProperties.glyphSource === "attribute" &&
+      this.attribute.nodeTypeProperties.glyphAttribute === this.attribute
+    ) {
+      this.attribute.nodeTypeProperties.updateNodeGlyphToAttribute();
     }
   }
 }
@@ -159,6 +179,31 @@ export class Attribute {
     this.valueMap.set(value.name, value);
   }
 
+  applyDefaultAttributeSettings() {
+    const defaultSettings = DEFAULT_ATTRIBUTE_SETTINGS.find(
+      (setting) =>
+        setting.attribute.name === this.name &&
+        setting.attribute.type === this.type &&
+        setting.attribute.records.includes(this.nodeTypeProperties.nodeType),
+    );
+    if (!defaultSettings) return;
+
+    for (const [name, settings] of Object.entries(
+      defaultSettings.defaultSettings.values,
+    )) {
+      const attributeValue = this.valueMap?.get(name);
+      if (!attributeValue) continue;
+
+      if (settings.glyph) {
+        attributeValue.setGlyph(settings.glyph);
+      }
+
+      if (settings.color) {
+        attributeValue.setColor(settings.color);
+      }
+    }
+  }
+
   static fromJson(
     nodeTypeProperties: NodeTypeProperties,
     attribute: AttributeDB,
@@ -178,6 +223,8 @@ export class Attribute {
         );
       }
     }
+
+    attributeInstance.applyDefaultAttributeSettings();
 
     return attributeInstance;
   }
