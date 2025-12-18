@@ -7,11 +7,7 @@ import {
   type GraphNodeType,
 } from "@/utils/schemas.ts";
 import type { Field } from "react-querybuilder";
-import {
-  DEFAULT_ATTRIBUTE_SETTINGS,
-  DEFINES,
-  RESERVED_ATTRIBUTES,
-} from "@/defines.ts";
+import { DEFINES, RESERVED_ATTRIBUTES } from "@/defines.ts";
 import {
   setPropertiesForNodesOfType,
   updatePropertiesForNodesOfType,
@@ -32,12 +28,21 @@ export class AttributeValue {
     name: string,
     label?: string,
     color?: string,
-    glyph?: Icon,
+    glyph?: string,
   ) {
     this.name = name;
     this.label = label;
     this.color = color ?? "#ffffff";
-    this.glyph = glyph;
+
+    if (glyph) {
+      this.glyph = IconMap.get(glyph);
+    }
+    if (!this.glyph && label) {
+      this.glyph = IconMap.get(label);
+    }
+    if (!this.glyph && name) {
+      this.glyph = IconMap.get(name);
+    }
 
     makeAutoObservable(this, {
       attribute: false,
@@ -59,15 +64,12 @@ export class AttributeValue {
     if (typeof attributeValue === "string") {
       return new AttributeValue(attribute, attributeValue);
     }
-    const glyph = attributeValue.glyph
-      ? IconMap.get(attributeValue.glyph)
-      : undefined;
     return new AttributeValue(
       attribute,
       attributeValue.name,
       attributeValue.label,
       attributeValue.color,
-      glyph,
+      attributeValue.glyph,
     );
   }
 
@@ -136,10 +138,14 @@ export class Attribute {
     return this.valueMap ? Array.from(this.valueMap.values()) : undefined;
   }
 
+  get displayName(): string {
+    return this.label ?? this.name;
+  }
+
   get field(): Field {
     return {
       name: this.name,
-      label: this.label ?? this.name,
+      label: this.displayName,
       datatype: this.type,
       values: this.values?.map((value) => {
         return {
@@ -179,31 +185,6 @@ export class Attribute {
     this.valueMap.set(value.name, value);
   }
 
-  applyDefaultAttributeSettings() {
-    const defaultSettings = DEFAULT_ATTRIBUTE_SETTINGS.find(
-      (setting) =>
-        setting.attribute.name === this.name &&
-        setting.attribute.type === this.type &&
-        setting.attribute.records.includes(this.nodeTypeProperties.nodeType),
-    );
-    if (!defaultSettings) return;
-
-    for (const [name, settings] of Object.entries(
-      defaultSettings.defaultSettings.values,
-    )) {
-      const attributeValue = this.valueMap?.get(name);
-      if (!attributeValue) continue;
-
-      if (settings.glyph) {
-        attributeValue.setGlyph(settings.glyph);
-      }
-
-      if (settings.color) {
-        attributeValue.setColor(settings.color);
-      }
-    }
-  }
-
   static fromJson(
     nodeTypeProperties: NodeTypeProperties,
     attribute: AttributeDB,
@@ -223,8 +204,6 @@ export class Attribute {
         );
       }
     }
-
-    attributeInstance.applyDefaultAttributeSettings();
 
     return attributeInstance;
   }
