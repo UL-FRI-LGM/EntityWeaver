@@ -137,12 +137,16 @@ export const RESERVED_ATTRIBUTES: AttributeDB[] = [
     name: "name",
     label: "Name",
     type: "text",
+    activeColor: false,
+    activeGlyph: false,
     records: ["Entity", "Mention"],
   },
   {
     name: "title",
     label: "Title",
     type: "text",
+    activeColor: false,
+    activeGlyph: false,
     records: ["Document"],
   },
 ] as const;

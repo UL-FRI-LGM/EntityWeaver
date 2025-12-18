@@ -76,6 +76,8 @@ const AttributeSchema = z
     name: z.string().min(1),
     label: z.optional(z.string()),
     type: AttributeDataTypeSchema,
+    activeColor: z.boolean().optional().default(false),
+    activeGlyph: z.boolean().optional().default(false),
     records: z.array(RecordTypeSchema).min(1),
     values: z.optional(z.array(AttributeValueSchema)),
   })

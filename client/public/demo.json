@@ -4,6 +4,7 @@
       "name": "type",
       "label": "Type",
       "type": "enum",
+      "activeGlyph": true,
       "records": [
         "Mention",
         "Entity"

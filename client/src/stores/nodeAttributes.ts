@@ -161,6 +161,8 @@ export class Attribute {
       name: this.name,
       type: this.type,
       records: [this.nodeTypeProperties.nodeType],
+      activeColor: this.nodeTypeProperties.colorAttribute === this,
+      activeGlyph: this.nodeTypeProperties.glyphAttribute === this,
       label: this.label,
       values: this.values?.map((value) => value.toJson()),
     };
@@ -552,6 +554,14 @@ export class AttributeManager {
         reserved,
       );
       nodeTypeProperties.addAttribute(attributeInstance);
+      if (attribute.activeColor) {
+        nodeTypeProperties.setColorAttribute(attribute.name);
+        nodeTypeProperties.setColorSource("attribute");
+      }
+      if (attribute.activeGlyph) {
+        nodeTypeProperties.setGlyphAttribute(attribute.name);
+        nodeTypeProperties.setGlyphSource("attribute");
+      }
     });
   }
 }
