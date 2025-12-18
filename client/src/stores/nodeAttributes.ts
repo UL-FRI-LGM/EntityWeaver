@@ -54,6 +54,10 @@ export class AttributeValue {
     this.attribute = attribute;
   }
 
+  get displayName(): string {
+    return this.label ?? this.name;
+  }
+
   toJson(): AttributeValueDB {
     return {
       name: this.name,
@@ -169,7 +173,7 @@ export class Attribute {
       values: this.values?.map((value) => {
         return {
           name: value.name,
-          label: value.label ?? value.name,
+          label: value.displayName,
         };
       }),
     };

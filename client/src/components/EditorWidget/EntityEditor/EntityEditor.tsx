@@ -12,7 +12,6 @@ import {
 } from "@mantine/core";
 import { useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
-import { typeToString } from "@/utils/helpers.ts";
 import MentionLinkEditor from "@/components/EditorWidget/MentionLinkEditor.tsx";
 import type { Entity } from "@/stores/entity.ts";
 import TypeSelectorCombobox from "@/components/EditorWidget/TypeSelectorCombobox.tsx";
@@ -46,7 +45,7 @@ const EntityEditor = observer(({ entity }: { entity: Entity }) => {
   return (
     <Fieldset
       className={sharedClasses.editorFieldset}
-      legend={typeToString(entity.type)}
+      legend={entity.nodeType}
       styles={{
         root: {
           borderColor: entity.color,

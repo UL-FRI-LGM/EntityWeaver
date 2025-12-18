@@ -30,7 +30,7 @@ const EnumColorPicker = observer(
     return attribute.values?.map((attributeValue) => {
       return (
         <Group justify={"space-between"} key={attributeValue.name}>
-          {attributeValue.label ?? attributeValue.name}
+          {attributeValue.displayName}
           <ColorInput
             className={classes.enumColorInput}
             withEyeDropper={false}
@@ -51,7 +51,7 @@ const EnumGlyphPicker = observer(
     return attribute.values?.map((attributeValue) => {
       return (
         <Group justify={"space-between"} key={attributeValue.name}>
-          {attributeValue.label ?? attributeValue.name}
+          {attributeValue.displayName}
           <Select
             className={classes.enumColorInput}
             disabled={disabled}

@@ -55,14 +55,6 @@ export async function loadDemo() {
   return (await response.json()) as DatasetDB;
 }
 
-export function typeToString(type: string) {
-  if (type in DEFINES.entityTypes.names)
-    return DEFINES.entityTypes.names[
-      type as keyof typeof DEFINES.entityTypes.names
-    ];
-  return type;
-}
-
 export function edgeTypeToProperties(type: keyof typeof DEFINES.edges) {
   return DEFINES.edges[type];
 }

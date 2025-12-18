@@ -26,7 +26,6 @@ import { useAppState } from "@/stores/appState.ts";
 import SearchableCombobox, {
   type SearchableComboboxOption,
 } from "../../SearchableCombobox/SearchableCombobox.tsx";
-import { typeToString } from "@/utils/helpers.ts";
 import sharedClasses from "../shared.module.css";
 import { type Mention } from "@/stores/mention.ts";
 import TypeSelectorCombobox from "@/components/EditorWidget/TypeSelectorCombobox.tsx";
@@ -172,7 +171,7 @@ const MentionEditor = observer(({ mention }: { mention: Mention }) => {
   return (
     <Fieldset
       className={sharedClasses.editorFieldset}
-      legend={typeToString(mention.type)}
+      legend={mention.nodeType}
       styles={{
         root: {
           borderColor: mention.color,
