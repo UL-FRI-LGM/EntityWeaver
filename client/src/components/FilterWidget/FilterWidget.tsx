@@ -198,7 +198,7 @@ const FilterWidget = observer(() => {
   return (
     <Stack className={sharedClasses.widgetContainer}>
       <div className={sharedClasses.widgetTopbar}>
-        <h3>Query Builder</h3>
+        <h3 style={{ margin: 0 }}>Query Builder</h3>
       </div>
 
       <Input.Wrapper label="Query Sequence">

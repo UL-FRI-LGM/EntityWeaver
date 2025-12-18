@@ -130,7 +130,7 @@ const TopBar = observer(() => {
 
   return (
     <Group justify={"space-between"} className={classes.container}>
-      <Group gap={40}>
+      <Group style={{ columnGap: 40 }}>
         <FileMenu />
 
         <Switch

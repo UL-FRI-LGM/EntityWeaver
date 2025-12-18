@@ -9,9 +9,9 @@
 
 .widgetTopbar {
   display: flex;
+  min-height: 40px;
+  flex-wrap: wrap;
   align-items: center;
-  height: 40px;
-  max-height: 40px;
   justify-content: space-between;
   padding: 0 2px 4px 2px;
   border-bottom: 1px solid var(--mantine-color-dark-light-color);
