@@ -145,6 +145,22 @@ export class Attribute {
     return this.label ?? this.name;
   }
 
+  get isValidColorAttribute(): boolean {
+    return (
+      this.type === "enum" &&
+      this.valueMap !== undefined &&
+      this.valueMap.size > 1
+    );
+  }
+
+  get isValidGlyphAttribute(): boolean {
+    return (
+      this.type === "enum" &&
+      this.valueMap !== undefined &&
+      this.valueMap.size > 1
+    );
+  }
+
   get field(): Field {
     return {
       name: this.name,
@@ -273,6 +289,12 @@ export class NodeTypeProperties {
       return;
     }
     this.attributeMap.set(attribute.name, attribute);
+    if (attribute.isValidColorAttribute) {
+      this.setColorAttribute(attribute.name);
+    }
+    if (attribute.isValidGlyphAttribute) {
+      this.setGlyphAttribute(attribute.name);
+    }
   }
 
   clearAttributes() {

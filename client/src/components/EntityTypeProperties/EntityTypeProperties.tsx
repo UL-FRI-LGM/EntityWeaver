@@ -76,11 +76,11 @@ const EntityTypeProperties = observer(
     const [selectedView, setSelectedView] = useState<string>("color");
 
     const colorValidAttributes = properties.attributes.filter(
-      ({ type }) => type === "enum",
+      (attribute) => attribute.isValidColorAttribute,
     );
 
     const glyphValidAttributes = properties.attributes.filter(
-      ({ type }) => type === "enum",
+      (attribute) => attribute.isValidGlyphAttribute,
     );
 
     return (

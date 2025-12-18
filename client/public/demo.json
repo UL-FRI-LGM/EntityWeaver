@@ -5,6 +5,7 @@
       "label": "Type",
       "type": "enum",
       "activeGlyph": true,
+      "activeColor": true,
       "records": [
         "Mention",
         "Entity"
