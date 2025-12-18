@@ -1,39 +1,30 @@
 {
   "attributes": [
     {
-      "name": "title",
-      "type": "text",
-      "records": ["Document"]
-    },
-    {
-      "name": "name",
-      "type": "text",
-      "records": ["Mention", "Entity"]
-    },
-    {
       "name": "type",
+      "label": "Type",
       "type": "enum",
-      "records": ["Mention", "Entity"],
+      "activeGlyph": true,
+      "records": [
+        "Mention",
+        "Entity"
+      ],
       "values": [
         {
           "name": "PER",
-          "label": "Person",
-          "color": "#f5ad76"
+          "label": "Person"
         },
         {
           "name": "ORG",
-          "label": "Organization",
-          "color": "#e07685"
+          "label": "Organization"
         },
         {
           "name": "LOC",
-          "label": "Location",
-          "color": "#96b7a8"
+          "label": "Location"
         },
         {
           "name": "MISC",
-          "label": "Miscellaneous",
-          "color": "#468dd3"
+          "label": "Miscellaneous"
         }
       ]
     }
@@ -64,134 +55,183 @@
     {
       "id": "entity_1",
       "name": "Alice Johnson",
-      "type": "PER"
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "entity_2",
       "name": "Bob Smith",
-      "type": "PER"
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "entity_3",
       "name": "Charlie Kim",
-      "type": "PER"
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "entity_4",
       "name": "Sophia Müller",
-      "type": "PER"
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "entity_5",
       "name": "Oliver O'Neil",
-      "type": "PER"
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "entity_6",
       "name": "Michael Green",
-      "type": "PER"
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "entity_7",
       "name": "Laura White",
-      "type": "PER"
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "entity_8",
       "name": "Acme Corp",
-      "type": "ORG"
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "entity_9",
       "name": "Delta Inc",
-      "type": "ORG"
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "entity_10",
       "name": "Omega Corp",
-      "type": "ORG"
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "entity_11",
       "name": "Zeta LLC",
-      "type": "ORG"
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "entity_12",
       "name": "European Union",
-      "type": "ORG"
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "entity_13",
       "name": "United Nations",
-      "type": "ORG"
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "entity_14",
       "name": "San Francisco",
-      "type": "LOC"
+      "attributes": {
+        "type": "LOC"
+      }
     },
     {
       "id": "entity_15",
       "name": "Berlin",
-      "type": "LOC"
+      "attributes": {
+        "type": "LOC"
+      }
     },
     {
       "id": "entity_16",
       "name": "London",
-      "type": "LOC"
+      "attributes": {
+        "type": "LOC"
+      }
     },
     {
       "id": "entity_17",
       "name": "Tokyo",
-      "type": "LOC"
+      "attributes": {
+        "type": "LOC"
+      }
     },
     {
       "id": "entity_18",
       "name": "New York City",
-      "type": "LOC"
+      "attributes": {
+        "type": "LOC"
+      }
     },
     {
       "id": "entity_19",
       "name": "Paris",
-      "type": "LOC"
+      "attributes": {
+        "type": "LOC"
+      }
     },
     {
       "id": "entity_20",
       "name": "Tech Summit",
-      "type": "MISC"
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "entity_21",
       "name": "Spring Festival",
-      "type": "MISC"
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "entity_22",
       "name": "Climate Conference 2025",
-      "type": "MISC"
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "entity_23",
       "name": "Annual Economic Forum",
-      "type": "MISC"
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "entity_24",
       "name": "World Cup",
-      "type": "MISC"
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "entity_25",
       "name": "Art Biennale",
-      "type": "MISC"
+      "attributes": {
+        "type": "MISC"
+      }
     }
   ],
   "mentions": [
     {
       "id": "mention_1",
       "name": "Alice Johnson",
-      "type": "PER",
       "document_id": "doc_1",
       "links": [
         {
@@ -200,12 +240,14 @@
         }
       ],
       "start_index": 0,
-      "end_index": 13
+      "end_index": 13,
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "mention_2",
       "name": "Johnson",
-      "type": "PER",
       "document_id": "doc_2",
       "links": [
         {
@@ -214,12 +256,14 @@
         }
       ],
       "start_index": 0,
-      "end_index": 7
+      "end_index": 7,
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "mention_3",
       "name": "Bob Smith",
-      "type": "PER",
       "document_id": "doc_1",
       "links": [
         {
@@ -228,12 +272,14 @@
         }
       ],
       "start_index": 18,
-      "end_index": 27
+      "end_index": 27,
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "mention_4",
       "name": "Smith",
-      "type": "PER",
       "document_id": "doc_2",
       "links": [
         {
@@ -242,12 +288,14 @@
         }
       ],
       "start_index": 12,
-      "end_index": 17
+      "end_index": 17,
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "mention_5",
       "name": "Charlie Kim",
-      "type": "PER",
       "document_id": "doc_2",
       "links": [
         {
@@ -256,12 +304,14 @@
         }
       ],
       "start_index": 65,
-      "end_index": 76
+      "end_index": 76,
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "mention_6",
       "name": "C. Kim",
-      "type": "PER",
       "document_id": "doc_3",
       "links": [
         {
@@ -270,12 +320,14 @@
         }
       ],
       "start_index": 0,
-      "end_index": 6
+      "end_index": 6,
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "mention_7",
       "name": "Sophia Müller",
-      "type": "PER",
       "document_id": "doc_2",
       "links": [
         {
@@ -284,12 +336,14 @@
         }
       ],
       "start_index": 81,
-      "end_index": 94
+      "end_index": 94,
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "mention_8",
       "name": "Müller",
-      "type": "PER",
       "document_id": "doc_3",
       "links": [
         {
@@ -298,12 +352,14 @@
         }
       ],
       "start_index": 21,
-      "end_index": 27
+      "end_index": 27,
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "mention_9",
       "name": "Oliver O'Neil",
-      "type": "PER",
       "document_id": "doc_3",
       "links": [
         {
@@ -312,12 +368,14 @@
         }
       ],
       "start_index": 32,
-      "end_index": 45
+      "end_index": 45,
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "mention_10",
       "name": "O'Neil",
-      "type": "PER",
       "document_id": "doc_4",
       "links": [
         {
@@ -326,12 +384,14 @@
         }
       ],
       "start_index": 0,
-      "end_index": 6
+      "end_index": 6,
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "mention_11",
       "name": "Michael Green",
-      "type": "PER",
       "document_id": "doc_3",
       "links": [
         {
@@ -340,12 +400,14 @@
         }
       ],
       "start_index": 154,
-      "end_index": 167
+      "end_index": 167,
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "mention_12",
       "name": "M. Green",
-      "type": "PER",
       "document_id": "doc_4",
       "links": [
         {
@@ -354,12 +416,14 @@
         }
       ],
       "start_index": 11,
-      "end_index": 19
+      "end_index": 19,
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "mention_13",
       "name": "Laura White",
-      "type": "PER",
       "document_id": "doc_4",
       "links": [
         {
@@ -368,12 +432,14 @@
         }
       ],
       "start_index": 92,
-      "end_index": 103
+      "end_index": 103,
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "mention_14",
       "name": "White",
-      "type": "PER",
       "document_id": "doc_1",
       "links": [
         {
@@ -382,12 +448,14 @@
         }
       ],
       "start_index": 144,
-      "end_index": 149
+      "end_index": 149,
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "mention_15",
       "name": "Acme Corp",
-      "type": "ORG",
       "document_id": "doc_1",
       "links": [
         {
@@ -396,12 +464,14 @@
         }
       ],
       "start_index": 58,
-      "end_index": 67
+      "end_index": 67,
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "mention_16",
       "name": "Acme",
-      "type": "ORG",
       "document_id": "doc_2",
       "links": [
         {
@@ -410,12 +480,14 @@
         }
       ],
       "start_index": 117,
-      "end_index": 121
+      "end_index": 121,
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "mention_17",
       "name": "Delta Inc",
-      "type": "ORG",
       "document_id": "doc_1",
       "links": [
         {
@@ -424,12 +496,14 @@
         }
       ],
       "start_index": 72,
-      "end_index": 81
+      "end_index": 81,
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "mention_18",
       "name": "Delta",
-      "type": "ORG",
       "document_id": "doc_2",
       "links": [
         {
@@ -438,12 +512,14 @@
         }
       ],
       "start_index": 123,
-      "end_index": 128
+      "end_index": 128,
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "mention_19",
       "name": "Omega Corp",
-      "type": "ORG",
       "document_id": "doc_2",
       "links": [
         {
@@ -452,12 +528,14 @@
         }
       ],
       "start_index": 130,
-      "end_index": 140
+      "end_index": 140,
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "mention_20",
       "name": "Omega",
-      "type": "ORG",
       "document_id": "doc_3",
       "links": [
         {
@@ -466,12 +544,14 @@
         }
       ],
       "start_index": 186,
-      "end_index": 191
+      "end_index": 191,
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "mention_21",
       "name": "Zeta LLC",
-      "type": "ORG",
       "document_id": "doc_2",
       "links": [
         {
@@ -480,12 +560,14 @@
         }
       ],
       "start_index": 146,
-      "end_index": 154
+      "end_index": 154,
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "mention_22",
       "name": "Zeta",
-      "type": "ORG",
       "document_id": "doc_3",
       "links": [
         {
@@ -494,12 +576,14 @@
         }
       ],
       "start_index": 193,
-      "end_index": 197
+      "end_index": 197,
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "mention_23",
       "name": "European Union",
-      "type": "ORG",
       "document_id": "doc_2",
       "links": [
         {
@@ -508,12 +592,14 @@
         }
       ],
       "start_index": 198,
-      "end_index": 212
+      "end_index": 212,
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "mention_24",
       "name": "EU",
-      "type": "ORG",
       "document_id": "doc_3",
       "links": [
         {
@@ -522,12 +608,14 @@
         }
       ],
       "start_index": 207,
-      "end_index": 209
+      "end_index": 209,
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "mention_25",
       "name": "United Nations",
-      "type": "ORG",
       "document_id": "doc_3",
       "links": [
         {
@@ -536,12 +624,14 @@
         }
       ],
       "start_index": 260,
-      "end_index": 274
+      "end_index": 274,
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "mention_26",
       "name": "UN",
-      "type": "ORG",
       "document_id": "doc_4",
       "links": [
         {
@@ -550,12 +640,14 @@
         }
       ],
       "start_index": 221,
-      "end_index": 223
+      "end_index": 223,
+      "attributes": {
+        "type": "ORG"
+      }
     },
     {
       "id": "mention_27",
       "name": "San Francisco",
-      "type": "LOC",
       "document_id": "doc_1",
       "links": [
         {
@@ -564,12 +656,14 @@
         }
       ],
       "start_index": 113,
-      "end_index": 126
+      "end_index": 126,
+      "attributes": {
+        "type": "LOC"
+      }
     },
     {
       "id": "mention_28",
       "name": "Berlin",
-      "type": "LOC",
       "document_id": "doc_2",
       "links": [
         {
@@ -578,12 +672,14 @@
         }
       ],
       "start_index": 98,
-      "end_index": 104
+      "end_index": 104,
+      "attributes": {
+        "type": "LOC"
+      }
     },
     {
       "id": "mention_29",
       "name": "London",
-      "type": "LOC",
       "document_id": "doc_2",
       "links": [
         {
@@ -592,12 +688,14 @@
         }
       ],
       "start_index": 109,
-      "end_index": 115
+      "end_index": 115,
+      "attributes": {
+        "type": "LOC"
+      }
     },
     {
       "id": "mention_30",
       "name": "London",
-      "type": "LOC",
       "document_id": "doc_3",
       "links": [
         {
@@ -606,12 +704,14 @@
         }
       ],
       "start_index": 49,
-      "end_index": 55
+      "end_index": 55,
+      "attributes": {
+        "type": "LOC"
+      }
     },
     {
       "id": "mention_31",
       "name": "Tokyo",
-      "type": "LOC",
       "document_id": "doc_3",
       "links": [
         {
@@ -620,12 +720,14 @@
         }
       ],
       "start_index": 60,
-      "end_index": 65
+      "end_index": 65,
+      "attributes": {
+        "type": "LOC"
+      }
     },
     {
       "id": "mention_32",
       "name": "New York City",
-      "type": "LOC",
       "document_id": "doc_4",
       "links": [
         {
@@ -634,12 +736,14 @@
         }
       ],
       "start_index": 52,
-      "end_index": 65
+      "end_index": 65,
+      "attributes": {
+        "type": "LOC"
+      }
     },
     {
       "id": "mention_33",
       "name": "Paris",
-      "type": "LOC",
       "document_id": "doc_4",
       "links": [
         {
@@ -648,12 +752,14 @@
         }
       ],
       "start_index": 70,
-      "end_index": 75
+      "end_index": 75,
+      "attributes": {
+        "type": "LOC"
+      }
     },
     {
       "id": "mention_34",
       "name": "Paris",
-      "type": "LOC",
       "document_id": "doc_1",
       "links": [
         {
@@ -662,12 +768,14 @@
         }
       ],
       "start_index": 131,
-      "end_index": 136
+      "end_index": 136,
+      "attributes": {
+        "type": "LOC"
+      }
     },
     {
       "id": "mention_35",
       "name": "Tech Summit",
-      "type": "MISC",
       "document_id": "doc_1",
       "links": [
         {
@@ -676,12 +784,14 @@
         }
       ],
       "start_index": 93,
-      "end_index": 104
+      "end_index": 104,
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "mention_36",
       "name": "Summit",
-      "type": "MISC",
       "document_id": "doc_2",
       "links": [
         {
@@ -690,12 +800,14 @@
         }
       ],
       "start_index": 248,
-      "end_index": 254
+      "end_index": 254,
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "mention_37",
       "name": "Spring Festival",
-      "type": "MISC",
       "document_id": "doc_4",
       "links": [
         {
@@ -704,12 +816,14 @@
         }
       ],
       "start_index": 33,
-      "end_index": 48
+      "end_index": 48,
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "mention_38",
       "name": "Festival",
-      "type": "MISC",
       "document_id": "doc_1",
       "links": [
         {
@@ -718,12 +832,14 @@
         }
       ],
       "start_index": 289,
-      "end_index": 297
+      "end_index": 297,
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "mention_39",
       "name": "Climate Conference 2025",
-      "type": "MISC",
       "document_id": "doc_2",
       "links": [
         {
@@ -732,12 +848,14 @@
         }
       ],
       "start_index": 275,
-      "end_index": 298
+      "end_index": 298,
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "mention_40",
       "name": "Climate Conference",
-      "type": "MISC",
       "document_id": "doc_3",
       "links": [
         {
@@ -746,12 +864,14 @@
         }
       ],
       "start_index": 104,
-      "end_index": 122
+      "end_index": 122,
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "mention_41",
       "name": "Annual Economic Forum",
-      "type": "MISC",
       "document_id": "doc_3",
       "links": [
         {
@@ -760,12 +880,14 @@
         }
       ],
       "start_index": 131,
-      "end_index": 152
+      "end_index": 152,
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "mention_42",
       "name": "Economic Forum",
-      "type": "MISC",
       "document_id": "doc_4",
       "links": [
         {
@@ -774,12 +896,14 @@
         }
       ],
       "start_index": 176,
-      "end_index": 190
+      "end_index": 190,
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "mention_43",
       "name": "World Cup",
-      "type": "MISC",
       "document_id": "doc_4",
       "links": [
         {
@@ -788,12 +912,14 @@
         }
       ],
       "start_index": 255,
-      "end_index": 264
+      "end_index": 264,
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "mention_44",
       "name": "Cup Final",
-      "type": "MISC",
       "document_id": "doc_1",
       "links": [
         {
@@ -802,12 +928,14 @@
         }
       ],
       "start_index": 236,
-      "end_index": 245
+      "end_index": 245,
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "mention_45",
       "name": "Art Biennale",
-      "type": "MISC",
       "document_id": "doc_4",
       "links": [
         {
@@ -816,12 +944,14 @@
         }
       ],
       "start_index": 273,
-      "end_index": 285
+      "end_index": 285,
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "mention_46",
       "name": "AI",
-      "type": "MISC",
       "document_id": "doc_1",
       "links": [
         {
@@ -838,12 +968,14 @@
         }
       ],
       "start_index": 217,
-      "end_index": 219
+      "end_index": 219,
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "mention_47",
       "name": "Green",
-      "type": "PER",
       "document_id": "doc_4",
       "links": [
         {
@@ -856,21 +988,25 @@
         }
       ],
       "start_index": 105,
-      "end_index": 110
+      "end_index": 110,
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "mention_48",
       "name": "Johnson",
-      "type": "PER",
       "document_id": "doc_2",
       "links": [],
       "start_index": 341,
-      "end_index": 348
+      "end_index": 348,
+      "attributes": {
+        "type": "PER"
+      }
     },
     {
       "id": "mention_49",
       "name": "Conference",
-      "type": "MISC",
       "document_id": "doc_3",
       "links": [
         {
@@ -891,16 +1027,21 @@
         }
       ],
       "start_index": 325,
-      "end_index": 335
+      "end_index": 335,
+      "attributes": {
+        "type": "MISC"
+      }
     },
     {
       "id": "mention_50",
       "name": "White",
-      "type": "PER",
       "document_id": "doc_1",
       "links": [],
       "start_index": 405,
-      "end_index": 410
+      "end_index": 410,
+      "attributes": {
+        "type": "PER"
+      }
     }
   ],
   "collocations": [
