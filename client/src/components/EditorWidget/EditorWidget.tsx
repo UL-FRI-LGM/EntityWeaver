@@ -15,6 +15,7 @@ function NodeEditor({ node }: { node: NodeSource }) {
   if (node instanceof Document) {
     return <DocumentEditor document={node} />;
   }
+  // noinspection SuspiciousTypeOfGuard
   if (node instanceof Entity) {
     return <EntityEditor entity={node} />;
   }
