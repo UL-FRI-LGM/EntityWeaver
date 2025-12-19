@@ -8,7 +8,7 @@ import {
   type NodeSource,
   type NodeType,
 } from "@/stores/appState.ts";
-import { edgeTypeToProperties, uncertaintyToEdgeColor } from "./helpers.ts";
+import { edgeTypeToProperties, valueToGradientColor } from "./helpers.ts";
 import { Dataset } from "@/stores/dataset.ts";
 import type Graph from "graphology";
 import { getCameraStateToFitViewportToNodes } from "@sigma/utils";
@@ -150,40 +150,6 @@ function getNodeColors(nodeSource: NodeSource): {
   };
 }
 
-export function setPropertiesForNodesOfType(
-  sigma: Sigma<NodeType, EdgeType> | null,
-  nodeType: GraphNodeType,
-  properties: Partial<NodeType>,
-) {
-  if (!sigma) {
-    return;
-  }
-  const graph = sigma.getGraph();
-  graph.forEachNode((nodeId, attributes) => {
-    if (attributes.source.nodeType !== nodeType) {
-      return;
-    }
-    graph.mergeNodeAttributes(nodeId, properties);
-  });
-}
-
-export function updatePropertiesForNodesOfType(
-  sigma: Sigma<NodeType, EdgeType> | null,
-  nodeType: GraphNodeType,
-  updater: (_attributes: NodeType) => NodeType,
-) {
-  if (!sigma) {
-    return;
-  }
-  const graph = sigma.getGraph();
-  graph.forEachNode((nodeId, attributes) => {
-    if (attributes.source.nodeType !== nodeType) {
-      return;
-    }
-    graph.updateNodeAttributes(nodeId, updater);
-  });
-}
-
 export function redrawNode(
   sigma: Sigma<NodeType, EdgeType> | null,
   nodeSource: NodeSource,
@@ -204,6 +170,22 @@ export function redrawNode(
     label: nodeSource.name,
     color: nodeSource.color,
     image: glyph,
+  });
+}
+
+export function redrawNodesOfType(
+  sigma: Sigma<NodeType, EdgeType> | null,
+  nodeType: GraphNodeType,
+) {
+  if (!sigma) {
+    return;
+  }
+  const graph = sigma.getGraph();
+  graph.forEachNode((_nodeId, attributes) => {
+    if (attributes.source.nodeType !== nodeType) {
+      return;
+    }
+    redrawNode(sigma, attributes.source);
   });
 }
 
@@ -520,7 +502,7 @@ export function addMentionToEntityEdge(
   link: EntityLink,
 ) {
   const appState = link.mention.dataset.appState;
-  const edgeColor = uncertaintyToEdgeColor(appState, link.confidence);
+  const edgeColor = valueToGradientColor(appState.tfStops, link.confidence);
   graph.addUndirectedEdge(link.mention.id, link.entity.id, {
     size: DEFINES.edges.MentionToEntity.width,
     color: edgeColor.hex(),
@@ -538,8 +520,8 @@ export function refreshEdgeColorsBasedOnUncertainty(appState: AppState) {
   const graph = appState.sigma.getGraph();
   graph.forEachEdge((edgeId, attributes) => {
     if (attributes.connectionType === "MentionToEntity") {
-      const edgeColor = uncertaintyToEdgeColor(
-        appState,
+      const edgeColor = valueToGradientColor(
+        appState.tfStops,
         attributes.confidence ?? 1,
       );
       graph.setEdgeAttribute(edgeId, "color", edgeColor.hex());

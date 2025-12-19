@@ -1,5 +1,6 @@
 import Color from "color";
 import type { AttributeDB } from "@/utils/schemas.ts";
+import type { GradientStopParameters } from "@/stores/gradientStopsHandler.ts";
 
 const edgeWidth = 1;
 
@@ -117,3 +118,14 @@ export const RESERVED_ATTRIBUTES: AttributeDB[] = [
     records: ["Document"],
   },
 ] as const;
+
+export const DefaultNumberAttributeStops: GradientStopParameters[] = [
+  {
+    threshold: 0,
+    color: new Color("hsl(360, 100%, 68%)"),
+  },
+  {
+    threshold: 1,
+    color: new Color("#26AF13"),
+  },
+];

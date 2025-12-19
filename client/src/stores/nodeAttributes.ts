@@ -7,15 +7,17 @@ import {
   type GraphNodeType,
 } from "@/utils/schemas.ts";
 import type { Field } from "react-querybuilder";
-import { DEFINES, RESERVED_ATTRIBUTES } from "@/defines.ts";
 import {
-  setPropertiesForNodesOfType,
-  updatePropertiesForNodesOfType,
-} from "@/utils/graphHelpers.ts";
+  DefaultNumberAttributeStops,
+  DEFINES,
+  RESERVED_ATTRIBUTES,
+} from "@/defines.ts";
 import type { NodeSource } from "@/stores/appState.ts";
 import { defaultIcon, type Icon, IconMap } from "@/utils/iconsHelper.tsx";
-import { getDefaultColor } from "@/utils/helpers.ts";
+import { getDefaultColor, valueToGradientColor } from "@/utils/helpers.ts";
 import { v4 as uuidv4 } from "uuid";
+import { redrawNodesOfType } from "@/utils/graphHelpers.ts";
+import { GradientStopsHandler } from "@/stores/gradientStopsHandler.ts";
 
 export class AttributeValue {
   name: string;
@@ -88,7 +90,7 @@ export class AttributeValue {
       this.attribute.nodeTypeProperties.colorSource === "attribute" &&
       this.attribute.nodeTypeProperties.colorAttribute === this.attribute
     ) {
-      this.attribute.nodeTypeProperties.updateNodeColorsToAttribute();
+      this.attribute.nodeTypeProperties.redrawNodes();
     }
   }
 
@@ -104,7 +106,7 @@ export class AttributeValue {
       this.attribute.nodeTypeProperties.glyphSource === "attribute" &&
       this.attribute.nodeTypeProperties.glyphAttribute === this.attribute
     ) {
-      this.attribute.nodeTypeProperties.updateNodeGlyphToAttribute();
+      this.attribute.nodeTypeProperties.redrawNodes();
     }
   }
 }
@@ -115,6 +117,11 @@ export class Attribute {
   label: string | undefined;
   type: AttributeDataType;
   valueMap: Map<string, AttributeValue> | undefined;
+  gradientStopsHandler: GradientStopsHandler | undefined;
+
+  // Only needed for number attributes, but let's just assume everything has it for simplicity
+  min = 0;
+  max = 1;
 
   nodeTypeProperties: NodeTypeProperties;
 
@@ -125,13 +132,39 @@ export class Attribute {
     nodeTypeProperties: NodeTypeProperties,
     name: string,
     type: AttributeDataType,
-    label?: string,
-    reserved = false,
+    {
+      label,
+      min = 0,
+      max = 1,
+      reserved = false,
+    }: {
+      label?: string;
+      min?: number;
+      max?: number;
+      reserved?: boolean;
+    } = {},
   ) {
     this.id = uuidv4();
     this.name = name;
     this.type = type;
     this.label = label;
+    this.min = min;
+    this.max = max;
+
+    if (type === "number") {
+      this.gradientStopsHandler = new GradientStopsHandler({
+        usesVisibilityComponent: false,
+        stops: DefaultNumberAttributeStops,
+        onChange: () => {
+          if (
+            this.nodeTypeProperties.colorSource === "attribute" &&
+            this.nodeTypeProperties.colorAttribute === this
+          ) {
+            this.nodeTypeProperties.redrawNodes();
+          }
+        },
+      });
+    }
 
     this.reserved = reserved;
 
@@ -155,9 +188,10 @@ export class Attribute {
 
   get isValidColorAttribute(): boolean {
     return (
-      this.type === "enum" &&
-      this.valueMap !== undefined &&
-      this.valueMap.size > 1
+      (this.type === "enum" &&
+        this.valueMap !== undefined &&
+        this.valueMap.size > 1) ||
+      (this.type === "number" && this.gradientStopsHandler !== undefined)
     );
   }
 
@@ -184,14 +218,31 @@ export class Attribute {
   }
 
   toJson(): AttributeDB {
-    return {
+    const base = {
       name: this.name,
-      type: this.type,
       records: [this.nodeTypeProperties.nodeType],
       activeColor: this.nodeTypeProperties.colorAttribute === this,
       activeGlyph: this.nodeTypeProperties.glyphAttribute === this,
       label: this.label,
-      values: this.values?.map((value) => value.toJson()),
+    };
+    if (this.type === "enum") {
+      return {
+        ...base,
+        type: "enum",
+        values: this.values?.map((value) => value.toJson()),
+      };
+    }
+    if (this.type === "number") {
+      return {
+        ...base,
+        type: "number",
+        min: 0,
+        max: 0,
+      };
+    }
+    return {
+      ...base,
+      type: this.type,
     };
   }
 
@@ -224,10 +275,9 @@ export class Attribute {
       nodeTypeProperties,
       attribute.name,
       attribute.type,
-      attribute.label,
-      reserved,
+      { label: attribute.label, reserved: reserved },
     );
-    if (attribute.values) {
+    if (attribute.type === "enum" && attribute.values) {
       for (const attributeValue of attribute.values) {
         attributeInstance.addAttributeValue(
           AttributeValue.fromJson(attributeInstance, attributeValue),
@@ -277,10 +327,10 @@ export class NodeTypeProperties {
 
     makeAutoObservable(this, {
       attributeManager: false,
-      updateNodeColorsToType: false,
       attributes: computed({ keepAlive: true }),
       nonReservedAttributes: computed({ keepAlive: true }),
       attributeMap: observable.shallow,
+      redrawNodes: false,
     });
 
     this.attributeManager = attributeManager;
@@ -302,10 +352,10 @@ export class NodeTypeProperties {
       return;
     }
     this.attributeMap.set(attribute.name, attribute);
-    if (attribute.isValidColorAttribute) {
+    if (this.colorAttribute === undefined && attribute.isValidColorAttribute) {
       this.setColorAttribute(attribute.name);
     }
-    if (attribute.isValidGlyphAttribute) {
+    if (this.glyphAttribute === undefined && attribute.isValidGlyphAttribute) {
       this.setGlyphAttribute(attribute.name);
     }
   }
@@ -318,6 +368,13 @@ export class NodeTypeProperties {
     }
   }
 
+  redrawNodes() {
+    redrawNodesOfType(
+      this.attributeManager.dataset.appState.sigma,
+      this.nodeType,
+    );
+  }
+
   ////////////
   // COLORS
   ///////////
@@ -327,18 +384,14 @@ export class NodeTypeProperties {
 
     this.colorSource = source;
 
-    if (this.colorSource === "type") {
-      this.updateNodeColorsToType();
-    } else {
-      this.updateNodeColorsToAttribute();
-    }
+    this.redrawNodes();
   }
 
   setTypeColor(color: string) {
     this.typeColor = color;
 
     if (this.colorSource === "type") {
-      this.updateNodeColorsToType();
+      this.redrawNodes();
     }
   }
 
@@ -354,7 +407,7 @@ export class NodeTypeProperties {
     if (this.colorAttribute === attribute) return;
 
     this.colorAttribute = attribute;
-    this.updateNodeColorsToAttribute();
+    this.redrawNodes();
   }
 
   getColorForNode(nodeSource: NodeSource): string {
@@ -362,50 +415,56 @@ export class NodeTypeProperties {
       return this.typeColor;
     } else {
       const attribute = this.colorAttribute;
-      if (attribute?.type !== "enum") {
+      if (!attribute) {
         return this.typeColor;
       }
 
-      if (!(attribute.name in nodeSource.attributes)) {
-        return this.typeColor;
+      if (attribute.type === "enum") {
+        if (!(attribute.name in nodeSource.attributes)) {
+          return this.typeColor;
+        }
+
+        const attributeValue = nodeSource.attributes[attribute.name];
+        const attributeValueInstance = attribute.valueMap?.get(
+          attributeValue as string,
+        );
+        if (!attributeValueInstance) {
+          return this.typeColor;
+        }
+
+        return attributeValueInstance.color;
       }
 
-      const attributeValue = nodeSource.attributes[attribute.name];
-      const attributeValueInstance = attribute.valueMap?.get(
-        attributeValue as string,
-      );
-      if (!attributeValueInstance) {
-        return this.typeColor;
+      if (attribute.type === "number") {
+        if (!(attribute.name in nodeSource.attributes)) {
+          return this.typeColor;
+        }
+
+        if (
+          !attribute.gradientStopsHandler ||
+          attribute.gradientStopsHandler.stops.length === 0
+        ) {
+          return this.typeColor;
+        }
+
+        const attributeValue = Number(nodeSource.attributes[attribute.name]);
+        if (isNaN(attributeValue)) {
+          return this.typeColor;
+        }
+
+        const scaledValue =
+          (attributeValue - attribute.min) / (attribute.max - attribute.min);
+
+        const color = valueToGradientColor(
+          attribute.gradientStopsHandler,
+          scaledValue,
+        );
+
+        return color.hex();
       }
 
-      return attributeValueInstance.color;
+      return this.typeColor;
     }
-  }
-
-  updateNodeColorsToType() {
-    setPropertiesForNodesOfType(
-      this.attributeManager.dataset.appState.sigma,
-      this.nodeType,
-      {
-        color: this.typeColor,
-      },
-    );
-  }
-
-  updateNodeColorsToAttribute() {
-    const attribute = this.colorAttribute;
-    if (attribute?.type !== "enum") return;
-
-    updatePropertiesForNodesOfType(
-      this.attributeManager.dataset.appState.sigma,
-      this.nodeType,
-      (attributes) => {
-        return {
-          ...attributes,
-          color: attributes.source.color,
-        };
-      },
-    );
   }
 
   ////////////
@@ -415,11 +474,7 @@ export class NodeTypeProperties {
   setGlyphSource(source: GlyphSource) {
     if (this.glyphSource === source) return;
     this.glyphSource = source;
-    if (this.glyphSource === "type") {
-      this.updateNodeGlyphToType();
-    } else {
-      this.updateNodeGlyphToAttribute();
-    }
+    this.redrawNodes();
   }
 
   setTypeGlyph(glyph: string) {
@@ -431,7 +486,7 @@ export class NodeTypeProperties {
 
     this.typeGlyph = icon;
     if (this.glyphSource === "type") {
-      this.updateNodeGlyphToType();
+      this.redrawNodes();
     }
   }
 
@@ -447,7 +502,7 @@ export class NodeTypeProperties {
     if (this.glyphAttribute === attribute) return;
 
     this.glyphAttribute = attribute;
-    this.updateNodeGlyphToAttribute();
+    this.redrawNodes();
   }
 
   getGlyphForNode(nodeSource: NodeSource): string {
@@ -473,32 +528,6 @@ export class NodeTypeProperties {
 
       return attributeValueInstance.glyph.url;
     }
-  }
-
-  updateNodeGlyphToType() {
-    setPropertiesForNodesOfType(
-      this.attributeManager.dataset.appState.sigma,
-      this.nodeType,
-      {
-        image: this.typeGlyph.url,
-      },
-    );
-  }
-
-  updateNodeGlyphToAttribute() {
-    const attribute = this.glyphAttribute;
-    if (attribute?.type !== "enum") return;
-
-    updatePropertiesForNodesOfType(
-      this.attributeManager.dataset.appState.sigma,
-      this.nodeType,
-      (attributes) => {
-        return {
-          ...attributes,
-          image: this.getGlyphForNode(attributes.source),
-        };
-      },
-    );
   }
 }
 

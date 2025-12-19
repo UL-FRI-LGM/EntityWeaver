@@ -13,6 +13,8 @@ import classes from "./EntityTypeProperties.module.css";
 import { IconCheck } from "@tabler/icons-react";
 import { type Attribute, NodeTypeProperties } from "@/stores/nodeAttributes.ts";
 import { IconMap, Icons } from "@/utils/iconsHelper.tsx";
+import GradientEditor from "@/components/GradientEditor/GradientEditor.tsx";
+import type { GradientStopsHandler } from "@/stores/gradientStopsHandler.ts";
 
 const renderGlyphOption: SelectProps["renderOption"] = ({
   option,
@@ -43,6 +45,22 @@ const EnumColorPicker = observer(
         </Group>
       );
     });
+  },
+);
+
+const NumberColorPicker = observer(
+  ({
+    gradientStopsHandler,
+    // disabled,
+  }: {
+    gradientStopsHandler: GradientStopsHandler;
+    // disabled: boolean;
+  }) => {
+    return (
+      <div style={{ marginTop: 10 }}>
+        <GradientEditor gradientStopsHandler={gradientStopsHandler} />
+      </div>
+    );
   },
 );
 
@@ -132,6 +150,14 @@ const EntityColorProperties = observer(
                 disabled={properties.colorSource !== "attribute"}
               />
             )}
+            {properties.colorAttribute?.type === "number" &&
+              properties.colorAttribute.gradientStopsHandler && (
+                <NumberColorPicker
+                  gradientStopsHandler={
+                    properties.colorAttribute.gradientStopsHandler
+                  }
+                />
+              )}
           </Stack>
         )}
       </Stack>

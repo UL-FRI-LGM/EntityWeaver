@@ -1,9 +1,12 @@
-import type { AppState } from "@/stores/appState.ts";
 import { makeAutoObservable } from "mobx";
 import { DEFINES } from "@/defines.ts";
 import { v4 as uuiv4 } from "uuid";
-import { refreshEdgeColorsBasedOnUncertainty } from "@/utils/graphHelpers.ts";
-import Color from "color";
+import Color, { type ColorInstance } from "color";
+
+export interface GradientStopParameters {
+  threshold: number;
+  color: ColorInstance;
+}
 
 export class GradientStop {
   position: number;
@@ -35,23 +38,37 @@ export class GradientStop {
 }
 
 export class GradientStopsHandler {
-  appState: AppState;
   stops: GradientStop[] = [];
   selectedStopIndex: number | null = null;
 
+  usesVisibilityComponent: boolean;
   minShownValue = 0;
   maxShownValue = 1;
 
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(appState: AppState) {
-    this.appState = appState;
-    for (const stop of DEFINES.defaultTFStops) {
+  private readonly onChange: (() => void) | undefined;
+
+  constructor({
+    onChange,
+    stops,
+    usesVisibilityComponent = true,
+  }: {
+    onChange?: () => void;
+    stops?: GradientStopParameters[];
+    usesVisibilityComponent?: boolean;
+  } = {}) {
+    this.onChange = onChange;
+    this.usesVisibilityComponent = usesVisibilityComponent;
+
+    const defaultStops = stops ?? DEFINES.defaultTFStops;
+
+    for (const stop of defaultStops) {
       this.stops.push(
         new GradientStop(stop.threshold, stop.color.hexa(), this),
       );
     }
-    makeAutoObservable(this, { appState: false, onTFStopsChanged: false });
+    makeAutoObservable(this, { onTFStopsChanged: false });
   }
 
   get sortedTFStops() {
@@ -77,7 +94,7 @@ export class GradientStopsHandler {
     this.minShownValue = min;
     this.maxShownValue = max;
 
-    this.onTFStopsChanged();
+    if (this.usesVisibilityComponent) this.onTFStopsChanged();
   }
 
   addTFStop(position: number, color: string) {
@@ -102,7 +119,9 @@ export class GradientStopsHandler {
       clearTimeout(this.debounceTimer);
     }
     this.debounceTimer = setTimeout(() => {
-      refreshEdgeColorsBasedOnUncertainty(this.appState);
+      if (this.onChange) {
+        this.onChange();
+      }
     }, DEFINES.gradientEditorDebounceMs);
   }
 }

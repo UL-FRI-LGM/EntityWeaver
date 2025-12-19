@@ -28,6 +28,16 @@
           "label": "Miscellaneous"
         }
       ]
+    },
+    {
+      "name": "type_confidence",
+      "label": "Type Confidence",
+      "type": "number",
+      "min": 0,
+      "max": 1,
+      "records": [
+        "Mention"
+      ]
     }
   ],
   "documents": [
@@ -243,7 +253,8 @@
       "start_index": 0,
       "end_index": 13,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.9909689031449769
       }
     },
     {
@@ -259,7 +270,8 @@
       "start_index": 0,
       "end_index": 7,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.903524693195488
       }
     },
     {
@@ -275,7 +287,8 @@
       "start_index": 18,
       "end_index": 27,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.9092022261810851
       }
     },
     {
@@ -291,7 +304,8 @@
       "start_index": 12,
       "end_index": 17,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.935284309283776
       }
     },
     {
@@ -307,7 +321,8 @@
       "start_index": 65,
       "end_index": 76,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.8353097294976294
       }
     },
     {
@@ -323,7 +338,8 @@
       "start_index": 0,
       "end_index": 6,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.9997440758895308
       }
     },
     {
@@ -339,7 +355,8 @@
       "start_index": 81,
       "end_index": 94,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.8333066335137445
       }
     },
     {
@@ -355,7 +372,8 @@
       "start_index": 21,
       "end_index": 27,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.8347282146394696
       }
     },
     {
@@ -371,7 +389,8 @@
       "start_index": 32,
       "end_index": 45,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.8118450675311694
       }
     },
     {
@@ -387,7 +406,8 @@
       "start_index": 0,
       "end_index": 6,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.988314774863877
       }
     },
     {
@@ -403,7 +423,8 @@
       "start_index": 154,
       "end_index": 167,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.8236811364671146
       }
     },
     {
@@ -419,7 +440,8 @@
       "start_index": 11,
       "end_index": 19,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.800930619292211
       }
     },
     {
@@ -435,7 +457,8 @@
       "start_index": 92,
       "end_index": 103,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.8848816800708615
       }
     },
     {
@@ -451,7 +474,8 @@
       "start_index": 144,
       "end_index": 149,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.9188306591662491
       }
     },
     {
@@ -467,7 +491,8 @@
       "start_index": 58,
       "end_index": 67,
       "attributes": {
-        "type": "ORG"
+        "type": "ORG",
+        "type_confidence": 0.9964426183473123
       }
     },
     {
@@ -483,7 +508,8 @@
       "start_index": 117,
       "end_index": 121,
       "attributes": {
-        "type": "ORG"
+        "type": "ORG",
+        "type_confidence": 0.9160642212859498
       }
     },
     {
@@ -499,7 +525,8 @@
       "start_index": 72,
       "end_index": 81,
       "attributes": {
-        "type": "ORG"
+        "type": "ORG",
+        "type_confidence": 0.842283270344796
       }
     },
     {
@@ -515,7 +542,8 @@
       "start_index": 123,
       "end_index": 128,
       "attributes": {
-        "type": "ORG"
+        "type": "ORG",
+        "type_confidence": 0.9528168008877776
       }
     },
     {
@@ -531,7 +559,8 @@
       "start_index": 130,
       "end_index": 140,
       "attributes": {
-        "type": "ORG"
+        "type": "ORG",
+        "type_confidence": 0.9894232500760721
       }
     },
     {
@@ -547,7 +576,8 @@
       "start_index": 186,
       "end_index": 191,
       "attributes": {
-        "type": "ORG"
+        "type": "ORG",
+        "type_confidence": 0.8594315218488656
       }
     },
     {
@@ -563,7 +593,8 @@
       "start_index": 146,
       "end_index": 154,
       "attributes": {
-        "type": "ORG"
+        "type": "ORG",
+        "type_confidence": 0.8982240417817241
       }
     },
     {
@@ -579,7 +610,8 @@
       "start_index": 193,
       "end_index": 197,
       "attributes": {
-        "type": "ORG"
+        "type": "ORG",
+        "type_confidence": 0.888973759331303
       }
     },
     {
@@ -595,7 +627,8 @@
       "start_index": 198,
       "end_index": 212,
       "attributes": {
-        "type": "ORG"
+        "type": "ORG",
+        "type_confidence": 0.8448480401246709
       }
     },
     {
@@ -611,7 +644,8 @@
       "start_index": 207,
       "end_index": 209,
       "attributes": {
-        "type": "ORG"
+        "type": "ORG",
+        "type_confidence": 0.977115006070127
       }
     },
     {
@@ -627,7 +661,8 @@
       "start_index": 260,
       "end_index": 274,
       "attributes": {
-        "type": "ORG"
+        "type": "ORG",
+        "type_confidence": 0.834363575980309
       }
     },
     {
@@ -643,7 +678,8 @@
       "start_index": 221,
       "end_index": 223,
       "attributes": {
-        "type": "ORG"
+        "type": "ORG",
+        "type_confidence": 0.9452360359679635
       }
     },
     {
@@ -659,7 +695,8 @@
       "start_index": 113,
       "end_index": 126,
       "attributes": {
-        "type": "LOC"
+        "type": "LOC",
+        "type_confidence": 0.919426036669755
       }
     },
     {
@@ -675,7 +712,8 @@
       "start_index": 98,
       "end_index": 104,
       "attributes": {
-        "type": "LOC"
+        "type": "LOC",
+        "type_confidence": 0.975714532131213
       }
     },
     {
@@ -691,7 +729,8 @@
       "start_index": 109,
       "end_index": 115,
       "attributes": {
-        "type": "LOC"
+        "type": "LOC",
+        "type_confidence": 0.999711760400803
       }
     },
     {
@@ -707,7 +746,8 @@
       "start_index": 49,
       "end_index": 55,
       "attributes": {
-        "type": "LOC"
+        "type": "LOC",
+        "type_confidence": 0.9883479252642493
       }
     },
     {
@@ -723,7 +763,8 @@
       "start_index": 60,
       "end_index": 65,
       "attributes": {
-        "type": "LOC"
+        "type": "LOC",
+        "type_confidence": 0.9564477103578498
       }
     },
     {
@@ -739,7 +780,8 @@
       "start_index": 52,
       "end_index": 65,
       "attributes": {
-        "type": "LOC"
+        "type": "LOC",
+        "type_confidence": 0.97016582435255
       }
     },
     {
@@ -755,7 +797,8 @@
       "start_index": 70,
       "end_index": 75,
       "attributes": {
-        "type": "LOC"
+        "type": "LOC",
+        "type_confidence": 0.826083199502228
       }
     },
     {
@@ -771,7 +814,8 @@
       "start_index": 131,
       "end_index": 136,
       "attributes": {
-        "type": "LOC"
+        "type": "LOC",
+        "type_confidence": 0.88683119468999
       }
     },
     {
@@ -787,7 +831,8 @@
       "start_index": 93,
       "end_index": 104,
       "attributes": {
-        "type": "MISC"
+        "type": "MISC",
+        "type_confidence": 0.8527832056837551
       }
     },
     {
@@ -803,7 +848,8 @@
       "start_index": 248,
       "end_index": 254,
       "attributes": {
-        "type": "MISC"
+        "type": "MISC",
+        "type_confidence": 0.8534456748705439
       }
     },
     {
@@ -819,7 +865,8 @@
       "start_index": 33,
       "end_index": 48,
       "attributes": {
-        "type": "MISC"
+        "type": "MISC",
+        "type_confidence": 0.8690575894269529
       }
     },
     {
@@ -835,7 +882,8 @@
       "start_index": 289,
       "end_index": 297,
       "attributes": {
-        "type": "MISC"
+        "type": "MISC",
+        "type_confidence": 0.8243216804222858
       }
     },
     {
@@ -851,7 +899,8 @@
       "start_index": 275,
       "end_index": 298,
       "attributes": {
-        "type": "MISC"
+        "type": "MISC",
+        "type_confidence": 0.929491119300509
       }
     },
     {
@@ -867,7 +916,8 @@
       "start_index": 104,
       "end_index": 122,
       "attributes": {
-        "type": "MISC"
+        "type": "MISC",
+        "type_confidence": 0.9622230977039204
       }
     },
     {
@@ -883,7 +933,8 @@
       "start_index": 131,
       "end_index": 152,
       "attributes": {
-        "type": "MISC"
+        "type": "MISC",
+        "type_confidence": 0.9594114212734648
       }
     },
     {
@@ -899,7 +950,8 @@
       "start_index": 176,
       "end_index": 190,
       "attributes": {
-        "type": "MISC"
+        "type": "MISC",
+        "type_confidence": 0.8229004732176347
       }
     },
     {
@@ -915,7 +967,8 @@
       "start_index": 255,
       "end_index": 264,
       "attributes": {
-        "type": "MISC"
+        "type": "MISC",
+        "type_confidence": 0.9241169542545505
       }
     },
     {
@@ -931,7 +984,8 @@
       "start_index": 236,
       "end_index": 245,
       "attributes": {
-        "type": "MISC"
+        "type": "MISC",
+        "type_confidence": 0.843597432197494
       }
     },
     {
@@ -947,7 +1001,8 @@
       "start_index": 273,
       "end_index": 285,
       "attributes": {
-        "type": "MISC"
+        "type": "MISC",
+        "type_confidence": 0.8129350778506395
       }
     },
     {
@@ -971,7 +1026,8 @@
       "start_index": 217,
       "end_index": 219,
       "attributes": {
-        "type": "MISC"
+        "type": "MISC",
+        "type_confidence": 0.8158858091910397
       }
     },
     {
@@ -991,7 +1047,8 @@
       "start_index": 105,
       "end_index": 110,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.8890986079652571
       }
     },
     {
@@ -1002,7 +1059,8 @@
       "start_index": 341,
       "end_index": 348,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.9598829060334608
       }
     },
     {
@@ -1030,7 +1088,8 @@
       "start_index": 325,
       "end_index": 335,
       "attributes": {
-        "type": "MISC"
+        "type": "MISC",
+        "type_confidence": 0.941953256343573
       }
     },
     {
@@ -1041,7 +1100,8 @@
       "start_index": 405,
       "end_index": 410,
       "attributes": {
-        "type": "PER"
+        "type": "PER",
+        "type_confidence": 0.8291224498124633
       }
     }
   ],

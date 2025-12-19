@@ -1,8 +1,8 @@
 import { DEFINES } from "../defines.ts";
 import demoJsonUrl from "/demo.json?url";
 import Color, { type ColorInstance } from "color";
-import type { AppState } from "@/stores/appState.ts";
 import type { DatasetDB } from "@/utils/schemas.ts";
+import type { GradientStopsHandler } from "@/stores/gradientStopsHandler.ts";
 
 interface ErrorResponse {
   message: string;
@@ -59,27 +59,28 @@ export function edgeTypeToProperties(type: keyof typeof DEFINES.edges) {
   return DEFINES.edges[type];
 }
 
-export function uncertaintyToEdgeColor(
-  appState: AppState,
-  certainty: number,
+export function valueToGradientColor(
+  gradientStopsHandler: GradientStopsHandler,
+  value: number,
 ): ColorInstance {
   if (
-    certainty < appState.tfStops.minShownValue ||
-    certainty > appState.tfStops.maxShownValue
+    gradientStopsHandler.usesVisibilityComponent &&
+    (value < gradientStopsHandler.minShownValue ||
+      value > gradientStopsHandler.maxShownValue)
   ) {
     return new Color("transparent");
   }
-  if (appState.tfStops.stops.length === 0) {
+  if (gradientStopsHandler.stops.length === 0) {
     return new Color("#00000000");
   }
   let prevThreshold = 0;
-  let prevColor = new Color(appState.tfStops.sortedTFStops[0].color);
-  for (const tfStop of appState.tfStops.sortedTFStops) {
+  let prevColor = new Color(gradientStopsHandler.sortedTFStops[0].color);
+  for (const tfStop of gradientStopsHandler.sortedTFStops) {
     const threshold: number = tfStop.position;
     const color = new Color(tfStop.color);
-    if (certainty <= threshold) {
+    if (value <= threshold) {
       const localCertainty =
-        (certainty - prevThreshold) / (threshold - prevThreshold);
+        (value - prevThreshold) / (threshold - prevThreshold);
       return prevColor.mix(color, localCertainty);
     }
     prevThreshold = threshold;

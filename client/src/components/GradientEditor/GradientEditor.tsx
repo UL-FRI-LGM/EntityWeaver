@@ -40,9 +40,10 @@ interface ColorStop {
   position: number;
 }
 
+// NOTE: Visibility slider and chart only work for edge data
 interface GradientEditorProps {
   gradientStopsHandler: GradientStopsHandler;
-  binData: BinInfo[];
+  binData?: BinInfo[];
 }
 
 const HistogramTooltip = ({
@@ -76,6 +77,69 @@ const HistogramTooltip = ({
     </div>
   );
 };
+
+const verticalCoordinatesGenerator: VerticalCoordinatesGenerator = (props) => {
+  const pixelsPerTick = 20;
+  const ticks = Math.ceil((props.width - 10) / pixelsPerTick) + 1;
+  return Array.from({ length: ticks + 1 }, (_, i) => i * pixelsPerTick + 5);
+};
+
+const horizontalCoordinatesGenerator: HorizontalCoordinatesGenerator = (
+  props,
+) => {
+  const pixelsPerTick = 30;
+  const ticks = Math.ceil((props.height - 10) / pixelsPerTick) + 1;
+  return Array.from({ length: ticks }, (_, i) => i * pixelsPerTick + 5);
+};
+
+const GradientDataChart = observer(({ binData }: { binData: BinInfo[] }) => {
+  return (
+    <AreaChart
+      className={classes.histogram}
+      responsive={true}
+      data={binData.map(({ value, count, relative }, index) => ({
+        bin: index,
+        value,
+        count,
+        relative,
+      }))}
+    >
+      <defs>
+        <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="5%" stopColor="#8884d8" stopOpacity={1} />
+          <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <CartesianGrid
+        stroke={"#aaaaaaaa"}
+        style={{
+          backgroundColor: "rgb(255, 255, 255, 0.05)",
+        }}
+        strokeDasharray="3 3"
+        verticalCoordinatesGenerator={verticalCoordinatesGenerator}
+        horizontalCoordinatesGenerator={horizontalCoordinatesGenerator}
+      />
+      <XAxis
+        dataKey="bin"
+        allowDecimals={false}
+        padding={"no-gap"}
+        scale="point"
+        hide={true}
+        style={{ padding: 0, margin: 0 }}
+      />
+      <YAxis width="auto" hide={true} />
+      <RechartsTooltip isAnimationActive={false} content={HistogramTooltip} />
+      <Area
+        type="monotone"
+        dataKey="value"
+        stroke="#8884d8"
+        fillOpacity={1}
+        fill="url(#colorUv)"
+        isAnimationActive={false}
+      />
+    </AreaChart>
+  );
+});
 
 const GradientEditor = observer(
   ({ gradientStopsHandler, binData }: GradientEditorProps) => {
@@ -136,88 +200,29 @@ const GradientEditor = observer(
       .map((stop) => `${stop.color} ${(stop.position * 100).toString()}%`)
       .join(", ");
 
-    const verticalCoordinatesGenerator: VerticalCoordinatesGenerator = (
-      props,
-    ) => {
-      const pixelsPerTick = 20;
-      const ticks = Math.ceil((props.width - 10) / pixelsPerTick) + 1;
-      return Array.from({ length: ticks + 1 }, (_, i) => i * pixelsPerTick + 5);
-    };
-
-    const horizontalCoordinatesGenerator: HorizontalCoordinatesGenerator = (
-      props,
-    ) => {
-      const pixelsPerTick = 30;
-      const ticks = Math.ceil((props.height - 10) / pixelsPerTick) + 1;
-      return Array.from({ length: ticks }, (_, i) => i * pixelsPerTick + 5);
-    };
-
     return (
       <Stack align={"center"} gap={"5px"}>
-        <AreaChart
-          className={classes.histogram}
-          responsive={true}
-          data={binData.map(({ value, count, relative }, index) => ({
-            bin: index,
-            value,
-            count,
-            relative,
-          }))}
-        >
-          <defs>
-            <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#8884d8" stopOpacity={1} />
-              <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid
-            stroke={"#aaaaaaaa"}
-            style={{
-              backgroundColor: "rgb(255, 255, 255, 0.05)",
+        {binData && <GradientDataChart binData={binData} />}
+        {gradientStopsHandler.usesVisibilityComponent && (
+          <RangeSlider
+            className={classes.slider}
+            // size="sm"
+            defaultValue={[0, 1]}
+            value={[
+              gradientStopsHandler.minShownValue,
+              gradientStopsHandler.maxShownValue,
+            ]}
+            onChange={([min, max]) => {
+              gradientStopsHandler.setMinMaxShownValues(min, max);
             }}
-            strokeDasharray="3 3"
-            verticalCoordinatesGenerator={verticalCoordinatesGenerator}
-            horizontalCoordinatesGenerator={horizontalCoordinatesGenerator}
+            min={0}
+            max={1}
+            minRange={0}
+            step={0.01}
+            label={(value) => `${(value * 100).toString()}%`}
           />
-          <XAxis
-            dataKey="bin"
-            allowDecimals={false}
-            padding={"no-gap"}
-            scale="point"
-            hide={true}
-            style={{ padding: 0, margin: 0 }}
-          />
-          <YAxis width="auto" hide={true} />
-          <RechartsTooltip
-            isAnimationActive={false}
-            content={HistogramTooltip}
-          />
-          <Area
-            type="monotone"
-            dataKey="value"
-            stroke="#8884d8"
-            fillOpacity={1}
-            fill="url(#colorUv)"
-            isAnimationActive={false}
-          />
-        </AreaChart>
-        <RangeSlider
-          className={classes.slider}
-          // size="sm"
-          defaultValue={[0, 1]}
-          value={[
-            gradientStopsHandler.minShownValue,
-            gradientStopsHandler.maxShownValue,
-          ]}
-          onChange={([min, max]) => {
-            gradientStopsHandler.setMinMaxShownValues(min, max);
-          }}
-          min={0}
-          max={1}
-          minRange={0}
-          step={0.01}
-          label={(value) => `${(value * 100).toString()}%`}
-        ></RangeSlider>
+        )}
+
         <div
           ref={gradientBoxRef}
           className={classes.gradientContainer}

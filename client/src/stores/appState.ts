@@ -10,6 +10,7 @@ import FA2Layout from "graphology-layout-forceatlas2/worker";
 import {
   assignRandomPositions,
   computeLayoutContribution,
+  refreshEdgeColorsBasedOnUncertainty,
   restoreEdgeProperties,
   updateEdgeProperties,
   updateEntityViewEdges,
@@ -90,7 +91,11 @@ export class AppState {
   tfStops: GradientStopsHandler;
 
   constructor() {
-    this.tfStops = new GradientStopsHandler(this);
+    this.tfStops = new GradientStopsHandler({
+      onChange: () => {
+        refreshEdgeColorsBasedOnUncertainty(this);
+      },
+    });
 
     makeAutoObservable(this);
   }

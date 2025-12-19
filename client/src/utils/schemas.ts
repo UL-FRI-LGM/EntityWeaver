@@ -72,7 +72,7 @@ export type GraphNodeType = z.infer<typeof RecordTypeSchema>;
 const AttributeDataTypeSchema = z.enum(["text", "number", "boolean", "enum"]);
 export type AttributeDataType = z.infer<typeof AttributeDataTypeSchema>;
 
-const AttributeSchema = z
+const BaseAttributeSchema = z
   .object({
     name: z.string().min(1),
     label: z.optional(z.string()),
@@ -80,16 +80,7 @@ const AttributeSchema = z
     activeColor: z.boolean().optional().default(false),
     activeGlyph: z.boolean().optional().default(false),
     records: z.array(RecordTypeSchema).min(1),
-    values: z.optional(z.array(AttributeValueSchema)),
   })
-  .refine(
-    (attribute) =>
-      attribute.type !== "enum" ||
-      (attribute.values !== undefined && attribute.values.length > 0),
-    {
-      error: "Enum attributes must have values defined",
-    },
-  )
   .refine(
     (attribute) => {
       for (const reservedAttribute of RESERVED_ATTRIBUTES) {
@@ -109,6 +100,25 @@ const AttributeSchema = z
       abort: true,
     },
   );
+
+const AttributeSchema = z.discriminatedUnion("type", [
+  BaseAttributeSchema.safeExtend({
+    type: z.literal("text"),
+  }),
+  BaseAttributeSchema.safeExtend({
+    type: z.literal("number"),
+    min: z.number(),
+    max: z.number(),
+  }),
+  BaseAttributeSchema.safeExtend({
+    type: z.literal("boolean"),
+  }),
+  BaseAttributeSchema.safeExtend({
+    type: z.literal("enum"),
+    values: z.optional(z.array(AttributeValueSchema)),
+  }),
+]);
+
 export type AttributeDB = z.output<typeof AttributeSchema>;
 
 export const DatasetSchema = z.object({
