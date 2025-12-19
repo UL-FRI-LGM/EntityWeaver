@@ -12,7 +12,8 @@
     "predeploy": "tsc -b && vite build --base=/EntityWeaver/",
     "deploy": "gh-pages -d dist",
     "upgrade:check": "npx npm-check-updates --format group",
-    "upgrade": "npx npm-check-updates -u"
+    "upgrade": "npx npm-check-updates -u",
+    "refresh-baseline-browser-mapping": "npm i --save-dev baseline-browser-mapping@latest"
   },
   "dependencies": {
     "@mantine/charts": "^8.3.9",
@@ -62,6 +63,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/seedrandom": "^3.0.8",
     "@vitejs/plugin-react-swc": "^4.2.2",
+    "baseline-browser-mapping": "^2.9.10",
     "eslint": "^9.39.1",
     "eslint-plugin-react-dom": "^2.3.7",
     "eslint-plugin-react-hooks": "^7.0.1",
