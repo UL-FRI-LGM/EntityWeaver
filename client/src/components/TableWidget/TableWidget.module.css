@@ -24,30 +24,3 @@
   width: 80px;
   max-width: 120px;
 }
-
-.typeColumn {
-  width: 80px;
-  min-width: 80px;
-  max-width: 80px;
-}
-
-.titleColumn {
-  width: 200px;
-  min-width: 200px;
-  max-width: 0;
-}
-
-.nameColumn {
-  max-width: 0;
-  min-width: 120px;
-}
-
-.documentColumn {
-  max-width: 0;
-  min-width: 200px;
-}
-
-.contentColumn {
-  max-width: 0;
-  min-width: 200px;
-}
